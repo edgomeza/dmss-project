@@ -118,21 +118,15 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="entidad" lowerBound="1"
         eType="#//Entidad"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="PaginaIndice" eSuperTypes="#//PaginaCRUD">
+  <eClassifiers xsi:type="ecore:EClass" name="PaginaIndice" abstract="true" eSuperTypes="#//PaginaCRUD">
     <eAnnotations source="http://www.eclipse.org/emf/2002/Ecore">
       <details key="constraints" value="R09_atributos_de_indice_pertenecen_a_entidad"/>
     </eAnnotations>
     <eAnnotations source="http://www.eclipse.org/emf/2002/Ecore/OCL/Pivot">
       <details key="R09_atributos_de_indice_pertenecen_a_entidad" value="&#xA;    &#x9;&#x9;self.atributosMostrados->forAll(a | self.entidad.atributos->includes(a)) and&#xA;    &#x9;&#x9;self.atributosFiltro->forAll(a | self.entidad.atributos->includes(a))"/>
     </eAnnotations>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="isPaginated" lowerBound="1"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="pageSize" lowerBound="1"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="atributosMostrados" lowerBound="1"
         upperBound="-1" eType="#//Atributo"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="atributosFiltro" upperBound="-1"
-        eType="#//Atributo"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="PaginaDetalle" eSuperTypes="#//PaginaCRUD"/>
   <eClassifiers xsi:type="ecore:EClass" name="PaginaCreacion" eSuperTypes="#//PaginaCRUD"/>
@@ -251,5 +245,18 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="mostrarDescripcion" lowerBound="1"
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="PaginaIndicePaginada"/>
+  <eClassifiers xsi:type="ecore:EClass" name="PaginaIndicePaginada" eSuperTypes="#//PaginaIndice">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="pageSize" lowerBound="1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="PaginaIndiceFiltros" eSuperTypes="#//PaginaIndice">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="atributosFiltro" upperBound="-1"
+        eType="#//Atributo"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="PaginaIndicePaginadaFiltrada" eSuperTypes="#//PaginaIndice">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="pageSize" lowerBound="1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="atributosFiltro" upperBound="-1"
+        eType="#//Atributo"/>
+  </eClassifiers>
 </ecore:EPackage>
