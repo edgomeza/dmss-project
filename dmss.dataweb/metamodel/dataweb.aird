@@ -2,9 +2,10 @@
 <xmi:XMI xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:description="http://www.eclipse.org/sirius/description/1.1.0" xmlns:description_1="http://www.eclipse.org/sirius/diagram/description/1.1.0" xmlns:diagram="http://www.eclipse.org/sirius/diagram/1.1.0" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:notation="http://www.eclipse.org/gmf/runtime/1.0.3/notation" xmlns:style="http://www.eclipse.org/sirius/diagram/description/style/1.1.0" xmlns:viewpoint="http://www.eclipse.org/sirius/1.1.0" xsi:schemaLocation="http://www.eclipse.org/sirius/description/1.1.0 http://www.eclipse.org/sirius/1.1.0#//description http://www.eclipse.org/sirius/diagram/description/1.1.0 http://www.eclipse.org/sirius/diagram/1.1.0#//description http://www.eclipse.org/sirius/diagram/description/style/1.1.0 http://www.eclipse.org/sirius/diagram/1.1.0#//description/style">
   <viewpoint:DAnalysis uid="_ipnsMBuxEfCmQI4lfh_30Q" selectedViews="_jh-3kBuxEfCmQI4lfh_30Q" version="15.2.0.202303281325">
     <semanticResources>dataweb.ecore</semanticResources>
+    <semanticResources>../model/Aplicacion.xmi</semanticResources>
     <ownedViews xmi:type="viewpoint:DView" uid="_jh-3kBuxEfCmQI4lfh_30Q">
       <viewpoint xmi:type="description:Viewpoint" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']"/>
-      <ownedRepresentationDescriptors xmi:type="viewpoint:DRepresentationDescriptor" uid="_jjsu0BuxEfCmQI4lfh_30Q" name="dataweb" repPath="#_jjHgABuxEfCmQI4lfh_30Q" changeId="1745308680295">
+      <ownedRepresentationDescriptors xmi:type="viewpoint:DRepresentationDescriptor" uid="_jjsu0BuxEfCmQI4lfh_30Q" name="dataweb" repPath="#_jjHgABuxEfCmQI4lfh_30Q" changeId="1745317933337">
         <description xmi:type="description_1:DiagramDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']"/>
         <target xmi:type="ecore:EPackage" href="dataweb.ecore#/"/>
       </ownedRepresentationDescriptors>
@@ -1541,7 +1542,7 @@
       </ownedStyle>
       <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC%20ESupertypes']"/>
     </ownedDiagramElements>
-    <ownedDiagramElements xmi:type="diagram:DNodeList" uid="_ZUFRcBu3EfCmQI4lfh_30Q" name="PaginaIndice" tooltipText="" outgoingEdges="_jOvj0hu3EfCmQI4lfh_30Q _DZSYqRu4EfCmQI4lfh_30Q" incomingEdges="_jPZughu7EfCmQI4lfh_30Q _9v4Mwh9OEfCwyLeyVRlVdw _Q9rebh9PEfCwyLeyVRlVdw _XcTuxB9PEfCwyLeyVRlVdw" width="12" height="10">
+    <ownedDiagramElements xmi:type="diagram:DNodeList" uid="_ZUFRcBu3EfCmQI4lfh_30Q" name="PaginaIndice" tooltipText="&#xA;ERROR : The «invariant» 'dataweb::PaginaIndice::R09_atributos_de_indice_pertenecen_a_entidad' is invalid: 'self.atributosMostrados->forAll(a | self.entidad.atributos->includes(a)) and&#xA;    &#x9;&#x9;self.atributosFiltro->forAll(a | self.entidad.atributos->includes(a))'&#xA;3:12: Unresolved Property 'dataweb::PaginaIndice::atributosFiltro'&#xA;ERROR :     &#x9;&#x9;self.atributosFiltro->forAll(a | self.entidad.atributos->includes(a))'&#xA;ERROR : 3:12: Unresolved Property 'dataweb::PaginaIndice::atributosFiltro'" outgoingEdges="_jOvj0hu3EfCmQI4lfh_30Q _DZSYqRu4EfCmQI4lfh_30Q" incomingEdges="_jPZughu7EfCmQI4lfh_30Q _9v4Mwh9OEfCwyLeyVRlVdw _Q9rebh9PEfCwyLeyVRlVdw _XcTuxB9PEfCwyLeyVRlVdw" width="12" height="10">
       <target xmi:type="ecore:EClass" href="dataweb.ecore#//PaginaIndice"/>
       <semanticElements xmi:type="ecore:EClass" href="dataweb.ecore#//PaginaIndice"/>
       <arrangeConstraints>KEEP_LOCATION</arrangeConstraints>
