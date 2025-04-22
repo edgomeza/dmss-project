@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring accessors="true" comment="Delete 6 elements from project &apos;StateMachines.edit&apos;&#x0D;&#x0A;- Original project: &apos;StateMachines.edit&apos;&#x0D;&#x0A;- Original elements:&#x0D;&#x0A;     FinalState.gif&#x0D;&#x0A;     InitialState.gif&#x0D;&#x0A;     NormalState.gif&#x0D;&#x0A;     State.gif&#x0D;&#x0A;     StateMachine.gif&#x0D;&#x0A;     Transition.gif" description="Delete elements" element1="icons/full/obj16/FinalState.gif" element2="icons/full/obj16/InitialState.gif" element3="icons/full/obj16/NormalState.gif" element4="icons/full/obj16/StateMachine.gif" element5="icons/full/obj16/State.gif" element6="icons/full/obj16/Transition.gif" elements="0" flags="589830" id="org.eclipse.jdt.ui.delete" resources="6" stamp="1742383382753" subPackages="false" version="1.0"/>
+</session>

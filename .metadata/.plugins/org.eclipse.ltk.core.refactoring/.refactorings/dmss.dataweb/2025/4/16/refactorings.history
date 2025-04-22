@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;dmss.dataweb/model&apos; to &apos;metamodel&apos;" description="Rename resource &apos;model&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="model" name="metamodel" stamp="1744911142856" updateReferences="true"/>
+</session>

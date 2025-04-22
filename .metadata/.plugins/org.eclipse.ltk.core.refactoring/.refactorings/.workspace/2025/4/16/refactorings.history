@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Delete 18 resources" deleteContents="true" description="Delete 18 resources" element1="/AcceleoExample1" element10="/Lab03_OCL" element11="/LaunchConfigurations" element12="/org.eclipse.acceleo.module.Example1" element13="/StateMachine" element14="/StateMachine.diagram" element15="/StateMachine.edit" element16="/StateMachine.editor" element17="/StateMachine.tests" element18="/UEX" element2="/atl_book2publication2" element3="/aulas_virtuales" element4="/aulas_virtuales.diagram" element5="/aulas_virtuales.edit" element6="/aulas_virtuales.editor" element7="/aulas_virtuales.tests" element8="/emf_componentes_basico" element9="/Families2Persons" flags="7" id="org.eclipse.ltk.core.refactoring.delete.resources" resources="18" stamp="1744629621399"/>
+</session>

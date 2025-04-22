@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<section name="ExportRepresentationsAsImagesDialog">
+		<item key="ExportRepresentationsAsImagesDialog.imageFormat" value="JPG"/>
+		<list key="ExportRepresentationsAsImagesDialog.file">
+			<item value="C:\Users\goalm\OneDrive\Desktop\Universidad\3º de Informática\DMSS\Proyecto"/>
+			<item value="C:\Users\goalm\Downloads"/>
+			<item value="C:\Users\goalm\Downloads\metamodelo.jpg"/>
+		</list>
+	</section>
+</section>
