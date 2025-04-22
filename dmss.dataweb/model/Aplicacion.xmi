@@ -1,3 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<dataweb:Aplicacion xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:dataweb="http://www.unex.es/dmss/dataweb" xsi:schemaLocation="http://www.unex.es/dmss/dataweb ../metamodel/dataweb.ecore"/>
+<dataweb:Aplicacion
+    xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:dataweb="http://www.unex.es/dmss/dataweb"
+    xsi:schemaLocation="http://www.unex.es/dmss/dataweb ../metamodel/dataweb.ecore"
+    nombre="Biblioteca Universitaria"
+    descripcion="Sistema de gestión de biblioteca universitaria">
+  <entidades
+      nombre="Libro"
+      tableName="LIBROS"
+      hasCRUD="true">
+    <atributos
+        nombre="id_libro"
+        isPrimaryKey="true"
+        tipo="INTEGER"/>
+    <atributos
+        nombre="titulo"/>
+    <atributos
+        nombre="autor"/>
+    <atributos
+        nombre="añoPublicacion"
+        tipo="INTEGER"/>
+    <atributos
+        nombre="disponible"
+        tipo="BOOLEAN"/>
+    <referencias
+        nombre="pertenece_categoria"
+        multiplicidad="1"
+        source="//@entidades.0"
+        target="//@entidades.1"/>
+  </entidades>
+  <entidades
+      nombre="Categoria"
+      tableName="CATEGORIAS"
+      hasIndex="true"
+      hasDetails="true"
+      hasCreate="true"
+      hasUpdate="true"
+      hasDelete="true">
+    <atributos
+        nombre="id_categoria"
+        isPrimaryKey="true"
+        tipo="INTEGER"/>
+    <atributos
+        nombre="nombre"/>
+    <atributos
+        nombre="descripcion"/>
+  </entidades>
+</dataweb:Aplicacion>
