@@ -48,4 +48,23 @@
     <atributos
         nombre="descripcion"/>
   </entidades>
+  <entidades
+      nombre="Usuario"
+      tableName="USUARIOS"
+      hasExtendedIndex="true"
+      hasDetails="true"
+      hasCreate="true"
+      hasUpdate="true">
+    <atributos
+        nombre="id_usuario"
+        isPrimaryKey="true"
+        tipo="INTEGER"/>
+    <atributos
+        nombre="nombre"/>
+    <atributos
+        nombre="email"/>
+    <atributos
+        nombre="activo"
+        tipo="BOOLEAN"/>
+  </entidades>
 </dataweb:Aplicacion>
