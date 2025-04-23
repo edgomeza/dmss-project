@@ -67,4 +67,107 @@
         nombre="activo"
         tipo="BOOLEAN"/>
   </entidades>
+  <entidades
+      nombre="Prestamo"
+      tableName="PRESTAMOS"
+      hasCreate="true"
+      hasUpdate="true"
+      hasDelete="true">
+    <atributos
+        nombre="id_prestamo"
+        isPrimaryKey="true"
+        tipo="INTEGER"/>
+    <atributos
+        nombre="fechaPrestamo"/>
+    <atributos
+        nombre="fechaDevolucion"/>
+    <referencias
+        nombre="prestamo_usuario"
+        multiplicidad="1"
+        source="//@entidades.3"
+        target="//@entidades.2"/>
+    <referencias
+        nombre="prestamo_libro"
+        multiplicidad="1"
+        source="//@entidades.3"
+        target="//@entidades.0"/>
+  </entidades>
+  <paginas xsi:type="dataweb:PaginaHome"
+      titulo="Biblioteca Universitaria - Inicio"
+      descripcion="Página principal del sistema de biblioteca"
+      enlaces="//@paginas.1"/>
+  <paginas xsi:type="dataweb:PaginaContenido"
+      titulo="Información Biblioteca"
+      descripcion="Información sobre la biblioteca"
+      enlaces="//@paginas.0"
+      contenido="La Biblioteca Universitaria ofrece servicios de consulta y préstamo de libros para toda la comunidad universitaria."/>
+  <paginas xsi:type="dataweb:PaginaDetalle"
+      titulo="Detalle de Categoría"
+      descripcion="Ver todos los datos de una categoría"
+      enlaces="//@paginas.4"
+      entidad="//@entidades.1"/>
+  <paginas xsi:type="dataweb:PaginaCreacion"
+      titulo="Crear Nueva Categoría"
+      descripcion="Formulario para crear una nueva categoría"
+      entidad="//@entidades.1"/>
+  <paginas xsi:type="dataweb:PaginaActualizacion"
+      titulo="Actualizar Categoría"
+      descripcion="Formulario para actualizar los datos de una categoría"
+      enlaces="//@paginas.2"
+      entidad="//@entidades.1"/>
+  <paginas xsi:type="dataweb:PaginaBorrado"
+      titulo="Eliminar Categoría"
+      descripcion="Confirmación para eliminar una categoría"
+      entidad="//@entidades.1"/>
+  <paginas xsi:type="dataweb:PaginaIndiceDetalle"
+      titulo="Índice y Detalle de Libros"
+      descripcion="Muestra una lista de libros y el detalle del seleccionado"
+      enlaces="//@paginas.0"
+      entidad="//@entidades.0"
+      atributosMostrados="//@entidades.0/@atributos.0 //@entidades.0/@atributos.1 //@entidades.0/@atributos.2"/>
+  <paginas xsi:type="dataweb:PaginaIndicePaginada"
+      titulo="Listado de Usuarios"
+      descripcion="Lista paginada de todos los usuarios"
+      enlaces="//@paginas.0"
+      entidad="//@entidades.2"
+      atributosMostrados="//@entidades.2/@atributos.0 //@entidades.2/@atributos.1 //@entidades.2/@atributos.2"
+      pageSize="10"/>
+  <paginas xsi:type="dataweb:PaginaIndiceFiltros"
+      titulo="Listado de Préstamos"
+      descripcion="Lista de préstamos con filtros"
+      enlaces="//@paginas.3"
+      entidad="//@entidades.3"
+      atributosMostrados="//@entidades.3/@atributos.0 //@entidades.3/@atributos.1 //@entidades.3/@atributos.2"
+      atributosFiltro="//@entidades.3/@atributos.1"/>
+  <paginas xsi:type="dataweb:PaginaIndicePaginadaFiltrada"
+      titulo="Búsqueda Avanzada de Libros"
+      descripcion="Búsqueda paginada y con filtros de libros"
+      enlaces="//@paginas.0"
+      entidad="//@entidades.0"
+      atributosMostrados="//@entidades.0/@atributos.0 //@entidades.0/@atributos.1 //@entidades.0/@atributos.2 //@entidades.0/@atributos.3"
+      pageSize="5"
+      atributosFiltro="//@entidades.0/@atributos.2 //@entidades.0/@atributos.3 //@entidades.0/@atributos.4"/>
+  <paginas xsi:type="dataweb:PaginaCreacion"
+      titulo="Registrar Préstamo"
+      descripcion="Formulario para registrar un nuevo préstamo"
+      enlaces="//@paginas.8"
+      entidad="//@entidades.3"/>
+  <paginas xsi:type="dataweb:PaginaActualizacion"
+      titulo="Actualizar Préstamo"
+      descripcion="Formulario para actualizar los datos de un préstamo"
+      enlaces="//@paginas.8"
+      entidad="//@entidades.3"/>
+  <paginas xsi:type="dataweb:PaginaBorrado"
+      titulo="Eliminar Préstamo"
+      descripcion="Confirmación para eliminar un préstamo"
+      enlaces="//@paginas.8"
+      entidad="//@entidades.3"/>
+  <redesSociales
+      nombre="twBiblioteca"
+      codigoEmbed="&lt;a class=\&quot;twitter-timeline\&quot; data-width=\&quot;220\&quot; data-height=\&quot;600\&quot; href=\&quot;https://twitter.com/BibliotecaUniv\&quot;>Tweets by BibliotecaUniv&lt;/a>&quot;"
+      nombreCuenta="BibliotecaUniv"/>
+  <fuentesRSS
+      url="https://biblioteca.universidad.edu/novedades/feed"
+      titulo="Novedades Bibliográficas"
+      numItems="5"/>
 </dataweb:Aplicacion>
