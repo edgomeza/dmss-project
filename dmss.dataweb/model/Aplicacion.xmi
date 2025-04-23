@@ -44,7 +44,7 @@
         isPrimaryKey="true"
         tipo="INTEGER"/>
     <atributos
-        nombre="nombre"/>
+        nombre="nombre_categoria"/>
     <atributos
         nombre="descripcion"/>
   </entidades>
@@ -60,7 +60,7 @@
         isPrimaryKey="true"
         tipo="INTEGER"/>
     <atributos
-        nombre="nombre"/>
+        nombre="nombre_usuario"/>
     <atributos
         nombre="email"/>
     <atributos
@@ -93,81 +93,211 @@
         target="//@entidades.0"/>
   </entidades>
   <paginas xsi:type="dataweb:PaginaHome"
+      enlaces="//@paginas.1 //@paginas.3"
+      redesSociales="twBiblioteca"
+      fuentesRSS="//@fuentesRSS.0"
+      nombre="inicio"
       titulo="Biblioteca Universitaria - Inicio"
-      descripcion="Página principal del sistema de biblioteca"
-      enlaces="//@paginas.1"/>
+      descripcion="Página principal del sistema de biblioteca"/>
   <paginas xsi:type="dataweb:PaginaContenido"
+      enlaces="//@paginas.0"
+      redesSociales="fbBiblioteca"
+      nombre="informacion"
       titulo="Información Biblioteca"
       descripcion="Información sobre la biblioteca"
-      enlaces="//@paginas.0"
       contenido="La Biblioteca Universitaria ofrece servicios de consulta y préstamo de libros para toda la comunidad universitaria."/>
   <paginas xsi:type="dataweb:PaginaDetalle"
+      enlaces="//@paginas.3 //@paginas.5"
+      nombre="detalleCategoria"
       titulo="Detalle de Categoría"
       descripcion="Ver todos los datos de una categoría"
-      enlaces="//@paginas.4"
       entidad="//@entidades.1"/>
+  <paginas xsi:type="dataweb:PaginaIndicePaginada"
+      enlaces="//@paginas.2 //@paginas.4"
+      nombre="indiceCategoria"
+      titulo="Índice de Categorías"
+      descripcion="Lista todas las categorías disponibles"
+      entidad="//@entidades.1"
+      atributosMostrados="//@entidades.1/@atributos.0 //@entidades.1/@atributos.1"
+      pageSize="5"/>
   <paginas xsi:type="dataweb:PaginaCreacion"
+      enlaces="//@paginas.3"
+      nombre="crearCategoria"
       titulo="Crear Nueva Categoría"
       descripcion="Formulario para crear una nueva categoría"
       entidad="//@entidades.1"/>
   <paginas xsi:type="dataweb:PaginaActualizacion"
+      enlaces="//@paginas.2"
+      nombre="actualizarCategoria"
       titulo="Actualizar Categoría"
       descripcion="Formulario para actualizar los datos de una categoría"
-      enlaces="//@paginas.2"
       entidad="//@entidades.1"/>
   <paginas xsi:type="dataweb:PaginaBorrado"
+      enlaces="//@paginas.3"
+      nombre="borrarCategoria"
       titulo="Eliminar Categoría"
       descripcion="Confirmación para eliminar una categoría"
       entidad="//@entidades.1"/>
   <paginas xsi:type="dataweb:PaginaIndiceDetalle"
+      enlaces="//@paginas.0"
+      redesSociales="twBiblioteca"
+      nombre="indiceDetalleLibro"
       titulo="Índice y Detalle de Libros"
       descripcion="Muestra una lista de libros y el detalle del seleccionado"
-      enlaces="//@paginas.0"
       entidad="//@entidades.0"
       atributosMostrados="//@entidades.0/@atributos.0 //@entidades.0/@atributos.1 //@entidades.0/@atributos.2"/>
   <paginas xsi:type="dataweb:PaginaIndicePaginada"
+      enlaces="//@paginas.0"
+      nombre="indiceUsuarios"
       titulo="Listado de Usuarios"
       descripcion="Lista paginada de todos los usuarios"
-      enlaces="//@paginas.0"
       entidad="//@entidades.2"
       atributosMostrados="//@entidades.2/@atributos.0 //@entidades.2/@atributos.1 //@entidades.2/@atributos.2"
       pageSize="10"/>
   <paginas xsi:type="dataweb:PaginaIndiceFiltros"
+      enlaces="//@paginas.11"
+      nombre="indicePrestamos"
       titulo="Listado de Préstamos"
       descripcion="Lista de préstamos con filtros"
-      enlaces="//@paginas.3"
       entidad="//@entidades.3"
       atributosMostrados="//@entidades.3/@atributos.0 //@entidades.3/@atributos.1 //@entidades.3/@atributos.2"
       atributosFiltro="//@entidades.3/@atributos.1"/>
   <paginas xsi:type="dataweb:PaginaIndicePaginadaFiltrada"
+      enlaces="//@paginas.0"
+      nombre="librosAvanzado"
       titulo="Búsqueda Avanzada de Libros"
       descripcion="Búsqueda paginada y con filtros de libros"
-      enlaces="//@paginas.0"
       entidad="//@entidades.0"
       atributosMostrados="//@entidades.0/@atributos.0 //@entidades.0/@atributos.1 //@entidades.0/@atributos.2 //@entidades.0/@atributos.3"
       pageSize="5"
       atributosFiltro="//@entidades.0/@atributos.2 //@entidades.0/@atributos.3 //@entidades.0/@atributos.4"/>
   <paginas xsi:type="dataweb:PaginaCreacion"
+      enlaces="//@paginas.9"
+      nombre="crearPrestamo"
       titulo="Registrar Préstamo"
       descripcion="Formulario para registrar un nuevo préstamo"
-      enlaces="//@paginas.8"
       entidad="//@entidades.3"/>
   <paginas xsi:type="dataweb:PaginaActualizacion"
+      enlaces="//@paginas.9"
+      nombre="actualizarPrestamo"
       titulo="Actualizar Préstamo"
       descripcion="Formulario para actualizar los datos de un préstamo"
-      enlaces="//@paginas.8"
       entidad="//@entidades.3"/>
   <paginas xsi:type="dataweb:PaginaBorrado"
+      enlaces="//@paginas.9"
+      nombre="borrarPrestamo"
       titulo="Eliminar Préstamo"
       descripcion="Confirmación para eliminar un préstamo"
-      enlaces="//@paginas.8"
       entidad="//@entidades.3"/>
+  <roles nombre="Administrador"
+      descripcion="Acceso total al sistema"
+      paginasAccesibles="//@paginas.0 //@paginas.1 //@paginas.2 //@paginas.3 //@paginas.4 //@paginas.5 //@paginas.6 //@paginas.7 //@paginas.8 //@paginas.9 //@paginas.10 //@paginas.11 //@paginas.12 //@paginas.13"/>
+  <roles nombre="Bibliotecario"
+      descripcion="Gestión de libros y préstamos"
+      paginasAccesibles="//@paginas.0 //@paginas.1 //@paginas.2 //@paginas.3 //@paginas.7 //@paginas.10 //@paginas.9 //@paginas.11 //@paginas.12 //@paginas.13"/>
+  <roles nombre="Estudiante"
+      descripcion="Consulta de libros disponibles"
+      paginasAccesibles="//@paginas.0 //@paginas.1 //@paginas.3 //@paginas.7 //@paginas.10"/>
+  <cuestionarios
+      nombre="satisfaccionBiblioteca"
+      descripcion="Evalúa tu experiencia con la biblioteca"
+      titulo="Cuestionario de Satisfacción">
+    <preguntas
+        xsi:type="dataweb:PreguntaOpcionMultiple"
+        nombre="calificacionServicio"
+        texto="¿Cómo calificarías el servicio de la biblioteca?"
+        respuestaCorrecta="//@cuestionarios.0/@preguntas.0/@opciones.0">
+      <opciones
+          nombre="satisfaccionOpcion1"
+          texto="Excelente"
+          valor="5"/>
+      <opciones
+          nombre="satisfaccionOpcion2"
+          texto="Bueno"
+          valor="4"/>
+      <opciones
+          nombre="satisfaccionOpcion3"
+          texto="Regular"
+          valor="3"/>
+      <opciones
+          nombre="satisfaccionOpcion4"
+          texto="Malo"
+          valor="2"/>
+      <opciones
+          nombre="satisfaccionOpcion5"
+          texto="Muy Malo"
+          valor="1"/>
+    </preguntas>
+    <preguntas
+        xsi:type="dataweb:PreguntaVerdaderoFalso"
+        nombre="horarioAdecuado"
+        texto="¿Consideras que el horario de la biblioteca es adecuado?"
+        respuestaCorrecta="true"/>
+    <preguntas
+        xsi:type="dataweb:PreguntaRespuestaCorta"
+        nombre="sugerencias"
+        texto="¿Qué sugerencias tienes para mejorar el servicio?"
+        respuestaCorta="Mayor número de ejemplares de libros populares"/>
+  </cuestionarios>
+  <encuestas
+      nombre="preferenciasBiblioteca"
+      descripcion="Ayúdanos a conocer tus preferencias de lectura"
+      tipoRepresentacion="BARRAS"
+      titulo="Encuesta de Preferencias">
+    <preguntas
+        xsi:type="dataweb:PreguntaOpcionMultiple"
+        nombre="generoFavorito"
+        texto="¿Cuál es tu género literario favorito?">
+      <opciones
+          nombre="preferenciasOpcion1"
+          texto="Ciencia Ficción"
+          valor="ciencia_ficcion"/>
+      <opciones
+          nombre="preferenciasOpcion2"
+          texto="Historia"
+          valor="historia"/>
+      <opciones
+          nombre="preferenciasOpcion3"
+          texto="Biografías"
+          valor="biografias"/>
+      <opciones
+          nombre="preferenciasOpcion4"
+          texto="Tecnología"
+          valor="tecnologia"/>
+    </preguntas>
+    <preguntas
+        xsi:type="dataweb:PreguntaVerdaderoFalso"
+        nombre="preferenciasLibrosDigitales"
+        texto="¿Prefieres los libros digitales sobre los físicos?"/>
+    <preguntas
+        xsi:type="dataweb:PreguntaRespuestaCorta"
+        nombre="autoresFavoritos"
+        texto="Menciona tus tres autores favoritos"/>
+  </encuestas>
   <redesSociales
       nombre="twBiblioteca"
       codigoEmbed="&lt;a class=\&quot;twitter-timeline\&quot; data-width=\&quot;220\&quot; data-height=\&quot;600\&quot; href=\&quot;https://twitter.com/BibliotecaUniv\&quot;>Tweets by BibliotecaUniv&lt;/a>&quot;"
       nombreCuenta="BibliotecaUniv"/>
+  <redesSociales
+      tipo="FACEBOOK"
+      nombre="fbBiblioteca"
+      codigoEmbed="&lt;iframe src=\&quot;https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2FBibliotecaUniversitaria\&quot; width=\&quot;500\&quot; height=\&quot;700\&quot; style=\&quot;border:none;overflow:hidden\&quot; scrolling=\&quot;no\&quot; frameborder=\&quot;0\&quot;>&lt;/iframe>"
+      nombreCuenta="BibliotecaUniversitaria"/>
+  <redesSociales
+      tipo="INSTAGRAM"
+      nombre="igBiblioteca"
+      codigoEmbed="&lt;blockquote class=\&quot;instagram-media\&quot; data-instgrm-permalink=\&quot;https://www.instagram.com/biblioteca_univ/\&quot;>&lt;/blockquote>"
+      nombreCuenta="biblioteca_univ"/>
   <fuentesRSS
+      nombre="novedadesRSS"
       url="https://biblioteca.universidad.edu/novedades/feed"
       titulo="Novedades Bibliográficas"
-      numItems="5"/>
+      numItems="5"
+      mostrarDescripcion="true"/>
+  <fuentesRSS
+      nombre="eventosBiblioteca"
+      url="https://biblioteca.universidad.edu/eventos/feed"
+      titulo="Eventos de la Biblioteca"
+      numItems="3"
+      mostrarDescripcion="true"/>
 </dataweb:Aplicacion>
