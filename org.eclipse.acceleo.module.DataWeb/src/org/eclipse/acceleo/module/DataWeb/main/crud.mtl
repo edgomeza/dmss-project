@@ -1,0 +1,141 @@
+[comment encoding = UTF-8 /]
+[module crud('http://www.unex.es/dmss/dataweb')]
+
+[template private getInputType(attr : Atributo)]
+	[if (attr.tipo.toString().toLowerCase() = 'boolean')]
+		checkbox
+	[elseif (attr.tipo.toString().toLowerCase() = 'integer')]
+		number
+	[else]
+		text
+	[/if]
+[/template]
+
+[template public generateCRUDPages(app : Aplicacion)]
+[for (entity : Entidad | app.entidades)]
+    [if (entity.hasCRUD)]
+        [generateFullCRUDPages(entity)/]
+    [/if]
+    
+    [if (entity.hasIndex)]
+        [generateIndexPage(entity)/]
+    [/if]
+    
+    [if (entity.hasDetails)]
+        [generateDetailPage(entity)/]
+    [/if]
+[/for]
+[/template]
+
+[template public generateFullCRUDPages(entity : Entidad)]
+[file ('html/crud_' + entity.nombre.toLowerCase() + '.html', false, 'UTF-8')]
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>CRUD - [entity.nombre/]</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/crud.css">
+</head>
+<body>
+    <div class="container crud-container">
+        <h1>Gestión de [entity.nombre/]</h1>
+        
+        <section id="crud-list">
+            <h2>Listado de [entity.nombre/]</h2>
+            <table class="crud-table">
+                <thead>
+                    [for (attr : Atributo | entity.atributos)]
+                    <th>[attr.nombre.toUpperFirst()/]</th>
+                    [/for]
+                    <th>Acciones</th>
+                </thead>
+                <tbody id="[entity.nombre.toLowerCase() + '-list'/]">
+                    <!-- Contenido generado dinámicamente por JavaScript -->
+                </tbody>
+            </table>
+        </section>
+        
+        <section id="crud-form">
+            <h2>Formulario de [entity.nombre/]</h2>
+            <form class="crud-form" data-entity-type="[entity.nombre.toLowerCase()/]" data-method="POST">
+                [for (attr : Atributo | entity.atributos)]
+                <div class="form-group">
+                    <label for="[attr.nombre/]">[attr.nombre.toUpperFirst()/]</label>
+                    <input 
+					    type="[getInputType(attr)/]" 
+					    id="[attr.nombre/]" 
+					    name="[attr.nombre/]"
+					    [if (attr.isPrimaryKey)]readonly[/if]
+					>
+                </div>
+                [/for]
+                
+                <button type="submit" class="btn">Guardar [entity.nombre/]</button>
+            </form>
+        </section>
+    </div>
+    
+    <script src="../js/crud.js"></script>
+</body>
+</html>
+[/file]
+[/template]
+
+[template public generateIndexPage(entity : Entidad)]
+[file ('html/index_' + entity.nombre.toLowerCase() + '.html', false, 'UTF-8')]
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Índice de [entity.nombre/]</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/crud.css">
+</head>
+<body>
+    <div class="container index-container">
+        <h1>Listado de [entity.nombre/]</h1>
+        <table class="index-table">
+            <thead>
+                [for (attr : Atributo | entity.atributos)]
+                <th>[attr.nombre.toUpperFirst()/]</th>
+                [/for]
+            </thead>
+            <tbody id="[entity.nombre.toLowerCase() + '-index'/]">
+                <!-- Contenido generado dinámicamente -->
+            </tbody>
+        </table>
+    </div>
+    <script src="../js/index.js"></script>
+</body>
+</html>
+[/file]
+[/template]
+
+[template public generateDetailPage(entity : Entidad)]
+[file ('html/detail_' + entity.nombre.toLowerCase() + '.html', false, 'UTF-8')]
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalle de [entity.nombre/]</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/crud.css">
+</head>
+<body>
+    <div class="container detail-container">
+        <h1>Detalles de [entity.nombre/]</h1>
+        <div id="[entity.nombre.toLowerCase() + '-details'/]">
+            [for (attr : Atributo | entity.atributos)]
+            <div class="detail-item">
+                <strong>[attr.nombre.toUpperFirst()/]:</strong>
+                <span id="[attr.nombre/]-value"></span>
+            </div>
+            [/for]
+        </div>
+    </div>
+    <script src="../js/detail.js"></script>
+</body>
+</html>
+[/file]
+[/template]
