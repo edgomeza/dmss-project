@@ -14,10 +14,10 @@
       <details key="constraints" value="R01_una_pagina_inicio_por_aplicacion R04_requiere_red_social_y_rss R06b_requiere_encuesta_y_cuestionario R08_una_pagina_indice_por_entidad"/>
     </eAnnotations>
     <eAnnotations source="http://www.eclipse.org/emf/2002/Ecore/OCL/Pivot">
-      <details key="R01_una_pagina_inicio_por_aplicacion" value="&#xA;&#x9;&#x9;&#x9;self.paginas->select(p | p.oclIsTypeOf(PaginaHome))->size() = 1"/>
+      <details key="R01_una_pagina_inicio_por_aplicacion" value="&#xA;    &#x9;&#x9;self.paginas->select(p | p.oclIsKindOf(PaginaHome))->size() = 1"/>
       <details key="R04_requiere_red_social_y_rss" value="&#xA;    &#x9;&#x9;self.redesSociales->size() >= 1 and self.fuentesRSS->size() >= 1"/>
       <details key="R06b_requiere_encuesta_y_cuestionario" value="&#xA;    &#x9;&#x9;self.encuestas->size() >= 1 and self.cuestionarios->size() >= 1"/>
-      <details key="R08_una_pagina_indice_por_entidad" value="&#xA;    &#x9;&#x9;self.paginas->select(p | p.oclIsTypeOf(PaginaIndice) and p.oclAsType(PaginaCRUD).entidad->size() = 1)->isUnique(p | p.oclAsType(PaginaCRUD).entidad)"/>
+      <details key="R08_una_pagina_indice_por_entidad" value="&#xA;    &#x9;&#x9;self.paginas->select(p | p.oclIsKindOf(PaginaIndice))&#xA;&#x9;&#x9;&#x9;    ->collect(p | p.oclAsType(PaginaCRUD).entidad)&#xA;&#x9;&#x9;&#x9;    ->isUnique(e | e.nombre)"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="nombre" lowerBound="1"
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -43,9 +43,9 @@
       <details key="constraints" value="R02_CRUD_incompatible_con_operaciones_individuales R03_indice_requiere_detalle R06_sin_referencias_circulares"/>
     </eAnnotations>
     <eAnnotations source="http://www.eclipse.org/emf/2002/Ecore/OCL/Pivot">
-      <details key="R02_CRUD_incompatible_con_operaciones_individuales" value="&#xA;&#x9;&#x9;&#x9;not (self.hasCRUD and (self.hasIndex or self.hasExtendedIndex or self.hasDetails or self.hasCreate or self.hasUpdate or self.hasDelete))"/>
-      <details key="R03_indice_requiere_detalle" value="&#xA;        &#x9;(self.hasIndex or self.hasExtendedIndex) implies self.hasDetails and self.hasDetails implies (self.hasIndex or self.hasExtendedIndex)"/>
-      <details key="R06_sin_referencias_circulares" value="&#xA;    &#x9;&#x9;let referencedEntities = self.referencias->collect(r | r.target) in&#xA;    &#x9;&#x9;referencedEntities->forAll(e | not e.referencias->exists(r | r.target = self))"/>
+      <details key="R02_CRUD_incompatible_con_operaciones_individuales" value="&#xA;    &#x9;&#x9;not (self.hasCRUD and (self.hasIndex or self.hasExtendedIndex or self.hasDetails or self.hasCreate or self.hasUpdate or self.hasDelete))"/>
+      <details key="R03_indice_requiere_detalle" value="&#xA;    &#x9;&#x9;(self.hasDetails = (self.hasIndex or self.hasExtendedIndex))"/>
+      <details key="R06_sin_referencias_circulares" value="&#xA;&#x9;&#x9;    let referencedEntities = self.referencias->collect(r | r.target) in&#xA;&#x9;&#x9;    referencedEntities->forAll(e | not e.referencias->exists(r | r.target = self))"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="nombre" lowerBound="1"
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -183,7 +183,7 @@
       <details key="constraints" value="R07_preguntas_de_cuestionario_con_respuesta preguntas_cuestionario_con_respuesta_obligatoria"/>
     </eAnnotations>
     <eAnnotations source="http://www.eclipse.org/emf/2002/Ecore/OCL/Pivot">
-      <details key="R07_preguntas_de_cuestionario_con_respuesta" value="&#xA;    &#x9;&#x9;&#x9;&#x9;&#x9;&#x9;self.preguntas->forAll(p | p.oclIsTypeOf(PreguntaOpcionMultiple) implies p.oclAsType(PreguntaOpcionMultiple).respuestaCorrecta->notEmpty() &#xA;    &#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;or p.oclIsTypeOf(PreguntaVerdaderoFalso) implies p.oclAsType(PreguntaVerdaderoFalso).respuestaCorrecta->notEmpty() &#xA;    &#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;or p.oclIsTypeOf(PreguntaRespuestaCorta) implies p.oclAsType(PreguntaRespuestaCorta).respuestaCorta->notEmpty())"/>
+      <details key="R07_preguntas_de_cuestionario_con_respuesta" value="&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;    self.preguntas->forAll(p |&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;        (p.oclIsKindOf(PreguntaOpcionMultiple) implies p.oclAsType(PreguntaOpcionMultiple).respuestaCorrecta->notEmpty()) and&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;        (p.oclIsKindOf(PreguntaVerdaderoFalso) implies p.oclAsType(PreguntaVerdaderoFalso).respuestaCorrecta->notEmpty()) and&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;        (p.oclIsKindOf(PreguntaRespuestaCorta) implies p.oclAsType(PreguntaRespuestaCorta).respuestaCorta->notEmpty()))"/>
       <details key="preguntas_cuestionario_con_respuesta_obligatoria" value="&#xA;    &#x9;&#x9;&#x9;&#x9;&#x9;&#x9;self.preguntas->forAll(p | &#xA;        &#x9;&#x9;&#x9;&#x9;&#x9;&#x9;(p.oclIsTypeOf(PreguntaOpcionMultiple) implies p.oclAsType(PreguntaOpcionMultiple).respuestaCorrecta->notEmpty()) and&#xA;        &#x9;&#x9;&#x9;&#x9;&#x9;&#x9;(p.oclIsTypeOf(PreguntaVerdaderoFalso) implies p.oclAsType(PreguntaVerdaderoFalso).respuestaCorrecta->notEmpty()) and&#xA;        &#x9;&#x9;&#x9;&#x9;&#x9;&#x9;(p.oclIsTypeOf(PreguntaRespuestaCorta) implies p.oclAsType(PreguntaRespuestaCorta).respuestaCorta->notEmpty()))"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="numeroPregVF" lowerBound="1"
