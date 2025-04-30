@@ -1,0 +1,144 @@
+.survey-container,
+.questionnaire-container {
+    background-color: var(--white);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    padding: 25px;
+    margin: 20px 0;
+}
+
+.survey-form,
+.questionnaire-form {
+    margin-top: 1.5rem;
+}
+
+.survey-question,
+.questionnaire-question {
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.question-header {
+    margin-bottom: 1rem;
+    font-weight: bold;
+}
+
+.survey-options,
+.questionnaire-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.survey-option,
+.questionnaire-option {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.survey-option:hover,
+.questionnaire-option:hover {
+    background-color: #f0f0f0;
+}
+
+.survey-option input[type="radio"],
+.questionnaire-option input[type="radio"],
+.survey-option input[type="checkbox"],
+.questionnaire-option input[type="checkbox"] {
+    margin-right: 0.75rem;
+}
+
+.survey-option label,
+.questionnaire-option label {
+    cursor: pointer;
+    flex-grow: 1;
+}
+
+.survey-results,
+.questionnaire-results {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.results-summary {
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.results-chart {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.chart-container {
+    margin: 2rem 0;
+}
+
+.result-bar {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.result-bar span {
+    width: 150px;
+    text-align: right;
+    margin-right: 1rem;
+}
+
+.result-bar div {
+    background-color: var(--primary-color);
+    height: 20px;
+    border-radius: 4px;
+    min-width: 2%;
+    position: relative;
+}
+
+.result-bar div::after {
+    content: attr(data-percentage) '%';
+    position: absolute;
+    right: -40px;
+    top: 0;
+}
+
+.correct-answer {
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    background-color: rgba(46, 204, 113, 0.1);
+    border: 1px solid var(--secondary-color);
+    border-radius: 4px;
+}
+
+.incorrect-answer {
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    background-color: rgba(231, 76, 60, 0.1);
+    border: 1px solid var(--accent-color);
+    border-radius: 4px;
+}
+
+.result-icon {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    color: white;
+    text-align: center;
+    line-height: 24px;
+    margin-right: 0.5rem;
+}
+
+.result-icon.correct {
+    background-color: var(--secondary-color);
+}
+
+.result-icon.incorrect {
+    background-color: var(--accent-color);
+}

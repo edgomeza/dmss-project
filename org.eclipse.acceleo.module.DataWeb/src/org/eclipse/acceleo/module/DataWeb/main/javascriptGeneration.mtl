@@ -27,7 +27,7 @@ function initNavigation() {
 
 function updateUIForRole(roleName) {
     // Ocultar/mostrar elementos según el rol
-    const allRoleSpecificElements = document.querySelectorAll('&#91;data-role-access&#93;');
+    const allRoleSpecificElements = document.querySelectorAll(['['/]role-access];');
     allRoleSpecificElements.forEach(el => {
         const allowedRoles = (el.dataset.roleAccess || '').split(',').map(r => r.trim());
         el.style.display = allowedRoles.includes(roleName) ? 'block' : 'none';

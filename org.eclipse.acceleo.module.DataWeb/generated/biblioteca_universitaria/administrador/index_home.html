@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicio - Administrador | Biblioteca Universitaria</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+</head>
+<body data-current-role="administrador">
+    <header class="site-header">
+        <h1>Biblioteca Universitaria - Panel de Administrador</h1>
+    </header>
+    
+    <div id="navigation-container">
+        <!-- El componente de navegación se cargará aquí -->
+    </div>
+    
+    <main class="role-dashboard">
+        <h2>Bienvenido al panel de Administrador</h2>
+        <p>Desde aquí puedes acceder a las siguientes funcionalidades:</p>
+        
+        <div class="dashboard-cards">
+            <div class="dashboard-card">
+                <h3>Biblioteca Universitaria - Inicio</h3>
+                <p>Página principal del sistema de biblioteca</p>
+                <a href="/administrador/index_home.html
+                " class="card-link">Acceder</a>
+            </div>
+            <div class="dashboard-card">
+                <h3>Información Biblioteca</h3>
+                <p>Información sobre la biblioteca</p>
+                <a href="/administrador/content_informacion.html
+                " class="card-link">Acceder</a>
+            </div>
+            <div class="dashboard-card">
+                <h3>Detalle de Categoría</h3>
+                <p>Ver todos los datos de una categoría</p>
+                <a href="/administrador/detail_categoria.html
+                " class="card-link">Acceder</a>
+            </div>
+            <div class="dashboard-card">
+                <h3>Índice de Categorías</h3>
+                <p>Lista todas las categorías disponibles</p>
+                <a href="/administrador/crud_categoria.html
+                " class="card-link">Acceder</a>
+            </div>
+            <div class="dashboard-card">
+                <h3>Crear Nueva Categoría</h3>
+                <p>Formulario para crear una nueva categoría</p>
+                <a href="/administrador/create_categoria.html
+                " class="card-link">Acceder</a>
+            </div>
+            <div class="dashboard-card">
+                <h3>Actualizar Categoría</h3>
+                <p>Formulario para actualizar los datos de una categoría</p>
+                <a href="/administrador/update_categoria.html
+                " class="card-link">Acceder</a>
+            </div>
+            <div class="dashboard-card">
+                <h3>Eliminar Categoría</h3>
+                <p>Confirmación para eliminar una categoría</p>
+                <a href="/administrador/delete_categoria.html
+                " class="card-link">Acceder</a>
+            </div>
+            <div class="dashboard-card">
+                <h3>Listado de Usuarios</h3>
+                <p>Lista paginada de todos los usuarios</p>
+                <a href="/administrador/crud_usuario.html
+                " class="card-link">Acceder</a>
+            </div>
+            <div class="dashboard-card">
+                <h3>Listado de Préstamos</h3>
+                <p>Lista de préstamos con filtros</p>
+                <a href="/administrador/crud_prestamo.html
+                " class="card-link">Acceder</a>
+            </div>
+            <div class="dashboard-card">
+                <h3>Búsqueda Avanzada de Libros</h3>
+                <p>Búsqueda paginada y con filtros de libros</p>
+                <a href="/administrador/crud_libro.html
+                " class="card-link">Acceder</a>
+            </div>
+            <div class="dashboard-card">
+                <h3>Registrar Préstamo</h3>
+                <p>Formulario para registrar un nuevo préstamo</p>
+                <a href="/administrador/create_prestamo.html
+                " class="card-link">Acceder</a>
+            </div>
+            <div class="dashboard-card">
+                <h3>Actualizar Préstamo</h3>
+                <p>Formulario para actualizar los datos de un préstamo</p>
+                <a href="/administrador/update_prestamo.html
+                " class="card-link">Acceder</a>
+            </div>
+            <div class="dashboard-card">
+                <h3>Eliminar Préstamo</h3>
+                <p>Confirmación para eliminar un préstamo</p>
+                <a href="/administrador/delete_prestamo.html
+                " class="card-link">Acceder</a>
+            </div>
+        </div>
+        
+        <section class="quick-access">
+            <h3>Acceso rápido a entidades</h3>
+            <ul class="entity-list">
+                <li>
+                    <a href="/administrador/crud_categoria.html
+                    ">
+                        Índice de Categorías
+                    </a>
+                </li>
+                <li>
+                    <a href="/administrador/crud_usuario.html
+                    ">
+                        Listado de Usuarios
+                    </a>
+                </li>
+                <li>
+                    <a href="/administrador/crud_prestamo.html
+                    ">
+                        Listado de Préstamos
+                    </a>
+                </li>
+                <li>
+                    <a href="/administrador/crud_libro.html
+                    ">
+                        Búsqueda Avanzada de Libros
+                    </a>
+                </li>
+            </ul>
+        </section>
+        
+        <section class="entity-management">
+            <h3>Gestión de entidades</h3>
+            <div class="entity-operations">
+                <div class="entity-group">
+                    <h4>Prestamo</h4>
+                    <div class="operation-buttons">
+                        <a href="create_prestamo.html" class="operation-btn">Crear</a>
+                        <a href="update_prestamo.html" class="operation-btn">Editar</a>
+                        <a href="delete_prestamo.html" class="operation-btn">Eliminar</a>
+                    </div>
+                </div>
+                <div class="entity-group">
+                    <h4>Usuario</h4>
+                    <div class="operation-buttons">
+                        <a href="create_usuario.html" class="operation-btn">Crear</a>
+                        <a href="update_usuario.html" class="operation-btn">Editar</a>
+                    </div>
+                </div>
+                <div class="entity-group">
+                    <h4>Libro</h4>
+                    <div class="operation-buttons">
+                        <a href="index_libro.html" class="operation-btn">Listar</a>
+                        <a href="create_libro.html" class="operation-btn">Crear</a>
+                        <a href="update_libro.html" class="operation-btn">Editar</a>
+                        <a href="delete_libro.html" class="operation-btn">Eliminar</a>
+                    </div>
+                </div>
+                <div class="entity-group">
+                    <h4>Categoria</h4>
+                    <div class="operation-buttons">
+                        <a href="index_categoria.html" class="operation-btn">Listar</a>
+                        <a href="create_categoria.html" class="operation-btn">Crear</a>
+                        <a href="update_categoria.html" class="operation-btn">Editar</a>
+                        <a href="delete_categoria.html" class="operation-btn">Eliminar</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <footer>
+        <p>&copy; Biblioteca Universitaria - Todos los derechos reservados</p>
+    </footer>
+    
+    <script>
+        // Cargar el componente de navegación
+        fetch('../components/navigation.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('navigation-container').innerHTML = html;
+                // Inicializar la navegación una vez cargada
+                const script = document.createElement('script');
+                script.src = '../js/navigation.js';
+                script.onload = function() {
+                    // Actualizar el selector de rol con el rol actual
+                    const roleSelector = document.getElementById('role-select');
+                    if (roleSelector) {
+                        roleSelector.value = 'administrador';
+                        // Activar el menú correspondiente
+                        updateVisibleMenu('administrador');
+                    }
+                };
+                document.body.appendChild(script);
+            });
+    </script>
+</body>
+</html>

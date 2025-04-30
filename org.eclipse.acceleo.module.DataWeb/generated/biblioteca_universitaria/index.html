@@ -5,46 +5,34 @@
     <title>Biblioteca Universitaria - Web Application</title>
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/responsive.css">
-    <link rel="stylesheet" href="css/crud.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Sistema de gestión de biblioteca universitaria">
 </head>
 <body>
-    <header>
+    <header class="site-header">
         <h1>Biblioteca Universitaria</h1>
         <p>Sistema de gestión de biblioteca universitaria</p>
     </header>
     
-    
-    <main>
-        <div class="main-content">
-            <section class="entities">
-                <h2>Entidades</h2>
-                <div class="entity-summary">
-                    <h3>Libro</h3>
-                    <p>Total de atributos: 5</p>
-                </div>
-                <div class="entity-summary">
-                    <h3>Categoria</h3>
-                    <p>Total de atributos: 3</p>
-                </div>
-                <div class="entity-summary">
-                    <h3>Usuario</h3>
-                    <p>Total de atributos: 4</p>
-                </div>
-                <div class="entity-summary">
-                    <h3>Prestamo</h3>
-                    <p>Total de atributos: 3</p>
-                </div>
-            </section>
-            
-            <section class="surveys">
-                <h2>Encuestas y Cuestionarios</h2>
-                <div class="survey-summary">
-                    <h3>Encuesta de Preferencias</h3>
-                    <p>Ayúdanos a conocer tus preferencias de lectura</p>
-                </div>
-            </section>
+    <main class="role-selection">
+        <h2>Selecciona un rol para continuar</h2>
+        
+        <div class="role-grid">
+            <div class="role-card" data-role="administrador">
+                <h3>Administrador</h3>
+                <p>Acceso total al sistema</p>
+                <button class="btn role-select-btn">Seleccionar</button>
+            </div>
+            <div class="role-card" data-role="bibliotecario">
+                <h3>Bibliotecario</h3>
+                <p>Gestión de libros y préstamos</p>
+                <button class="btn role-select-btn">Seleccionar</button>
+            </div>
+            <div class="role-card" data-role="estudiante">
+                <h3>Estudiante</h3>
+                <p>Consulta de libros disponibles</p>
+                <button class="btn role-select-btn">Seleccionar</button>
+            </div>
         </div>
     </main>
     
@@ -52,8 +40,28 @@
         <p>© Biblioteca Universitaria - Generado con DataWeb DSL</p>
     </footer>
     
-    <script src="js/main.js"></script>
-    <script src="js/navigation.js"></script>
-    <script src="js/crud.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Agregar evento de clic a los botones de selección de rol
+            const roleCards = document.querySelectorAll('.role-card');
+            
+            roleCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    const roleId = this.dataset.role;
+                    window.location.href = roleId + '/index_home.html';
+                });
+                
+                // Agregar evento al botón específico también
+                const btn = card.querySelector('.role-select-btn');
+                if (btn) {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation(); // Evitar propagación al card
+                        const roleId = card.dataset.role;
+                        window.location.href = roleId + '/index_home.html';
+                    });
+                }
+            });
+        });
+    </script>
 </body>
 </html>
