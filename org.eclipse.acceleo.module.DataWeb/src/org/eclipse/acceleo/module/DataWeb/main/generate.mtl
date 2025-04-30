@@ -1,0 +1,89 @@
+[comment encoding = UTF-8 /]
+[module generate('http://www.unex.es/dmss/dataweb')]
+
+[import org::eclipse::acceleo::module::DataWeb::main::cssGeneration/]
+[import org::eclipse::acceleo::module::DataWeb::main::javascriptGeneration/]
+[import org::eclipse::acceleo::module::DataWeb::main::navigation/]
+[import org::eclipse::acceleo::module::DataWeb::main::encuesta/]
+[import org::eclipse::acceleo::module::DataWeb::main::redesSociales/]
+[import org::eclipse::acceleo::module::DataWeb::main::rss/]
+[import org::eclipse::acceleo::module::DataWeb::main::sql/]
+[import org::eclipse::acceleo::module::DataWeb::main::crud/]
+
+[comment @main /]
+[template public generateDataWeb(app : Aplicacion)]
+[comment Generates the entire web application structure /]
+[file (app.nombre.toLowerCase().replaceAll(' ', '_') + '/index.html', false, 'UTF-8')]
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>[app.nombre/] - Web Application</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/crud.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="[app.descripcion/]">
+</head>
+<body>
+    [generateHeader(app)/]
+    [generateNavigation(app)/]
+    
+    <main>
+        [generateMainContent(app)/]
+    </main>
+    
+    [generateFooter(app)/]
+    
+    <script src="js/main.js"></script>
+    <script src="js/navigation.js"></script>
+    <script src="js/crud.js"></script>
+</body>
+</html>
+[/file]
+
+[generateCSSFiles(app)/]
+[generateJavaScriptFiles(app)/]
+[generateCRUDPages(app)/]
+[generateSurveyPages(app)/]
+[generateSocialMediaIntegration(app)/]
+[generateRSSFeeds(app)/]
+[generateSQLSchema(app)/]
+[/template]
+
+[template public generateHeader(app : Aplicacion)]
+<header>
+    <h1>[app.nombre/]</h1>
+    <p>[app.descripcion/]</p>
+</header>
+[/template]
+
+[template public generateMainContent(app : Aplicacion)]
+<div class="main-content">
+    <section class="entities">
+        <h2>Entidades</h2>
+        [for (entity : Entidad | app.entidades)]
+        <div class="entity-summary">
+            <h3>[entity.nombre/]</h3>
+            <p>Total de atributos: [entity.atributos->size()/]</p>
+        </div>
+        [/for]
+    </section>
+    
+    <section class="surveys">
+        <h2>Encuestas y Cuestionarios</h2>
+        [for (survey : Encuesta | app.encuestas)]
+        <div class="survey-summary">
+            <h3>[survey.titulo/]</h3>
+            <p>[survey.descripcion/]</p>
+        </div>
+        [/for]
+    </section>
+</div>
+[/template]
+
+[template public generateFooter(app : Aplicacion)]
+<footer>
+    <p>© [app.nombre/] - Generado con DataWeb DSL</p>
+</footer>
+[/template]

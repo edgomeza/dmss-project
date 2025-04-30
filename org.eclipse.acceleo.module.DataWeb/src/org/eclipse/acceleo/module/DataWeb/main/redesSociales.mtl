@@ -1,0 +1,115 @@
+[comment encoding = UTF-8 /]
+[module redesSociales('http://www.unex.es/dmss/dataweb')]
+
+[template public generateSocialMediaIntegration(app : Aplicacion)]
+[file ('html/components/social_media.html', false, 'UTF-8')]
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Integración de Redes Sociales</title>
+    <link rel="stylesheet" href="../css/social-media.css">
+</head>
+<body>
+    <div class="social-media-container">
+        [for (social : RedSocial | app.redesSociales)]
+        <div class="social-media-widget" data-platform="[social.tipo.toString().toLowerCase()/]">
+            <h3>[social.nombreCuenta/]</h3>
+            <div class="social-embed">
+                [social.codigoEmbed/]
+            </div>
+        </div>
+        [/for]
+    </div>
+    
+    <script src="../js/social-media.js"></script>
+</body>
+</html>
+[/file]
+
+[file ('js/social-media.js', false, 'UTF-8')]
+document.addEventListener('DOMContentLoaded', () => {
+    const socialWidgets = document.querySelectorAll('.social-media-widget');
+    
+    socialWidgets.forEach(widget => {
+        const platform = widget.dataset.platform;
+        
+        switch(platform) {
+            case 'twitter':
+                loadTwitterWidget(widget);
+                break;
+            case 'facebook':
+                loadFacebookWidget(widget);
+                break;
+            case 'instagram':
+                loadInstagramWidget(widget);
+                break;
+        }
+    });
+});
+
+function loadTwitterWidget(widget) {
+    if (window.twttr) {
+        window.twttr.widgets.load(widget);
+    } else {
+        const script = document.createElement('script');
+        script.src = 'https://platform.twitter.com/widgets.js';
+        script.async = true;
+        document.body.appendChild(script);
+    }
+}
+
+function loadFacebookWidget(widget) {
+    if (window.FB) {
+        window.FB.XFBML.parse(widget);
+    } else {
+        const script = document.createElement('script');
+        script.src = 'https://connect.facebook.net/es_ES/sdk.js#xfbml=1&version=v10.0';
+        script.async = true;
+        script.defer = true;
+        document.body.appendChild(script);
+    }
+}
+
+function loadInstagramWidget(widget) {
+    if (window.instgrm) {
+        window.instgrm.Embeds.process(widget);
+    } else {
+        const script = document.createElement('script');
+        script.src = 'https://www.instagram.com/embed.js';
+        script.async = true;
+        document.body.appendChild(script);
+    }
+}
+[/file]
+
+[file ('css/social-media.css', false, 'UTF-8')]
+.social-media-container {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    margin: 20px 0;
+}
+
+.social-media-widget {
+    flex: 1;
+    min-width: 250px;
+    margin: 10px;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.social-media-widget h3 {
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.social-embed {
+    width: 100%;
+    min-height: 300px;
+    overflow: auto;
+}
+[/file]
+[/template]
