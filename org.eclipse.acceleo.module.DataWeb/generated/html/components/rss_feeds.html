@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Fuentes RSS</title>
+    <link rel="stylesheet" href="../css/rss-feed.css">
+</head>
+<body>
+    <div 
+        class="rss-feed-container" 
+        data-feed-url="https://biblioteca.universidad.edu/novedades/feed" 
+        data-max-items="5"
+    >
+        <h2>Novedades Bibliográficas</h2>
+        <!-- Contenido del feed RSS se cargará dinámicamente -->
+    </div>
+    <div 
+        class="rss-feed-container" 
+        data-feed-url="https://biblioteca.universidad.edu/eventos/feed" 
+        data-max-items="3"
+    >
+        <h2>Eventos de la Biblioteca</h2>
+        <!-- Contenido del feed RSS se cargará dinámicamente -->
+    </div>
+    
+    <script src="../js/rss-feed.js"></script>
+</body>
+</html>

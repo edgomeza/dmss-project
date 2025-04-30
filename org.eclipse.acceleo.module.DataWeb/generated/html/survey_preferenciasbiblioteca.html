@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Encuesta de Preferencias</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/survey.css">
+</head>
+<body>
+    <div class="container survey-container" data-survey-id="preferenciasbiblioteca">
+        <h1>Encuesta de Preferencias</h1>
+        <p>Ayúdanos a conocer tus preferencias de lectura</p>
+        
+        <form class="survey-form">
+            <div class="survey-question">
+                <h3>¿Cuál es tu género literario favorito?</h3>
+                
+                    <div class="survey-options">
+                        <div class="survey-option">
+                            <input 
+                                type="radio" 
+                                id="preferenciasOpcion1" 
+                                name="generoFavorito" 
+                                value="ciencia_ficcion"
+                            >
+                            <label for="preferenciasOpcion1">Ciencia Ficción</label>
+                        </div>
+                        <div class="survey-option">
+                            <input 
+                                type="radio" 
+                                id="preferenciasOpcion2" 
+                                name="generoFavorito" 
+                                value="historia"
+                            >
+                            <label for="preferenciasOpcion2">Historia</label>
+                        </div>
+                        <div class="survey-option">
+                            <input 
+                                type="radio" 
+                                id="preferenciasOpcion3" 
+                                name="generoFavorito" 
+                                value="biografias"
+                            >
+                            <label for="preferenciasOpcion3">Biografías</label>
+                        </div>
+                        <div class="survey-option">
+                            <input 
+                                type="radio" 
+                                id="preferenciasOpcion4" 
+                                name="generoFavorito" 
+                                value="tecnologia"
+                            >
+                            <label for="preferenciasOpcion4">Tecnología</label>
+                        </div>
+                    </div>
+                
+                
+            </div>
+            <div class="survey-question">
+                <h3>¿Prefieres los libros digitales sobre los físicos?</h3>
+                
+                
+                    <div class="survey-options">
+                        <div class="survey-option">
+                            <input 
+                                type="radio" 
+                                id="preferenciasLibrosDigitales_true" 
+                                name="preferenciasLibrosDigitales" 
+                                value="true"
+                            >
+                            <label for="preferenciasLibrosDigitales_true">Verdadero</label>
+                        </div>
+                        <div class="survey-option">
+                            <input 
+                                type="radio" 
+                                id="preferenciasLibrosDigitales_false" 
+                                name="preferenciasLibrosDigitales" 
+                                value="false"
+                            >
+                            <label for="preferenciasLibrosDigitales_false">Falso</label>
+                        </div>
+                    </div>
+                
+            </div>
+            <div class="survey-question">
+                <h3>Menciona tus tres autores favoritos</h3>
+                
+                
+                
+                    <div class="survey-options">
+                        <textarea 
+                            id="autoresFavoritos" 
+                            name="autoresFavoritos" 
+                            rows="4" 
+                            placeholder="Escribe tu respuesta aquí"
+                        ></textarea>
+                    </div>
+            </div>
+            
+            <button type="submit" class="btn">Enviar Encuesta</button>
+        </form>
+        
+        <div class="survey-results">
+            <!-- Resultados se cargarán dinámicamente -->
+        </div>
+    </div>
+    
+    <script src="../js/survey.js"></script>
+</body>
+</html>

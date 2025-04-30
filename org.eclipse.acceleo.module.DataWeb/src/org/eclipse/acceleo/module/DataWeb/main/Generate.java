@@ -13,7 +13,6 @@ package org.eclipse.acceleo.module.DataWeb.main;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.acceleo.engine.event.IAcceleoTextGenerationListener;
@@ -22,16 +21,8 @@ import org.eclipse.acceleo.engine.service.AbstractAcceleoGenerator;
 import org.eclipse.emf.common.util.BasicMonitor;
 import org.eclipse.emf.common.util.Monitor;
 import org.eclipse.emf.common.util.URI;
-import org.eclipse.emf.ecore.EClass;
-import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.EPackage;
-import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
-import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
-import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
-import org.eclipse.emf.ecore.xmi.impl.XMLResourceFactoryImpl;
 
 /**
  * Entry point of the 'Generate' generation module.
@@ -131,89 +122,44 @@ public class Generate extends AbstractAcceleoGenerator {
         try {
             if (args.length < 2) {
                 System.out.println("Arguments not valid : {model, folder}.");
-                return;
-            }
-
-            // Configuración inicial
-            String modelPath = args[0];
-            File modelFile = new File(modelPath);
-            if (!modelFile.exists()) {
-                System.err.println("ERROR: El archivo del modelo no existe: " + modelPath);
-                return;
-            }
-            System.out.println("Archivo del modelo encontrado: " + modelFile.getAbsolutePath());
-
-            // Crear ResourceSet y registrar fábricas
-            ResourceSet resourceSet = new ResourceSetImpl();
-            resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put("*", new XMIResourceFactoryImpl());
-            resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put("xmi", new XMIResourceFactoryImpl());
-            resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put("xml", new XMLResourceFactoryImpl());
-            resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put("ecore", new EcoreResourceFactoryImpl());
-            
-            // Cargar el metamodelo
-            String metamodelPath = "C:\\Users\\vagrant\\eclipse-workspace\\202312\\dmss-project\\dmss.dataweb\\metamodel\\dataweb.ecore";
-            URI metamodelUri = URI.createFileURI(new File(metamodelPath).getAbsolutePath());
-            Resource metamodelResource = resourceSet.createResource(metamodelUri);
-            try {
-                metamodelResource.load(Collections.emptyMap());
-                EPackage ePackage = (EPackage) metamodelResource.getContents().get(0);
-                resourceSet.getPackageRegistry().put(ePackage.getNsURI(), ePackage);
-                System.out.println("Metamodelo registrado: " + ePackage.getName() + " (URI: " + ePackage.getNsURI() + ")");
+            } else {
+                URI modelURI = URI.createFileURI(args[0]);
+                File folder = new File(args[1]);
                 
-                // Imprimir información detallada del metamodelo
-                System.out.println("Clases en el metamodelo:");
-                for (EClassifier classifier : ePackage.getEClassifiers()) {
-                    if (classifier instanceof EClass) {
-                        EClass eClass = (EClass) classifier;
-                        System.out.println(" - " + eClass.getName());
-                        // Verificar si hay una clase Aplicacion
-                        if ("Aplicacion".equals(eClass.getName())) {
-                            System.out.println("   ¡Encontrada la clase Aplicacion!");
-                        }
-                    }
-                }
-            } catch (IOException e) {
-                System.err.println("Error al cargar el metamodelo: " + e.getMessage());
-                e.printStackTrace();
-                return;
-            }
-            
-            // Cargar el modelo
-            URI modelURI = URI.createFileURI(modelFile.getAbsolutePath());
-            try {
-                Resource modelResource = resourceSet.getResource(modelURI, true);
-                if (modelResource.getContents().isEmpty()) {
-                    System.err.println("ERROR: El modelo está vacío.");
-                    return;
-                }
-                
-                EObject rootObject = modelResource.getContents().get(0);
-                System.out.println("Modelo cargado con éxito. Elemento raíz: " + rootObject.eClass().getName());
-                System.out.println("Tipo completo del elemento raíz: " + rootObject.eClass().getEPackage().getNsURI() + "#" + rootObject.eClass().getName());
-                
-                // Comprobar si el elemento raíz es del tipo esperado
-                boolean isCorrectType = "http://www.unex.es/dmss/dataweb".equals(rootObject.eClass().getEPackage().getNsURI()) && 
-                                      "Aplicacion".equals(rootObject.eClass().getName());
-                System.out.println("¿Es del tipo correcto para el template?: " + isCorrectType);
-                
-                // Iniciar generación
-                File targetFolder = new File(args[1]);
                 List<String> arguments = new ArrayList<String>();
-                Generate generator = new Generate(modelURI, targetFolder, arguments);
                 
+                /*
+                 * If you want to change the content of this method, do NOT forget to change the "@generated"
+                 * tag in the Javadoc of this method to "@generated NOT". Without this new tag, any compilation
+                 * of the Acceleo module with the main template that has caused the creation of this class will
+                 * revert your modifications.
+                 */
+
+                /*
+                 * Add in this list all the arguments used by the starting point of the generation
+                 * If your main template is called on an element of your model and a String, you can
+                 * add in "arguments" this "String" attribute.
+                 */
+                
+                Generate generator = new Generate(modelURI, folder, arguments);
+                
+                /*
+                 * Add the properties from the launch arguments.
+                 * If you want to programmatically add new properties, add them in "propertiesFiles"
+                 * You can add the absolute path of a properties files, or even a project relative path.
+                 * If you want to add another "protocol" for your properties files, please override 
+                 * "getPropertiesLoaderService(AcceleoService)" in order to return a new property loader.
+                 * The behavior of the properties loader service is explained in the Acceleo documentation
+                 * (Help -> Help Contents).
+                 */
+                 
                 for (int i = 2; i < args.length; i++) {
                     generator.addPropertiesFile(args[i]);
                 }
                 
                 generator.doGenerate(new BasicMonitor());
-                System.out.println("Generación completada.");
-                
-            } catch (Exception e) {
-                System.err.println("Error al cargar el modelo o durante la generación:");
-                e.printStackTrace();
             }
-        } catch (Exception e) {
-            System.err.println("Error general:");
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -462,43 +408,5 @@ public class Generate extends AbstractAcceleoGenerator {
          */ 
         // UMLResourcesUtil.init(resourceSet)
     }
-    
-    /**
-     * Sobrescribe el método initialize para registrar correctamente el metamodelo
-     * 
-     * @generated NOT
-     */
-    @Override
-    public void initialize(URI modelURI, File targetFolder,
-            List<? extends Object> arguments) throws IOException {
-        
-        // Crear un ResourceSet fresco con todas las fábricas necesarias
-        ResourceSet resourceSet = new ResourceSetImpl();
-        resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put("*", new XMIResourceFactoryImpl());
-        resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put("xmi", new XMIResourceFactoryImpl());
-        resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put("ecore", new EcoreResourceFactoryImpl());
-        
-        // Registrar el metamodelo
-        File ecoreFile = new File("C:\\Users\\vagrant\\eclipse-workspace\\202312\\dmss-project\\dmss.dataweb\\metamodel\\dataweb.ecore");
-        URI metamodelUri = URI.createFileURI(ecoreFile.getAbsolutePath());
-        Resource res = resourceSet.createResource(metamodelUri);
-        res.load(null);
-        EPackage pack = (EPackage) res.getContents().get(0);
-        resourceSet.getPackageRegistry().put(pack.getNsURI(), pack);
-        
-        // Cargar el modelo
-        Resource modelResource = resourceSet.getResource(modelURI, true);
-        this.model = modelResource.getContents().get(0);
-        
-        // Configurar carpeta destino
-        this.targetFolder = targetFolder;
-        this.generationArguments = arguments;
-        
-        // Registrar listeners, estrategia, propiedades, etc.
-        this.generationListeners = new ArrayList<IAcceleoTextGenerationListener>();
-        this.postInitialize();
-    }
-
-
     
 }

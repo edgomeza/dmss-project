@@ -10,8 +10,9 @@
 [import org::eclipse::acceleo::module::DataWeb::main::sql/]
 [import org::eclipse::acceleo::module::DataWeb::main::crud/]
 
-[comment @main /]
+
 [template public generateDataWeb(app : Aplicacion)]
+[comment @main /]
 [comment Generates the entire web application structure /]
 [file (app.nombre.toLowerCase().replaceAll(' ', '_') + '/index.html', false, 'UTF-8')]
 <!DOCTYPE html>

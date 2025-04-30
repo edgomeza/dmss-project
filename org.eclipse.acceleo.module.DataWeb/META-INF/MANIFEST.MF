@@ -4,6 +4,8 @@ Bundle-Name: Acceleo DataWeb Module Runtime Plug-in
 Bundle-SymbolicName: org.eclipse.acceleo.module.DataWeb
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: org.eclipse.acceleo.module.DataWeb.Activator
+Bundle-ClassPath: bin/,
+ .
 Bundle-Vendor: Eclipse Modeling Project
 Require-Bundle: org.eclipse.core.runtime, 
  org.eclipse.emf.ecore, 
