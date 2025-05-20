@@ -1,0 +1,604 @@
+[comment encoding = UTF-8 /]
+[module generateWebPages_quizResults('http://www.unex.es/dmss/dataweb')]
+
+[template public generateQuizResults(app : Aplicacion)]
+[file ('web/quizzes/results.html', false, 'UTF-8')]
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[app.nombre/] - Resultados de Cuestionario</title>
+    <meta name="description" content="Resultados detallados de tu cuestionario evaluado">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="icon" type="image/x-icon" href="../assets/icons/favicon.ico">
+</head>
+<body>
+    <header class="app-header">
+        <div class="container">
+            <h1>Resultados de tu Cuestionario</h1>
+            <p>Revisa tus respuestas y puntuación detallada</p>
+        </div>
+    </header>
+    
+    <nav class="main-nav">
+        <div class="container nav-container">
+            <div class="nav-brand">
+                <a href="../index.html" class="nav-logo">[app.nombre/]</a>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="../index.html" class="nav-link">Inicio</a>
+                </li>
+                <li class="nav-item">
+                    <a href="index.html" class="nav-link">Cuestionarios</a>
+                </li>
+                <li class="nav-item">
+                    <a href="results.html" class="nav-link active">Resultados</a>
+                </li>
+            </ul>
+            <button class="nav-toggle" aria-label="Abrir menú">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+    
+    <main class="main-content">
+        <div class="container">
+            <div id="loading" class="loading-indicator">
+                <div class="loading-spinner"></div>
+                <p>Cargando tus resultados...</p>
+            </div>
+            
+            <div id="no-results" class="empty-state" style="display: none;">
+                <div class="empty-icon">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                </div>
+                <h3>No hay resultados disponibles</h3>
+                <p>Todavía no hay resultados confirmados para mostrar. Puede que tus respuestas aún estén pendientes de revisión por un administrador.</p>
+                <a href="index.html" class="btn btn-primary">Ver cuestionarios disponibles</a>
+            </div>
+            
+            <div id="results-container" style="display: none;">
+                <!-- Aquí se cargarán los resultados dinámicamente -->
+            </div>
+        </div>
+    </main>
+    
+    <footer class="app-footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2025 [app.nombre/]. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script src="../assets/js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Inicializar la carga de resultados
+            await loadQuizResults();
+        });
+        
+        async function loadQuizResults() {
+            try {
+                const loadingElement = document.getElementById('loading');
+                const noResultsElement = document.getElementById('no-results');
+                const resultsContainer = document.getElementById('results-container');
+                
+                // Obtener el ID de resultado de la URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const resultId = urlParams.get('id');
+                
+                // Inicializar la base de datos
+                const db = await initDatabase();
+                
+                // Si no hay ID específico, mostrar todos los resultados confirmados
+                if (!resultId) {
+                    const currentUserId = 'usuario@example.com'; // En una implementación real, esto vendría de la sesión
+                    const allResults = await db.query('RESPUESTAS_CUESTIONARIO', { userId: currentUserId });
+                    const confirmedResults = allResults.filter(r => r.results && r.results.gradeConfirmed);
+                    
+                    loadingElement.style.display = 'none';
+                    
+                    if (confirmedResults.length === 0) {
+                        noResultsElement.style.display = 'block';
+                        return;
+                    }
+                    
+                    resultsContainer.style.display = 'block';
+                    resultsContainer.innerHTML = `
+                        <div class="card mb-6">
+                            <div class="card-header">
+                                <h2>Tus cuestionarios evaluados</h2>
+                                <p>Selecciona un cuestionario para ver los resultados detallados</p>
+                            </div>
+                            <div class="card-body">
+                                <div class="results-list">
+                                    ${confirmedResults.map(result => `
+                                        <div class="result-item">
+                                            <div class="result-info">
+                                                <div class="result-title">${result.quizName}</div>
+                                                <div class="result-meta">
+                                                    Completado: ${new Date(result.timestamp).toLocaleDateString('es-ES')}
+                                                </div>
+                                            </div>
+                                            <div class="result-score-container">
+                                                <div class="result-score">${result.results.porcentaje}%</div>
+                                                <div class="result-status">${getScoreStatus(result.results.porcentaje)}</div>
+                                            </div>
+                                            <div class="result-actions">
+                                                <a href="results.html?id=${result.id}" class="btn btn-primary btn-sm">Ver detalles</a>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Buscar el resultado específico
+                const allResponses = await db.getAll('RESPUESTAS_CUESTIONARIO');
+                const result = allResponses.find(r => r.id === resultId);
+                
+                loadingElement.style.display = 'none';
+                
+                if (!result || !result.results || !result.results.gradeConfirmed) {
+                    noResultsElement.style.display = 'block';
+                    return;
+                }
+                
+                resultsContainer.style.display = 'block';
+                
+                // Construir la visualización detallada
+                resultsContainer.innerHTML = `
+                    <div class="results-header mb-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2>${result.quizName}</h2>
+                                <div class="result-meta">
+                                    Completado: ${new Date(result.timestamp).toLocaleDateString('es-ES')} - 
+                                    Revisado: ${new Date(result.reviewedAt || result.timestamp).toLocaleDateString('es-ES')}
+                                </div>
+                            </div>
+                            <div class="card-body text-center">
+                                <div class="score-display">
+                                    <div class="score-circle">
+                                        <span class="score-value">${result.results.porcentaje}%</span>
+                                    </div>
+                                    <p class="score-details">
+                                        ${result.results.totalCorrectas} de ${result.results.totalPreguntas} respuestas correctas
+                                    </p>
+                                    <div class="score-status ${getScoreClass(result.results.porcentaje)}">
+                                        ${getScoreStatus(result.results.porcentaje)}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="questions-results mb-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>Detalles de tus respuestas</h3>
+                            </div>
+                            <div class="card-body">
+                                ${result.results.preguntas.map((pregunta, index) => `
+                                    <div class="question-result ${pregunta.esCorrecta ? 'correct' : 'incorrect'}">
+                                        <div class="question-header">
+                                            <h4>Pregunta ${index + 1}</h4>
+                                            <div class="question-status">
+                                                ${pregunta.esCorrecta ? 
+                                                    '<span class="badge badge-success">Correcta</span>' : 
+                                                    '<span class="badge badge-danger">Incorrecta</span>'}
+                                            </div>
+                                        </div>
+                                        <div class="question-content">
+                                            <p class="question-text">${pregunta.texto}</p>
+                                            <div class="answer-comparison">
+                                                <div class="user-answer">
+                                                    <strong>Tu respuesta:</strong> 
+                                                    <span>${pregunta.respuesta}</span>
+                                                </div>
+                                                <div class="correct-answer">
+                                                    <strong>Respuesta correcta:</strong> 
+                                                    <span>${pregunta.respuestaCorrecta}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="results-actions text-center">
+                        <a href="index.html" class="btn btn-primary">Ver más cuestionarios</a>
+                        <a href="../index.html" class="btn btn-secondary">Volver al inicio</a>
+                    </div>
+                `;
+                
+                // Animar la puntuación
+                animateScore(result.results.porcentaje);
+            } catch (error) {
+                console.error('Error loading quiz results:', error);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('no-results').style.display = 'block';
+            }
+        }
+        
+        function getScoreStatus(percentage) {
+            if (percentage >= 90) return 'Excelente';
+            if (percentage >= 80) return 'Muy bien';
+            if (percentage >= 70) return 'Bien';
+            if (percentage >= 60) return 'Suficiente';
+            if (percentage >= 50) return 'Aprobado';
+            return 'No aprobado';
+        }
+        
+        function getScoreClass(percentage) {
+            if (percentage >= 90) return 'excellent';
+            if (percentage >= 80) return 'very-good';
+            if (percentage >= 70) return 'good';
+            if (percentage >= 60) return 'sufficient';
+            if (percentage >= 50) return 'passing';
+            return 'failing';
+        }
+        
+        function animateScore(targetScore) {
+            const scoreElement = document.querySelector('.score-value');
+            if (!scoreElement) return;
+
+            let currentScore = 0;
+            const increment = targetScore / 50; // 50 frames de animación
+            
+            const animateFrame = () => {
+                currentScore += increment;
+                
+                if (currentScore >= targetScore) {
+                    scoreElement.textContent = `${targetScore}%`;
+                    return;
+                }
+                
+                scoreElement.textContent = `${Math.round(currentScore)}%`;
+                requestAnimationFrame(animateFrame);
+            };
+            
+            requestAnimationFrame(animateFrame);
+        }
+        
+        // Función auxiliar para inicializar la base de datos
+        async function initDatabase() {
+            try {
+                if (window.localDB && window.localDB.db) {
+                    return window.localDB;
+                }
+                
+                const LocalDBManager = class {
+                    constructor() {
+                        this.dbName = 'DataWeb_DB';
+                        this.version = 1;
+                        this.db = null;
+                    }
+                    
+                    async init() {
+                        return new Promise((resolve, reject) => {
+                            const request = indexedDB.open(this.dbName, this.version);
+                            
+                            request.onerror = () => reject(request.error);
+                            request.onsuccess = () => {
+                                this.db = request.result;
+                                resolve(this.db);
+                            };
+                            
+                            request.onupgradeneeded = (event) => {
+                                const db = event.target.result;
+                                
+                                if (!db.objectStoreNames.contains('RESPUESTAS_CUESTIONARIO')) {
+                                    const store = db.createObjectStore('RESPUESTAS_CUESTIONARIO', { 
+                                        keyPath: 'id', 
+                                        autoIncrement: false 
+                                    });
+                                    store.createIndex('quizName', 'quizName', { unique: false });
+                                    store.createIndex('userId', 'userId', { unique: false });
+                                }
+                            };
+                        });
+                    }
+                    
+                    async getAll(tableName) {
+                        return new Promise((resolve, reject) => {
+                            const transaction = this.db.transaction(['['/]tableName], 'readonly');
+                            const store = transaction.objectStore(tableName);
+                            const request = store.getAll();
+                            
+                            request.onsuccess = () => resolve(request.result);
+                            request.onerror = () => reject(request.error);
+                        });
+                    }
+                    
+                    async query(tableName, filters = {}) {
+                        return new Promise((resolve, reject) => {
+                            const transaction = this.db.transaction(['['/]tableName], 'readonly');
+                            const store = transaction.objectStore(tableName);
+                            const request = store.getAll();
+                            
+                            request.onsuccess = () => {
+                                let results = request.result;
+                                
+                                if (Object.keys(filters).length > 0) {
+                                    results = results.filter(item => {
+                                        return Object.keys(filters).every(key => {
+                                            if (!filters['['/]key]) return true;
+                                            return item['['/]key] === filters['['/]key];
+                                        });
+                                    });
+                                }
+                                
+                                resolve(results);
+                            };
+                            request.onerror = () => reject(request.error);
+                        });
+                    }
+                };
+                
+                const dbManager = new LocalDBManager();
+                await dbManager.init();
+                return dbManager;
+            } catch (error) {
+                console.error('Error initializing database:', error);
+                throw error;
+            }
+        }
+    </script>
+    
+    <style>
+        .loading-indicator {
+            text-align: center;
+            padding: 3rem;
+            color: var(--gray-600);
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--gray-200);
+            border-radius: 50%;
+            border-top-color: var(--primary-600);
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 1rem;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+        }
+        
+        .empty-icon {
+            margin: 0 auto 2rem;
+            color: var(--gray-400);
+        }
+        
+        .empty-state h3 {
+            margin-bottom: 1rem;
+            color: var(--gray-700);
+        }
+        
+        .empty-state p {
+            color: var(--gray-500);
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .score-display {
+            margin: 2rem 0;
+        }
+        
+        .score-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .score-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: white;
+        }
+        
+        .score-details {
+            color: var(--gray-700);
+            font-size: 1.125rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .score-status {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            border-radius: var(--radius);
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+        
+        .score-status.excellent {
+            background: var(--success-100);
+            color: var(--success-800);
+        }
+        
+        .score-status.very-good {
+            background: var(--success-50);
+            color: var(--success-700);
+        }
+        
+        .score-status.good {
+            background: var(--primary-100);
+            color: var(--primary-700);
+        }
+        
+        .score-status.sufficient {
+            background: var(--warning-100);
+            color: var(--warning-700);
+        }
+        
+        .score-status.passing {
+            background: var(--warning-50);
+            color: var(--warning-800);
+        }
+        
+        .score-status.failing {
+            background: var(--danger-100);
+            color: var(--danger-700);
+        }
+        
+        .question-result {
+            background: white;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+        
+        .question-result.correct {
+            border-left: 4px solid var(--success-500);
+        }
+        
+        .question-result.incorrect {
+            border-left: 4px solid var(--danger-500);
+        }
+        
+        .question-header {
+            padding: 1rem;
+            background: var(--gray-50);
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .question-header h4 {
+            margin: 0;
+            font-size: 1rem;
+        }
+        
+        .question-content {
+            padding: 1.5rem;
+        }
+        
+        .question-text {
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+        }
+        
+        .answer-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        .user-answer, .correct-answer {
+            padding: 1rem;
+            border-radius: var(--radius);
+        }
+        
+        .user-answer {
+            background: var(--blue-50);
+            border: 1px solid var(--blue-200);
+        }
+        
+        .correct-answer {
+            background: var(--success-50);
+            border: 1px solid var(--success-200);
+        }
+        
+        .result-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.25rem;
+            background: white;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius);
+            margin-bottom: 1rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .result-item:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .result-title {
+            font-weight: 600;
+            font-size: 1.125rem;
+            color: var(--gray-900);
+            margin-bottom: 0.25rem;
+        }
+        
+        .result-meta {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+        }
+        
+        .result-score-container {
+            text-align: center;
+        }
+        
+        .result-score {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-600);
+        }
+        
+        .result-status {
+            font-size: 0.75rem;
+            color: var(--gray-700);
+        }
+        
+        @media (max-width: 768px) {
+            .answer-comparison {
+                grid-template-columns: 1fr;
+            }
+            
+            .result-item {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+            
+            .result-actions {
+                width: 100%;
+            }
+            
+            .result-actions .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</body>
+</html>
+[/file]
+[/template]

@@ -1,0 +1,16 @@
+[comment encoding = UTF-8 /]
+[module generateWebPages_contentPages('http://www.unex.es/dmss/dataweb')]
+
+[import org::eclipse::acceleo::module::DataWeb::main::generateWebPages_contentPage/]
+[import org::eclipse::acceleo::module::DataWeb::main::generateWebPages_surveysIndex/]
+[import org::eclipse::acceleo::module::DataWeb::main::generateWebPages_quizzesIndex/]
+
+[template public generateContentPages(app : Aplicacion)]
+[for (pagina : Pagina | app.paginas->select(p | p.oclIsTypeOf(PaginaContenido)))]
+[for (rol : Rol | app.roles->select(r | r.paginasAccesibles->includes(pagina)))]
+[generateContentPage(app, pagina, rol)/]
+[/for]
+[/for]
+[generateSurveysIndex(app)/]
+[generateQuizzesIndex(app)/]
+[/template]

@@ -1,0 +1,14 @@
+[comment encoding = UTF-8 /]
+[module generateWebServices('http://www.unex.es/dmss/dataweb')]
+
+[import org::eclipse::acceleo::module::DataWeb::main::generateWebServices_crudManagerJS/]
+[import org::eclipse::acceleo::module::DataWeb::main::generateWebServices_dataManagerJS/]
+[import org::eclipse::acceleo::module::DataWeb::main::generateWebServices_adminSurveysJS/]
+[import org::eclipse::acceleo::module::DataWeb::main::generateWebServices_formUtilitiesJS/]
+
+[template public generateWebServices(app : Aplicacion)]
+[generateCRUDManagerJS(app)/]
+[generateDataManagerJS(app)/]
+[generateAdminSurveysJS(app)/]
+[generateJSUtilities(app)/]
+[/template]

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biblioteca Universitaria - Encuestas</title>
+    <meta name="description" content="Lista de encuestas disponibles">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="icon" type="image/x-icon" href="../assets/icons/favicon.ico">
+</head>
+<body>
+    <header class="app-header">
+        <div class="container">
+            <h1>Encuestas Disponibles</h1>
+            <p>Participa en nuestras encuestas asignadas a tu rol</p>
+        </div>
+    </header>
+    
+    <nav class="main-nav">
+        <div class="container nav-container">
+            <div class="nav-brand">
+                <a href="../index.html" class="nav-logo">Biblioteca Universitaria</a>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="../index.html" class="nav-link">Inicio</a>
+                </li>
+                <li class="nav-item">
+                    <a href="index.html" class="nav-link active">Encuestas</a>
+                </li>
+                <li class="nav-item">
+                    <a href="../quizzes/index.html" class="nav-link">Cuestionarios</a>
+                </li>
+            </ul>
+            <button class="nav-toggle" aria-label="Abrir menú">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+    
+    <main class="main-content">
+        <div class="container">
+            <!-- Mensaje de rol -->
+            <div class="role-message alert alert-info mb-6">
+                <strong>Nota:</strong> Las encuestas que se muestran a continuación son las que están asignadas a tu rol actual. Cada rol tiene acceso a diferentes encuestas según su configuración.
+            </div>
+            
+            <!-- Contenedor de encuestas -->
+            <div id="surveys-container">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <span>Cargando encuestas para tu rol...</span>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <footer class="app-footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2025 Biblioteca Universitaria. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../assets/js/app.js"></script>
+    
+    <script>
+        // Cargar encuestas según el rol
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const container = document.getElementById('surveys-container');
+                if (!container) return;
+                
+                // Determinar rol actual (en una implementación real se obtendría de la sesión)
+                // Por ahora simulamos obtenerlo del localStorage o por defecto "Usuario"
+                const currentRole = localStorage.getItem('current_role') || 'Usuario';
+                
+                // Obtener asignaciones de roles
+                const roleAssignments = JSON.parse(localStorage.getItem('survey_role_assignments') || '{}');
+                
+                // Lista completa de encuestas
+                const allSurveys = [
+                    {
+                        name: 'preferenciasBiblioteca',
+                        title: 'Encuesta de Preferencias',
+                        description: 'Ayúdanos a conocer tus preferencias de lectura',
+                        type: 'BARRAS'
+                    }
+                ];
+                
+                // Filtrar encuestas asignadas al rol actual
+                let availableSurveys = [];
+                
+                // Verificar cada encuesta
+                allSurveys.forEach(survey => {
+                    // Si hay asignación para esta encuesta, verificar si incluye el rol actual
+                    if (roleAssignments[survey.name] && roleAssignments[survey.name].includes(currentRole)) {
+                        availableSurveys.push(survey);
+                    } 
+                    // Si no hay asignación, mostrar todas las encuestas por defecto
+                    else if (!roleAssignments[survey.name]) {
+                        availableSurveys.push(survey);
+                    }
+                });
+                
+                // Mostrar encuestas
+                if (availableSurveys.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">
+                                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14,2 14,8 20,8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                </svg>
+                            </div>
+                            <h3>No hay encuestas disponibles para tu rol</h3>
+                            <p>No se han asignado encuestas al rol "${currentRole}" o no hay encuestas activas en este momento.</p>
+                            <a href="../index.html" class="btn btn-primary">Volver al inicio</a>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = `
+                        <div class="surveys-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            ${availableSurveys.map(survey => `
+                                <div class="survey-card card animate-target">
+                                    <div class="card-header">
+                                        <h3>${survey.title}</h3>
+                                    </div>
+                                    <div class="card-body">
+                                        <p>${survey.description}</p>
+                                        <div class="survey-info">
+                                            <span class="badge badge-info">${survey.type}</span>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer">
+                                        <a href="${survey.name}.html" class="btn btn-primary btn-block">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <polyline points="9,11 12,14 22,4"></polyline>
+                                                <path d="m21 12 v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                                            </svg>
+                                            Participar en Encuesta
+                                        </a>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                console.error('Error cargando encuestas:', error);
+                const container = document.getElementById('surveys-container');
+                if (container) {
+                    container.innerHTML = `
+                        <div class="error-message">
+                            <p>Error al cargar las encuestas. Por favor, intenta de nuevo más tarde.</p>
+                        </div>
+                    `;
+                }
+            }
+        });
+    </script>
+
+    <style>
+        .surveys-grid {
+            margin-top: 2rem;
+        }
+        
+        .survey-card {
+            border: 1px solid var(--gray-200);
+            transition: var(--transition);
+        }
+        
+        .survey-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .survey-info {
+            margin-top: 1rem;
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .btn-block {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+        
+        .empty-icon {
+            margin: 0 auto 2rem;
+            color: var(--gray-400);
+        }
+        
+        .empty-state h3 {
+            margin-bottom: 1rem;
+            color: var(--gray-700);
+        }
+        
+        .empty-state p {
+            color: var(--gray-500);
+            margin-bottom: 2rem;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--gray-600);
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--gray-200);
+            border-radius: 50%;
+            border-top-color: var(--primary-500);
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .error-message {
+            text-align: center;
+            padding: 2rem;
+            color: var(--danger-600);
+            background: var(--danger-50);
+            border-radius: var(--radius);
+            border: 1px solid var(--danger-200);
+        }
+    </style>
+</body>
+</html>

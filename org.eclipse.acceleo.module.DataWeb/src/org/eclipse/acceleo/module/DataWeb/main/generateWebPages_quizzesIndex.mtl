@@ -1,0 +1,516 @@
+[comment encoding = UTF-8 /]
+[module generateWebPages_quizzesIndex('http://www.unex.es/dmss/dataweb')]
+
+[template public generateQuizzesIndex(app : Aplicacion)]
+[file ('web/quizzes/index.html', false, 'UTF-8')]
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[app.nombre/] - Cuestionarios</title>
+    <meta name="description" content="Lista de cuestionarios disponibles">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="icon" type="image/x-icon" href="../assets/icons/favicon.ico">
+</head>
+<body>
+    <header class="app-header">
+        <div class="container">
+            <h1>Cuestionarios de Evaluación</h1>
+            <p>Pon a prueba tus conocimientos con nuestros cuestionarios asignados a tu rol</p>
+        </div>
+    </header>
+    
+    <nav class="main-nav">
+        <div class="container nav-container">
+            <div class="nav-brand">
+                <a href="../index.html" class="nav-logo">[app.nombre/]</a>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="../index.html" class="nav-link">Inicio</a>
+                </li>
+                [if (not app.encuestas->isEmpty())]
+                <li class="nav-item">
+                    <a href="../surveys/index.html" class="nav-link">Encuestas</a>
+                </li>
+                [/if]
+                <li class="nav-item">
+                    <a href="index.html" class="nav-link active">Cuestionarios</a>
+                </li>
+            </ul>
+            <button class="nav-toggle" aria-label="Abrir menú">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+    
+    <main class="main-content">
+        <div class="container">
+            <!-- Mensaje de rol -->
+            <div class="role-message alert alert-info mb-6">
+                <strong>Nota:</strong> Los cuestionarios que se muestran a continuación son los que están asignados a tu rol actual. Cada rol tiene acceso a diferentes evaluaciones según su configuración.
+            </div>
+            
+            <!-- Contenedor de cuestionarios -->
+            <div id="quizzes-container">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <span>Cargando cuestionarios para tu rol...</span>
+                </div>
+            </div>
+            
+            <!-- Resultados de cuestionarios -->
+            <section class="quiz-results mt-8" id="quiz-results-section" style="display:none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Tus Resultados de Evaluaciones</h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="quiz-results-container">
+                            <p class="loading-message">Cargando tus resultados...</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+    
+    <footer class="app-footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2025 [app.nombre/]. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script src="../assets/js/app.js"></script>
+    
+    <script>
+        // Cargar cuestionarios según el rol
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const container = document.getElementById('quizzes-container');
+                if (!container) return;
+                
+                // Determinar rol actual (en una implementación real se obtendría de la sesión)
+                const currentRole = localStorage.getItem('current_role') || 'Usuario';
+                
+                // Obtener asignaciones de roles
+                const roleAssignments = JSON.parse(localStorage.getItem('quiz_role_assignments') || '{}');
+                
+                // Lista completa de cuestionarios
+                const allQuizzes = ['['/]
+                    [for (cuestionario : Cuestionario | app.cuestionarios) separator(',')]
+                    {
+                        name: '[cuestionario.nombre/]',
+                        title: '[cuestionario.titulo/]',
+                        description: '[if (cuestionario.descripcion.oclIsUndefined() = false)][cuestionario.descripcion/][else]Cuestionario: [cuestionario.titulo/][/if]',
+                        questions: [cuestionario.preguntas->size()/]
+                    }
+                    [/for]
+                ];
+                
+                // Filtrar cuestionarios asignados al rol actual
+                let availableQuizzes = ['['/]];
+                
+                // Verificar cada cuestionario
+                allQuizzes.forEach(quiz => {
+                    // Si hay asignación para este cuestionario, verificar si incluye el rol actual
+                    if (roleAssignments['['/]quiz.name] && roleAssignments['['/]quiz.name].includes(currentRole)) {
+                        availableQuizzes.push(quiz);
+                    } 
+                    // Si no hay asignación, mostrar todos los cuestionarios por defecto
+                    else if (!roleAssignments['['/]quiz.name]) {
+                        availableQuizzes.push(quiz);
+                    }
+                });
+                
+                // Mostrar cuestionarios
+                if (availableQuizzes.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">
+                                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                                </svg>
+                            </div>
+                            <h3>No hay cuestionarios disponibles para tu rol</h3>
+                            <p>No se han asignado cuestionarios al rol "${currentRole}" o no hay cuestionarios activos en este momento.</p>
+                            <a href="../index.html" class="btn btn-primary">Volver al inicio</a>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = `
+                        <div class="quizzes-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            ${availableQuizzes.map(quiz => `
+                                <div class="quiz-card card animate-target">
+                                    <div class="card-header">
+                                        <h3>${quiz.title}</h3>
+                                    </div>
+                                    <div class="card-body">
+                                        <p>${quiz.description}</p>
+                                        <div class="quiz-info">
+                                            <span class="badge badge-primary">${quiz.questions} preguntas</span>
+                                            <span class="badge badge-warning">Evaluativo</span>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer">
+                                        <a href="${quiz.name}.html" class="btn btn-primary btn-block">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <circle cx="12" cy="12" r="10"></circle>
+                                                <path d="m9 12 2 2 4-4"></path>
+                                            </svg>
+                                            Realizar Cuestionario
+                                        </a>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>`;
+                }
+                
+                // Cargar resultados de cuestionarios
+                await loadQuizResults();
+                
+            } catch (error) {
+                console.error('Error cargando cuestionarios:', error);
+                const container = document.getElementById('quizzes-container');
+                if (container) {
+                    container.innerHTML = `
+                        <div class="error-message">
+                            <p>Error al cargar los cuestionarios. Por favor, intenta de nuevo más tarde.</p>
+                        </div>
+                    `;
+                }
+            }
+        });
+        
+        // Función para cargar los resultados de cuestionarios
+		async function loadQuizResults() {
+		    try {
+		        const resultsSection = document.getElementById('quiz-results-section');
+		        if (!resultsSection) return;
+		        
+		        const currentUserId = 'usuario@example.com'; // En una implementación real, se obtendría de la sesión
+		        
+		        // Inicializar la base de datos
+		        const db = await initDatabase();
+		        
+		        // Buscar resultados confirmados
+		        const allResults = await db.query('RESPUESTAS_CUESTIONARIO', { userId: currentUserId });
+		        const confirmedResults = allResults.filter(r => r.results && r.results.gradeConfirmed);
+		        
+		        if (confirmedResults.length === 0) {
+		            resultsSection.innerHTML = `
+		                <div class="card">
+		                    <div class="card-header">
+		                        <h2>Tus Resultados de Evaluaciones</h2>
+		                    </div>
+		                    <div class="card-body">
+		                        <div class="empty-state">
+		                            <p>Aún no tienes evaluaciones calificadas por un administrador.</p>
+		                        </div>
+		                        <div class="text-center mt-4">
+		                            <a href="results.html" class="btn btn-primary">Ver página de resultados</a>
+		                        </div>
+		                    </div>
+		                </div>
+		            `;
+		        } else {
+		            resultsSection.innerHTML = `
+		                <div class="card">
+		                    <div class="card-header">
+		                        <h2>Tus Resultados de Evaluaciones</h2>
+		                    </div>
+		                    <div class="card-body">
+		                        <p>Tienes ${confirmedResults.length} evaluaciones calificadas por un administrador.</p>
+		                        <div class="text-center mt-4">
+		                            <a href="results.html" class="btn btn-primary">Ver todos mis resultados</a>
+		                        </div>
+		                    </div>
+		                </div>
+		            `;
+		        }
+		        
+		        resultsSection.style.display = 'block';
+		    } catch (error) {
+		        console.error('Error loading quiz results:', error);
+		    }
+		}
+        
+        // Función para inicializar la base de datos
+        async function initDB() {
+            try {
+                // Si la base de datos global ya existe, la usamos
+                if (window.localDB && window.localDB.db) {
+                    return window.localDB;
+                }
+
+                // Importar o crear LocalDBManager
+                const LocalDBManager = window.LocalDBManager || class LocalDBManager {
+                    constructor() {
+                        this.dbName = 'DataWeb_DB';
+                        this.version = 1;
+                        this.db = null;
+                    }
+
+                    async init() {
+                        return new Promise((resolve, reject) => {
+                            const request = indexedDB.open(this.dbName, this.version);
+                            
+                            request.onerror = () => {
+                                reject(request.error);
+                            };
+                            
+                            request.onsuccess = () => {
+                                this.db = request.result;
+                                resolve(this.db);
+                            };
+                            
+                            request.onupgradeneeded = (event) => {
+                                const db = event.target.result;
+                                
+                                if (!db.objectStoreNames.contains('RESPUESTAS_CUESTIONARIO')) {
+                                    const store = db.createObjectStore('RESPUESTAS_CUESTIONARIO', { 
+                                        keyPath: 'id', 
+                                        autoIncrement: false 
+                                    });
+                                    store.createIndex('quizName', 'quizName', { unique: false });
+                                    store.createIndex('userId', 'userId', { unique: false });
+                                    store.createIndex('reviewed', 'reviewed', { unique: false });
+                                }
+                            };
+                        });
+                    }
+
+                    async query(tableName, filters = {}) {
+                        return new Promise((resolve, reject) => {
+                            const transaction = this.db.transaction(['['/]tableName], 'readonly');
+                            const store = transaction.objectStore(tableName);
+                            const request = store.getAll();
+                            
+                            request.onsuccess = () => {
+                                let results = request.result;
+                                
+                                if (Object.keys(filters).length > 0) {
+                                    results = results.filter(item => {
+                                        return Object.keys(filters).every(key => {
+                                            if (!filters['['/]key]) return true;
+                                            return item['['/]key] === filters['['/]key];
+                                        });
+                                    });
+                                }
+                                
+                                resolve(results);
+                            };
+                            request.onerror = () => reject(request.error);
+                        });
+                    }
+                };
+
+                // Inicializar base de datos
+                const dbManager = new LocalDBManager();
+                await dbManager.init();
+                
+                // Guardar globalmente
+                window.localDB = dbManager;
+                
+                return dbManager;
+            } catch (error) {
+                console.error('Error initializing database:', error);
+                throw error;
+            }
+        }
+    </script>
+    
+    <style>
+        .quizzes-grid {
+            margin-top: 2rem;
+        }
+        
+        .quiz-card {
+            border: 1px solid var(--gray-200);
+            transition: var(--transition);
+        }
+        
+        .quiz-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .quiz-info {
+            margin-top: 1rem;
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .badge-warning {
+            background: var(--warning-100);
+            color: var(--warning-700);
+        }
+        
+        .badge-primary {
+            background: var(--primary-100);
+            color: var(--primary-700);
+        }
+        
+        .btn-block {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+        
+        .empty-icon {
+            margin: 0 auto 2rem;
+            color: var(--gray-400);
+        }
+        
+        .empty-state h3 {
+            margin-bottom: 1rem;
+            color: var(--gray-700);
+        }
+        
+        .empty-state p {
+            color: var(--gray-500);
+            margin-bottom: 2rem;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--gray-600);
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--gray-200);
+            border-radius: 50%;
+            border-top-color: var(--primary-500);
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading-message {
+            text-align: center;
+            color: var(--gray-600);
+            padding: 2rem;
+        }
+        
+        .error-message {
+            text-align: center;
+            padding: 2rem;
+            color: var(--danger-600);
+            background: var(--danger-50);
+            border-radius: var(--radius);
+            border: 1px solid var(--danger-200);
+        }
+        
+        /* Estilos para los resultados */
+        .results-grid {
+            margin-top: 1.5rem;
+        }
+        
+        .result-card {
+            background: white;
+            border-radius: var(--radius);
+            border: 1px solid var(--gray-200);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .result-header {
+            padding: 1rem;
+            background: var(--gray-50);
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .result-title {
+            font-weight: 600;
+            color: var(--gray-800);
+        }
+        
+        .result-score {
+            background: var(--primary-100);
+            color: var(--primary-700);
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius);
+            font-weight: 700;
+        }
+        
+        .result-details {
+            padding: 1rem;
+        }
+        
+        .result-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+        
+        .result-stat {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+        }
+        
+        .result-value {
+            font-weight: 500;
+            color: var(--gray-900);
+        }
+        
+        .pending-list {
+            list-style: none;
+            padding: 0;
+            margin: 1rem 0 0;
+        }
+        
+        .pending-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem;
+            background: var(--gray-50);
+            border-radius: var(--radius);
+            margin-bottom: 0.5rem;
+        }
+        
+        .pending-name {
+            font-weight: 500;
+            color: var(--gray-800);
+        }
+        
+        .pending-date {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 2rem;
+            color: var(--gray-600);
+            font-style: italic;
+        }
+    </style>
+</body>
+</html>
+[/file]
+[/template]

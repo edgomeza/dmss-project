@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biblioteca Universitaria - Cuestionario de Satisfacción</title>
+    <meta name="description" content="Evalúa tu experiencia con la biblioteca">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="icon" type="image/x-icon" href="../assets/icons/favicon.ico">
+</head>
+<body>
+    <!-- Header -->
+    <header class="app-header">
+        <div class="container">
+            <h1>Cuestionario de Satisfacción</h1>
+            <p>Evalúa tu experiencia con la biblioteca</p>
+        </div>
+    </header>
+    
+    <nav class="main-nav">
+        <div class="container nav-container">
+            <div class="nav-brand">
+                <a href="../index.html" class="nav-logo">Biblioteca Universitaria</a>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="../index.html" class="nav-link">Inicio</a>
+                </li>
+            </ul>
+            <button class="nav-toggle" aria-label="Abrir menú">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+    
+    <main class="main-content">
+        <div class="container">
+            <div class="quiz-container">
+                <div class="quiz-info card mb-6">
+                    <div class="card-body">
+                        <div class="quiz-overview grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div class="overview-item">
+                                <div class="overview-icon">📝</div>
+                                <div class="overview-content">
+                                    <div class="overview-number">3</div>
+                                    <div class="overview-label">Preguntas</div>
+                                </div>
+                            </div>
+                            <div class="overview-item">
+                                <div class="overview-icon">⏱️</div>
+                                <div class="overview-content">
+                                    <div class="overview-number">30</div>
+                                    <div class="overview-label">Minutos</div>
+                                </div>
+                            </div>
+                            <div class="overview-item">
+                                <div class="overview-icon">🎯</div>
+                                <div class="overview-content">
+                                    <div class="overview-number">100</div>
+                                    <div class="overview-label">Puntos Máximos</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="quiz-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                    </div>
+                    <div class="progress-info">
+                        <span class="progress-text">
+                            Pregunta <span id="current-question">1</span> de <span id="total-questions">3</span>
+                        </span>
+                        <span class="timer" id="timer-display">30:00</span>
+                    </div>
+                </div>
+                
+                <form id="quiz-form" class="quiz-form card" data-quiz-id="satisfaccionBiblioteca" data-time-limit="30">
+                    <div class="card-body">
+                        <div class="question-container" data-question="1" >
+                            <div class="question-header">
+                                <h3 class="question-text">¿Cómo calificarías el servicio de la biblioteca?</h3>
+                            </div>
+                            
+                            <div class="question-options">
+                                <div class="option-card">
+                                    <input type="radio" id="q1_satisfaccionOpcion1" name="question_1" value="5" class="option-input" required>
+                                    <label for="q1_satisfaccionOpcion1" class="option-label">
+                                        <div class="option-indicator">
+                                            <span class="option-letter">A</span>
+                                        </div>
+                                        <div class="option-content">
+                                            <span class="option-text">Excelente</span>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="option-card">
+                                    <input type="radio" id="q2_satisfaccionOpcion2" name="question_2" value="4" class="option-input" required>
+                                    <label for="q2_satisfaccionOpcion2" class="option-label">
+                                        <div class="option-indicator">
+                                            <span class="option-letter">B</span>
+                                        </div>
+                                        <div class="option-content">
+                                            <span class="option-text">Bueno</span>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="option-card">
+                                    <input type="radio" id="q3_satisfaccionOpcion3" name="question_3" value="3" class="option-input" required>
+                                    <label for="q3_satisfaccionOpcion3" class="option-label">
+                                        <div class="option-indicator">
+                                            <span class="option-letter">C</span>
+                                        </div>
+                                        <div class="option-content">
+                                            <span class="option-text">Regular</span>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="option-card">
+                                    <input type="radio" id="q4_satisfaccionOpcion4" name="question_4" value="2" class="option-input" required>
+                                    <label for="q4_satisfaccionOpcion4" class="option-label">
+                                        <div class="option-indicator">
+                                            <span class="option-letter">D</span>
+                                        </div>
+                                        <div class="option-content">
+                                            <span class="option-text">Malo</span>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="option-card">
+                                    <input type="radio" id="q5_satisfaccionOpcion5" name="question_5" value="1" class="option-input" required>
+                                    <label for="q5_satisfaccionOpcion5" class="option-label">
+                                        <div class="option-indicator">
+                                            <span class="option-letter">E</span>
+                                        </div>
+                                        <div class="option-content">
+                                            <span class="option-text">Muy Malo</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="question-navigation">
+                                
+                                <button type="button" class="btn btn-primary ml-auto" onclick="nextQuestion(1)" disabled>
+                                    Siguiente
+                                </button>
+                            </div>
+                        </div>
+                        <div class="question-container" data-question="2" style="display: none;">
+                            <div class="question-header">
+                                <h3 class="question-text">¿Consideras que el horario de la biblioteca es adecuado?</h3>
+                            </div>
+                            
+                            <div class="question-options">
+                                <div class="option-card">
+                                    <input type="radio" id="q2_true" name="question_2" value="true" class="option-input" required>
+                                    <label for="q2_true" class="option-label">
+                                        <div class="option-indicator">
+                                            <span class="option-letter">V</span>
+                                        </div>
+                                        <div class="option-content">
+                                            <span class="option-text">Verdadero</span>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="option-card">
+                                    <input type="radio" id="q2_false" name="question_2" value="false" class="option-input" required>
+                                    <label for="q2_false" class="option-label">
+                                        <div class="option-indicator">
+                                            <span class="option-letter">F</span>
+                                        </div>
+                                        <div class="option-content">
+                                            <span class="option-text">Falso</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="question-navigation">
+                                <button type="button" class="btn btn-secondary" onclick="previousQuestion(2)">
+                                    Anterior
+                                </button>
+                                
+                                <button type="button" class="btn btn-primary ml-auto" onclick="nextQuestion(2)" disabled>
+                                    Siguiente
+                                </button>
+                            </div>
+                        </div>
+                        <div class="question-container" data-question="3" style="display: none;">
+                            <div class="question-header">
+                                <h3 class="question-text">¿Qué sugerencias tienes para mejorar el servicio?</h3>
+                            </div>
+                            
+                            <div class="question-options">
+                                <div class="textarea-container">
+                                    <textarea id="q3_text" name="question_3" rows="4" class="form-textarea" placeholder="Escribe tu respuesta aquí..." required maxlength="500"></textarea>
+                                    <div class="textarea-counter">
+                                        <span id="q3_counter">0</span>/500 caracteres
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="question-navigation">
+                                <button type="button" class="btn btn-secondary" onclick="previousQuestion(3)">
+                                    Anterior
+                                </button>
+                                
+                                <button type="button" class="btn btn-success ml-auto" onclick="showSubmitConfirmation()" disabled>
+                                    Finalizar Cuestionario
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Modal de confirmación -->
+                <div id="submit-confirmation-modal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4>¿Finalizar cuestionario?</h4>
+                        </div>
+                        <div class="modal-body">
+                            <p>¿Estás seguro de que quieres finalizar? Una vez enviadas tus respuestas no podrás modificarlas.</p>
+                            <div id="submission-summary"></div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+                            <button type="button" class="btn btn-success btn-submit-final" onclick="submitSurvey()">Sí, finalizar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <footer class="app-footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2025 Biblioteca Universitaria. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script src="../assets/js/app.js"></script>
+    <script src="../assets/js/survey.js"></script>
+    <style>
+    
+.overview-item {
+    text-align: center;
+    padding: 1.5rem;
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--gray-200);
+    transition: var(--transition);
+}
+
+.overview-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.overview-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+.overview-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary-600);
+    line-height: 1;
+}
+
+.overview-label {
+    font-size: 0.875rem;
+    color: var(--gray-600);
+    margin-top: 0.25rem;
+}
+
+.quiz-progress {
+    background: white;
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--gray-200);
+}
+
+.progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+}
+
+.timer {
+    font-family: var(--font-family-mono);
+    font-weight: 600;
+    color: var(--primary-600);
+    background: var(--primary-50);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--primary-200);
+}
+
+.question-container {
+    background: white;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--gray-200);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.question-header {
+    background: var(--gray-50);
+    padding: 2rem 2rem 1rem;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.question-text {
+    margin: 0;
+    color: var(--gray-900);
+    font-size: 1.25rem;
+    line-height: 1.5;
+    font-weight: 600;
+}
+
+.question-options {
+    padding: 2rem;
+}
+
+.option-card {
+    margin-bottom: 1rem;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+}
+
+.option-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+}
+
+.option-label {
+    display: flex;
+    align-items: center;
+    padding: 1.25rem;
+    cursor: pointer;
+    transition: var(--transition);
+    background: white;
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius);
+    margin: 0;
+}
+
+.option-label:hover {
+    border-color: var(--primary-300);
+    background: var(--primary-50);
+}
+
+.option-input:checked + .option-label {
+    border-color: var(--primary-500);
+    background: var(--primary-100);
+    box-shadow: 0 0 0 3px var(--primary-100);
+}
+
+.option-indicator {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: var(--gray-100);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    transition: var(--transition);
+    position: relative;
+}
+
+.option-input:checked + .option-label .option-indicator {
+    background: var(--primary-500);
+    color: white;
+}
+
+.option-letter {
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.option-content {
+    flex: 1;
+}
+
+.option-text {
+    color: var(--gray-700);
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.option-input:checked + .option-label .option-text {
+    color: var(--gray-900);
+    font-weight: 500;
+}
+
+.question-navigation {
+    padding: 2rem;
+    border-top: 1px solid var(--gray-200);
+    background: var(--gray-50);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.quiz-results {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.results-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.score-display {
+    margin: 2rem 0;
+}
+
+.score-circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    box-shadow: var(--shadow-lg);
+}
+
+.score-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: white;
+}
+
+.score-details {
+    color: var(--gray-600);
+    font-size: 1.125rem;
+}
+
+.question-result {
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    background: white;
+}
+
+.question-result.correct {
+    border-color: var(--success-300);
+    background: var(--success-50);
+}
+
+.question-result.incorrect {
+    border-color: var(--danger-300);
+    background: var(--danger-50);
+}
+
+.question-number {
+    font-weight: 700;
+    color: var(--primary-600);
+    margin-bottom: 0.5rem;
+}
+
+.question-result .question-text {
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--gray-900);
+}
+
+.answer-comparison {
+    margin-top: 1rem;
+}
+
+.user-answer, .correct-answer {
+    padding: 0.75rem;
+    border-radius: var(--radius);
+    margin-bottom: 0.5rem;
+}
+
+.user-answer {
+    background: var(--blue-50);
+    border: 1px solid var(--blue-200);
+}
+
+.correct-answer {
+    background: var(--green-50);
+    border: 1px solid var(--green-200);
+}
+
+.correct-indicator {
+    color: var(--success-600);
+    font-weight: 600;
+    margin-left: 0.5rem;
+}
+
+.incorrect-indicator {
+    color: var(--danger-600);
+    font-weight: 600;
+    margin-left: 0.5rem;
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+    background: white;
+    margin: 15% auto;
+    max-width: 500px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    animation: slideIn 0.3s ease;
+}
+
+.modal-header {
+    padding: 1.5rem 1.5rem 0;
+}
+
+.modal-header h4 {
+    margin: 0;
+    color: var(--gray-900);
+}
+
+.modal-body {
+    padding: 1rem 1.5rem;
+}
+
+.modal-footer {
+    padding: 0 1.5rem 1.5rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from { 
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+    to { 
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .quiz-container {
+        padding: 0 0.5rem;
+    }
+    
+    .question-header {
+        padding: 1.5rem 1rem 1rem;
+    }
+    
+    .question-options {
+        padding: 1rem;
+    }
+    
+    .option-label {
+        padding: 1rem;
+    }
+    
+    .question-navigation {
+        padding: 1rem;
+        flex-direction: column;
+    }
+    
+    .question-navigation button {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .ml-auto {
+        margin-left: 0;
+    }
+    
+    .progress-info {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .overview-item {
+        padding: 1rem;
+    }
+    
+    .overview-number {
+        font-size: 1.5rem;
+    }
+}
+    </style>
+</body>
+</html>

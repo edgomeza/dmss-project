@@ -1,0 +1,546 @@
+[comment encoding = UTF-8 /]
+[module generateDAOClasses('http://www.unex.es/dmss/dataweb')]
+
+[template public generateDAOClasses(app : Aplicacion)]
+[generateDAOInterfaces(app)/]
+[generateDAOFactory(app)/]
+[for (entidad : Entidad | app.entidades)]
+[file ('app/src/dao/'+entidad.nombre+'DAO.java', false, 'UTF-8')]
+package dao;
+
+import model.[entidad.nombre/];
+// Importación de modelos relacionados
+[for (ref : Referencia | entidad.referencias)]
+import model.[ref.target.nombre/];
+import dao.[ref.target.nombre/]DAO;
+[/for]
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Optional;
+import java.util.Random;
+import java.util.Date;
+import java.text.SimpleDateFormat;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+/**
+ * Implementación de DAO para la entidad [entidad.nombre/]
+ * Proporciona métodos para realizar operaciones CRUD y consultas más complejas
+ */
+public class [entidad.nombre/]DAO implements IDAO<[entidad.nombre/], [if (entidad.atributos->select(a | a.isPrimaryKey)->first().tipo = TipoAtributo::INTEGER)]Integer[elseif (entidad.atributos->select(a | a.isPrimaryKey)->first().tipo = TipoAtributo::BOOLEAN)]Boolean[elseif (entidad.atributos->select(a | a.isPrimaryKey)->first().tipo = TipoAtributo::DECIMAL)]Double[else]String[/if]> {
+    private static [entidad.nombre/]DAO instance;
+    private Map<[if (entidad.atributos->select(a | a.isPrimaryKey)->first().tipo = TipoAtributo::INTEGER)]Integer[elseif (entidad.atributos->select(a | a.isPrimaryKey)->first().tipo = TipoAtributo::BOOLEAN)]Boolean[elseif (entidad.atributos->select(a | a.isPrimaryKey)->first().tipo = TipoAtributo::DECIMAL)]Double[else]String[/if], [entidad.nombre/]> data;
+    private int nextId = 1; // Para generar IDs automáticamente
+    
+    /**
+     * Constructor privado para aplicar el patrón Singleton
+     */
+    private [entidad.nombre/]DAO() {
+        data = new HashMap<>();
+        initData();
+    }
+    
+    /**
+     * Obtiene la instancia única del DAO
+     * @return Instancia del DAO de [entidad.nombre/]
+     */
+    public static [entidad.nombre/]DAO getInstance() {
+        if (instance == null) {
+            instance = new [entidad.nombre/]DAO();
+        }
+        return instance;
+    }
+    
+    /**
+     * Inicializa datos de prueba para la aplicación
+     */
+    private void initData() {
+        System.out.println("Inicializando datos de prueba para [entidad.nombre/]...");
+        Random rand = new Random();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date currentDate = new Date();
+        
+        // Valores de ejemplo para los diferentes tipos de datos
+        String['['/]] nombresPosibles = {"Principal", "Secundario", "Premium", "Regular", "Especial", "Básico", "Avanzado", "Estándar"};
+        String['['/]] descripcionesPosibles = {"Descripción detallada sobre este elemento", 
+                                        "Información básica y generalizada", 
+                                        "Datos principales y características específicas", 
+                                        "Detalles técnicos y especificaciones",
+                                        "Información complementaria sobre el elemento"};
+        String['['/]] estadosPosibles = {"Activo", "Inactivo", "Pendiente", "En proceso", "Completado", "Cancelado"};
+        
+        // Crear entre 5 y 15 instancias de ejemplo
+        int numInstancias = rand.nextInt(10) + 5;
+        for (int i = 1; i <= numInstancias; i++) {
+            [entidad.nombre/] entity = new [entidad.nombre/]();
+            
+            // Generamos valores para cada atributo según su tipo
+            [for (atrib : Atributo | entidad.atributos)]
+            [if (atrib.isPrimaryKey)]
+            [if (atrib.tipo = TipoAtributo::INTEGER)]
+            entity.set[atrib.nombre.toUpperFirst()/](i);
+            [else]
+            entity.set[atrib.nombre.toUpperFirst()/]("[entidad.nombre/]_" + i);
+            [/if]
+            [elseif (atrib.tipo = TipoAtributo::INTEGER)]
+            entity.set[atrib.nombre.toUpperFirst()/](rand.nextInt(1000) + 1);
+            [elseif (atrib.tipo = TipoAtributo::BOOLEAN)]
+            entity.set[atrib.nombre.toUpperFirst()/](rand.nextBoolean());
+            [elseif (atrib.tipo = TipoAtributo::DECIMAL)]
+            entity.set[atrib.nombre.toUpperFirst()/](Math.round(rand.nextDouble() * 10000.0) / 100.0); // Dos decimales
+            [else]
+			[if (atrib.nombre.toLower().contains('fecha') or atrib.nombre.toLower().contains('date'))]
+			// Generamos fechas aleatorias con nombres únicos
+			long offset_[atrib.nombre/] = (long) (rand.nextDouble() * 395) - 365;
+			Date date_[atrib.nombre/] = new Date(currentDate.getTime() + offset_[atrib.nombre/] * 24 * 60 * 60 * 1000);
+			entity.set[atrib.nombre.toUpperFirst()/](dateFormat.format(date_[atrib.nombre/]));
+            [elseif (atrib.nombre.toLower().contains('nombre') or atrib.nombre.toLower().contains('name') or atrib.nombre.toLower().contains('titulo'))]
+            entity.set[atrib.nombre.toUpperFirst()/](nombresPosibles['['/]rand.nextInt(nombresPosibles.length)] + " " + i);
+            [elseif (atrib.nombre.toLower().contains('descripcion') or atrib.nombre.toLower().contains('description'))]
+            entity.set[atrib.nombre.toUpperFirst()/](descripcionesPosibles['['/]rand.nextInt(descripcionesPosibles.length)]);
+            [elseif (atrib.nombre.toLower().contains('estado') or atrib.nombre.toLower().contains('status'))]
+            entity.set[atrib.nombre.toUpperFirst()/](estadosPosibles['['/]rand.nextInt(estadosPosibles.length)]);
+            [else]
+            entity.set[atrib.nombre.toUpperFirst()/]("[atrib.nombre/]_" + i);
+            [/if]
+            [/if]
+            [/for]
+            
+            // Guardamos la entidad en el mapa
+            data.put(entity.get[entidad.atributos->select(a | a.isPrimaryKey)->first().nombre.toUpperFirst()/](), entity);
+            
+            // Actualizamos el contador de ID para la próxima entidad
+            [if (entidad.atributos->select(a | a.isPrimaryKey)->first().tipo = TipoAtributo::INTEGER)]
+            if (entity.get[entidad.atributos->select(a | a.isPrimaryKey)->first().nombre.toUpperFirst()/]() >= nextId) {
+                nextId = entity.get[entidad.atributos->select(a | a.isPrimaryKey)->first().nombre.toUpperFirst()/]() + 1;
+            }
+            [/if]
+        }
+        
+        System.out.println("Se han creado " + numInstancias + " instancias de prueba para [entidad.nombre/]");
+    }
+
+    /**
+     * Configura las relaciones con otras entidades
+     * Se debe llamar después de que todas las entidades estén inicializadas
+     */
+    public void setupRelationships() {
+        [if (not entidad.referencias->isEmpty())]
+        System.out.println("Configurando relaciones para [entidad.nombre/]...");
+        Random rand = new Random();
+        
+        [for (ref : Referencia | entidad.referencias)]
+        try {
+            // Obtener instancias de la entidad referenciada
+            [ref.target.nombre/]DAO [ref.nombre/]DAO = ([ref.target.nombre/]DAO) DAOFactory.getDAO([ref.target.nombre/].class);
+            List<[ref.target.nombre/]> [ref.nombre/]List = [ref.nombre/]DAO.findAll();
+            
+            if ([ref.nombre/]List.isEmpty()) {
+                System.out.println("Advertencia: No hay entidades [ref.target.nombre/] disponibles para establecer relaciones");
+                return;
+            }
+            
+            // Asignar aleatoriamente entidades relacionadas
+            for ([entidad.nombre/] entity : data.values()) {
+                // Determinar si asignamos una relación (80% de probabilidad)
+                if (rand.nextDouble() < 0.8) {
+                    [ref.target.nombre/] related = [ref.nombre/]List.get(rand.nextInt([ref.nombre/]List.size()));
+                    entity.set[ref.nombre.toUpperFirst()/](related);
+                }
+            }
+            System.out.println("Relaciones [ref.nombre/] configuradas correctamente");
+        } catch (Exception e) {
+            System.err.println("Error al configurar relaciones [ref.nombre/]: " + e.getMessage());
+            e.printStackTrace();
+        }
+        [/for]
+        [/if]
+    }
+    
+    /**
+     * Busca una entidad por su identificador
+     * @param id Identificador de la entidad
+     * @return Entidad encontrada o null si no existe
+     */
+    @Override
+	public [entidad.nombre/] findById([if (entidad.atributos->select(a | a.isPrimaryKey)->first().tipo = TipoAtributo::INTEGER)]Integer[elseif (entidad.atributos->select(a | a.isPrimaryKey)->first().tipo = TipoAtributo::BOOLEAN)]Boolean[elseif (entidad.atributos->select(a | a.isPrimaryKey)->first().tipo = TipoAtributo::DECIMAL)]Double[else]String[/if] id) {
+	    return data.get(id);
+	}
+    
+    /**
+     * Obtiene todas las entidades
+     * @return Lista con todas las entidades
+     */
+    @Override
+    public List<[entidad.nombre/]> findAll() {
+        return new ArrayList<>(data.values());
+    }
+    
+    /**
+     * Guarda una nueva entidad
+     * @param entity Entidad a guardar
+     * @return La entidad guardada
+     */
+    @Override
+    public [entidad.nombre/] save([entidad.nombre/] entity) {
+        // Si es una entidad nueva y tiene ID numérico, asignarle uno automáticamente
+        [if (entidad.atributos->select(a | a.isPrimaryKey)->first().tipo = TipoAtributo::INTEGER)]
+        if (entity.get[entidad.atributos->select(a | a.isPrimaryKey)->first().nombre.toUpperFirst()/]() == 0) {
+            entity.set[entidad.atributos->select(a | a.isPrimaryKey)->first().nombre.toUpperFirst()/](nextId++);
+        }
+        [/if]
+        
+        data.put(entity.get[entidad.atributos->select(a | a.isPrimaryKey)->first().nombre.toUpperFirst()/](), entity);
+        System.out.println("[entidad.nombre/] guardado: " + entity);
+        return entity;
+    }
+    
+    /**
+     * Actualiza una entidad existente
+     * @param entity Entidad a actualizar
+     * @return true si se actualizó correctamente, false si no existe
+     */
+    @Override
+    public boolean update([entidad.nombre/] entity) {
+        if (data.containsKey(entity.get[entidad.atributos->select(a | a.isPrimaryKey)->first().nombre.toUpperFirst()/]())) {
+            data.put(entity.get[entidad.atributos->select(a | a.isPrimaryKey)->first().nombre.toUpperFirst()/](), entity);
+            System.out.println("[entidad.nombre/] actualizado: " + entity);
+            return true;
+        }
+        System.out.println("Error al actualizar: No existe [entidad.nombre/] con id " + entity.get[entidad.atributos->select(a | a.isPrimaryKey)->first().nombre.toUpperFirst()/]());
+        return false;
+    }
+    
+    /**
+     * Elimina una entidad por su identificador
+     * @param id Identificador de la entidad a eliminar
+     * @return true si se eliminó correctamente, false si no existía
+     */
+    @Override
+	public boolean delete([if (entidad.atributos->select(a | a.isPrimaryKey)->first().tipo = TipoAtributo::INTEGER)]Integer[elseif (entidad.atributos->select(a | a.isPrimaryKey)->first().tipo = TipoAtributo::BOOLEAN)]Boolean[elseif (entidad.atributos->select(a | a.isPrimaryKey)->first().tipo = TipoAtributo::DECIMAL)]Double[else]String[/if] id) {
+	    [entidad.nombre/] removed = data.remove(id);
+	    if (removed != null) {
+	        System.out.println("[entidad.nombre/] con id " + id + " eliminado correctamente");
+	        return true;
+	    } else {
+	        System.out.println("No se encontró [entidad.nombre/] con id " + id + " para eliminar");
+	        return false;
+	    }
+	}
+    
+    /**
+     * Elimina todas las entidades
+     */
+    @Override
+    public void deleteAll() {
+        data.clear();
+        System.out.println("Todas las entidades [entidad.nombre/] han sido eliminadas");
+    }
+    
+    /**
+     * Cuenta el número total de entidades
+     * @return Número total de entidades
+     */
+    @Override
+    public int count() {
+        return data.size();
+    }
+    
+    /**
+     * Busca entidades que cumplan con un criterio personalizado
+     * @param filter Predicado que define el criterio de búsqueda
+     * @return Lista de entidades que cumplen el criterio
+     */
+    public List<[entidad.nombre/]> findByFilter(Predicate<[entidad.nombre/]> filter) {
+        return data.values().stream()
+                .filter(filter)
+                .collect(Collectors.toList());
+    }
+    
+    /**
+     * Obtiene una página de entidades
+     * @param pageNumber Número de página (empezando en 1)
+     * @param pageSize Tamaño de la página
+     * @return Lista de entidades en la página especificada
+     */
+    public List<[entidad.nombre/]> getPage(int pageNumber, int pageSize) {
+        if (pageNumber < 1 || pageSize < 1) {
+            throw new IllegalArgumentException("El número de página y el tamaño deben ser mayores que 0");
+        }
+        
+        return data.values().stream()
+                .skip((long) (pageNumber - 1) * pageSize)
+                .limit(pageSize)
+                .collect(Collectors.toList());
+    }
+    
+    /**
+     * Obtiene una página de entidades filtradas
+     * @param filter Predicado que define el criterio de filtrado
+     * @param pageNumber Número de página (empezando en 1)
+     * @param pageSize Tamaño de la página
+     * @return Lista de entidades filtradas en la página especificada
+     */
+    public List<[entidad.nombre/]> getFilteredPage(Predicate<[entidad.nombre/]> filter, int pageNumber, int pageSize) {
+        if (pageNumber < 1 || pageSize < 1) {
+            throw new IllegalArgumentException("El número de página y el tamaño deben ser mayores que 0");
+        }
+        
+        return data.values().stream()
+                .filter(filter)
+                .skip((long) (pageNumber - 1) * pageSize)
+                .limit(pageSize)
+                .collect(Collectors.toList());
+    }
+    
+    /**
+     * Cuenta el número de entidades que cumplen un criterio
+     * @param filter Predicado que define el criterio
+     * @return Número de entidades que cumplen el criterio
+     */
+    public int countByFilter(Predicate<[entidad.nombre/]> filter) {
+        return (int) data.values().stream()
+                .filter(filter)
+                .count();
+    }
+    
+    // Métodos específicos para búsquedas por atributos
+    
+    [for (atrib : Atributo | entidad.atributos->select(a | not a.isPrimaryKey))]
+    /**
+     * Busca entidades por el atributo [atrib.nombre/]
+     * @param value Valor a buscar
+     * @return Lista de entidades que coinciden con el valor
+     */
+    public List<[entidad.nombre/]> findBy[atrib.nombre.toUpperFirst()/]([if (atrib.tipo = TipoAtributo::INTEGER)]int[elseif (atrib.tipo = TipoAtributo::BOOLEAN)]boolean[elseif (atrib.tipo = TipoAtributo::DECIMAL)]double[else]String[/if] value) {
+        return findByFilter(entity -> {
+            [if (atrib.tipo = TipoAtributo::STRING)]
+            return entity.get[atrib.nombre.toUpperFirst()/]() != null && 
+                   entity.get[atrib.nombre.toUpperFirst()/]().toLowerCase().contains(value.toLowerCase());
+            [else]
+            return entity.get[atrib.nombre.toUpperFirst()/]() == value;
+            [/if]
+        });
+    }
+    
+    [/for]
+    
+    [if (not entidad.referencias->isEmpty())]
+    // Métodos para búsqueda por relaciones
+    
+    [for (ref : Referencia | entidad.referencias)]
+    /**
+     * Busca entidades por su relación con [ref.target.nombre/]
+     * @param [ref.target.nombre.toLower()/]Id ID de la entidad [ref.target.nombre/] relacionada
+     * @return Lista de entidades relacionadas con la [ref.target.nombre/] especificada
+     */
+	public List<[entidad.nombre/]> findBy[ref.nombre.toUpperFirst()/]([if (ref.target.atributos->select(a | a.isPrimaryKey)->first().tipo = TipoAtributo::INTEGER)]Integer[elseif (ref.target.atributos->select(a | a.isPrimaryKey)->first().tipo = TipoAtributo::BOOLEAN)]Boolean[elseif (ref.target.atributos->select(a | a.isPrimaryKey)->first().tipo = TipoAtributo::DECIMAL)]Double[else]String[/if] refId) {
+	    return findByFilter(entity -> 
+	        entity.get[ref.nombre.toUpperFirst()/]() != null && 
+	        entity.get[ref.nombre.toUpperFirst()/]().get[ref.target.atributos->select(a | a.isPrimaryKey)->first().nombre.toUpperFirst()/]() != null && 
+	        [if (ref.target.atributos->select(a | a.isPrimaryKey)->first().tipo = TipoAtributo::INTEGER or ref.target.atributos->select(a | a.isPrimaryKey)->first().tipo = TipoAtributo::BOOLEAN or ref.target.atributos->select(a | a.isPrimaryKey)->first().tipo = TipoAtributo::DECIMAL)]
+	        entity.get[ref.nombre.toUpperFirst()/]().get[ref.target.atributos->select(a | a.isPrimaryKey)->first().nombre.toUpperFirst()/]() == refId
+	        [else]
+	        entity.get[ref.nombre.toUpperFirst()/]().get[ref.target.atributos->select(a | a.isPrimaryKey)->first().nombre.toUpperFirst()/]().equals(refId)
+	        [/if]
+	    );
+	}
+    
+    [/for]
+    [/if]
+    
+    /**
+     * Verifica si existe una entidad con el ID especificado
+     * @param id ID a verificar
+     * @return true si existe, false en caso contrario
+     */
+    public boolean existsById([if (entidad.atributos->select(a | a.isPrimaryKey)->first().tipo = TipoAtributo::INTEGER)]int[elseif (entidad.atributos->select(a | a.isPrimaryKey)->first().tipo = TipoAtributo::BOOLEAN)]boolean[elseif (entidad.atributos->select(a | a.isPrimaryKey)->first().tipo = TipoAtributo::DECIMAL)]double[else]String[/if] id) {
+        return data.containsKey(id);
+    }
+    
+    /**
+     * Encuentra la primera entidad que cumple un criterio o devuelve Optional vacío
+     * @param filter Predicado que define el criterio
+     * @return Optional con la entidad encontrada o vacío
+     */
+    public Optional<[entidad.nombre/]> findFirst(Predicate<[entidad.nombre/]> filter) {
+        return data.values().stream()
+                .filter(filter)
+                .findFirst();
+    }
+}
+[/file]
+[/for]
+[/template]
+
+[template public generateDAOInterfaces(app : Aplicacion)]
+[file ('app/src/dao/IDAO.java', false, 'UTF-8')]
+package dao;
+
+import java.util.List;
+
+/**
+ * Interfaz genérica para los Data Access Objects (DAO)
+ * @param <T> Tipo de entidad a gestionar
+ * @param <ID> Tipo de identificador de la entidad
+ */
+public interface IDAO<T, ID> {
+    /**
+     * Busca una entidad por su identificador
+     * @param id Identificador de la entidad
+     * @return Entidad encontrada o null si no existe
+     */
+    T findById(ID id);
+    
+    /**
+     * Obtiene todas las entidades
+     * @return Lista con todas las entidades
+     */
+    List<T> findAll();
+    
+    /**
+     * Guarda una nueva entidad
+     * @param entity Entidad a guardar
+     * @return La entidad guardada
+     */
+    T save(T entity);
+    
+    /**
+     * Actualiza una entidad existente
+     * @param entity Entidad a actualizar
+     * @return true si se actualizó correctamente, false si no existe
+     */
+    boolean update(T entity);
+    
+    /**
+     * Elimina una entidad por su identificador
+     * @param id Identificador de la entidad a eliminar
+     * @return true si se eliminó correctamente, false si no existía
+     */
+    boolean delete(ID id);
+    
+    /**
+     * Elimina todas las entidades
+     */
+    void deleteAll();
+    
+    /**
+     * Cuenta el número total de entidades
+     * @return Número total de entidades
+     */
+    int count();
+}
+[/file]
+[/template]
+
+[template public generateDAOFactory(app : Aplicacion)]
+[file ('app/src/dao/DAOFactory.java', false, 'UTF-8')]
+package dao;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Collection;
+[for (entidad : Entidad | app.entidades)]
+import model.[entidad.nombre/];
+[/for]
+
+/**
+ * Factoría para la creación y obtención de DAOs
+ * Implementa el patrón Factory y Singleton
+ */
+public class DAOFactory {
+    private static Map<Class<?>, IDAO<?, ?>> daoMap = new HashMap<>();
+    private static boolean initialized = false;
+    private static boolean initializing = false;
+    
+    /**
+     * Inicializa todos los DAOs del sistema
+     */
+    public static synchronized void initialize() {
+        if (!initialized && !initializing) {
+            initializing = true;
+            System.out.println("Inicializando DAOFactory...");
+            
+            // Primero registramos todos los DAOs
+            [for (entidad : Entidad | app.entidades)]
+            daoMap.put([entidad.nombre/].class, [entidad.nombre/]DAO.getInstance());
+            [/for]
+            
+            // Marcamos como inicializado antes de configurar relaciones
+            initialized = true;
+            
+            // Después configuramos las relaciones entre entidades
+            [for (entidad : Entidad | app.entidades)]
+            [if (not entidad.referencias->isEmpty())]
+            (([entidad.nombre/]DAO) daoMap.get([entidad.nombre/].class)).setupRelationships();
+            [/if]
+            [/for]
+            
+            initializing = false;
+            System.out.println("DAOFactory inicializado correctamente");
+        }
+    }
+    
+    /**
+     * Obtiene el DAO para una clase de entidad específica
+     * @param <T> Tipo de entidad
+     * @param entityClass Clase de la entidad
+     * @return DAO correspondiente a la entidad
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> IDAO<T, ?> getDAO(Class<T> entityClass) {
+        if (!initialized && !initializing) {
+            initialize();
+        }
+        
+        IDAO<?, ?> dao = daoMap.get(entityClass);
+        if (dao == null) {
+            throw new IllegalArgumentException("No se ha encontrado un DAO para la clase " + entityClass.getName());
+        }
+        
+        return (IDAO<T, ?>) dao;
+    }
+    
+    /**
+     * Obtiene todos los DAOs registrados
+     * @return Colección con todos los DAOs
+     */
+    public static Collection<IDAO<?, ?>> getAllDAOs() {
+        if (!initialized && !initializing) {
+            initialize();
+        }
+        
+        return daoMap.values();
+    }
+    
+    /**
+     * Obtiene directamente un DAO sin verificar inicialización (para uso interno)
+     * @param <T> Tipo de entidad
+     * @param entityClass Clase de la entidad
+     * @return DAO correspondiente a la entidad
+     */
+    @SuppressWarnings("unchecked")
+    static <T> IDAO<T, ?> getDAODirect(Class<T> entityClass) {
+        IDAO<?, ?> dao = daoMap.get(entityClass);
+        if (dao == null) {
+            throw new IllegalArgumentException("No se ha encontrado un DAO para la clase " + entityClass.getName());
+        }
+        
+        return (IDAO<T, ?>) dao;
+    }
+    
+    /**
+     * Reinicia todos los DAOs
+     * Útil para pruebas y simulaciones
+     */
+    public static synchronized void reset() {
+        System.out.println("Reiniciando DAOFactory...");
+        daoMap.clear();
+        initialized = false;
+        initializing = false;
+    }
+}
+[/file]
+[/template]

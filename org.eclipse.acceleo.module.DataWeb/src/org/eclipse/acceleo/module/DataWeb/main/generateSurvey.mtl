@@ -1,0 +1,869 @@
+[comment encoding = UTF-8 /]
+[module generateSurvey('http://www.unex.es/dmss/dataweb')]
+
+[template public generateSurvey(app : Aplicacion)]
+[file ('app/src/survey/Encuesta.java', false, 'UTF-8')]
+package survey;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Date;
+import java.text.SimpleDateFormat;
+
+/**
+ * Clase que representa una encuesta
+ */
+public class Encuesta implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
+    private int id;
+    private String titulo;
+    private String descripcion;
+    private String creador;
+    private String fechaCreacion;
+    private String fechaCierre;
+    private boolean activa;
+    private List<String> rolesPermitidos;
+    private List<Pregunta> preguntas;
+    
+    /**
+     * Constructor por defecto
+     */
+    public Encuesta() {
+        this.rolesPermitidos = new ArrayList<>();
+        this.preguntas = new ArrayList<>();
+        this.activa = true;
+        this.fechaCreacion = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+    }
+    
+    /**
+     * Constructor con parámetros principales
+     * @param id ID de la encuesta
+     * @param titulo Título de la encuesta
+     * @param descripcion Descripción de la encuesta
+     * @param creador Usuario creador
+     */
+    public Encuesta(int id, String titulo, String descripcion, String creador) {
+        this();
+        this.id = id;
+        this.titulo = titulo;
+        this.descripcion = descripcion;
+        this.creador = creador;
+    }
+    
+    // Getters y Setters
+    
+    public int getId() {
+        return id;
+    }
+    
+    public void setId(int id) {
+        this.id = id;
+    }
+    
+    public String getTitulo() {
+        return titulo;
+    }
+    
+    public void setTitulo(String titulo) {
+        this.titulo = titulo;
+    }
+    
+    public String getDescripcion() {
+        return descripcion;
+    }
+    
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
+    }
+    
+    public String getCreador() {
+        return creador;
+    }
+    
+    public void setCreador(String creador) {
+        this.creador = creador;
+    }
+    
+    public String getFechaCreacion() {
+        return fechaCreacion;
+    }
+    
+    public void setFechaCreacion(String fechaCreacion) {
+        this.fechaCreacion = fechaCreacion;
+    }
+    
+    public String getFechaCierre() {
+        return fechaCierre;
+    }
+    
+    public void setFechaCierre(String fechaCierre) {
+        this.fechaCierre = fechaCierre;
+    }
+    
+    public boolean isActiva() {
+        return activa;
+    }
+    
+    public void setActiva(boolean activa) {
+        this.activa = activa;
+    }
+    
+    public List<String> getRolesPermitidos() {
+        return rolesPermitidos;
+    }
+    
+    public void addRolPermitido(String rol) {
+        if (!rolesPermitidos.contains(rol)) {
+            rolesPermitidos.add(rol);
+        }
+    }
+    
+    public void removeRolPermitido(String rol) {
+        rolesPermitidos.remove(rol);
+    }
+    
+    public List<Pregunta> getPreguntas() {
+        return preguntas;
+    }
+    
+    public void addPregunta(Pregunta pregunta) {
+        preguntas.add(pregunta);
+    }
+    
+    public void removePregunta(Pregunta pregunta) {
+        preguntas.remove(pregunta);
+    }
+    
+    /**
+     * Verifica si un rol específico tiene acceso a esta encuesta
+     * @param rol Rol a verificar
+     * @return true si el rol tiene acceso, false en caso contrario
+     */
+    public boolean tieneAcceso(String rol) {
+        return rolesPermitidos.isEmpty() || rolesPermitidos.contains(rol);
+    }
+    
+    @Override
+    public String toString() {
+        return "Encuesta{" +
+                "id=" + id +
+                ", titulo='" + titulo + '\'' +
+                ", creador='" + creador + '\'' +
+                ", fechaCreacion='" + fechaCreacion + '\'' +
+                ", activa=" + activa +
+                ", preguntas=" + preguntas.size() +
+                '}';
+    }
+}
+[/file]
+
+[file ('app/src/survey/Pregunta.java', false, 'UTF-8')]
+package survey;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Clase que representa una pregunta de encuesta o cuestionario
+ */
+public class Pregunta implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
+    public enum TipoPregunta {
+        OPCION_MULTIPLE,
+        VERDADERO_FALSO,
+        RESPUESTA_CORTA,
+        RESPUESTA_LARGA,
+        ESCALA
+    }
+    
+    private int id;
+    private String texto;
+    private TipoPregunta tipo;
+    private boolean obligatoria;
+    private List<String> opciones;
+    private String respuestaCorrecta; // Para preguntas evaluables
+    private int puntuacion; // Para preguntas evaluables
+    
+    /**
+     * Constructor por defecto
+     */
+    public Pregunta() {
+        this.opciones = new ArrayList<>();
+        this.obligatoria = true;
+        this.puntuacion = 1;
+    }
+    
+    /**
+     * Constructor con parámetros principales
+     * @param id ID de la pregunta
+     * @param texto Texto de la pregunta
+     * @param tipo Tipo de pregunta
+     */
+    public Pregunta(int id, String texto, TipoPregunta tipo) {
+        this();
+        this.id = id;
+        this.texto = texto;
+        this.tipo = tipo;
+    }
+    
+    // Getters y Setters
+    
+    public int getId() {
+        return id;
+    }
+    
+    public void setId(int id) {
+        this.id = id;
+    }
+    
+    public String getTexto() {
+        return texto;
+    }
+    
+    public void setTexto(String texto) {
+        this.texto = texto;
+    }
+    
+    public TipoPregunta getTipo() {
+        return tipo;
+    }
+    
+    public void setTipo(TipoPregunta tipo) {
+        this.tipo = tipo;
+    }
+    
+    public boolean isObligatoria() {
+        return obligatoria;
+    }
+    
+    public void setObligatoria(boolean obligatoria) {
+        this.obligatoria = obligatoria;
+    }
+    
+    public List<String> getOpciones() {
+        return opciones;
+    }
+    
+    public void addOpcion(String opcion) {
+        opciones.add(opcion);
+    }
+    
+    public void removeOpcion(String opcion) {
+        opciones.remove(opcion);
+    }
+    
+    public String getRespuestaCorrecta() {
+        return respuestaCorrecta;
+    }
+    
+    public void setRespuestaCorrecta(String respuestaCorrecta) {
+        this.respuestaCorrecta = respuestaCorrecta;
+    }
+    
+    public int getPuntuacion() {
+        return puntuacion;
+    }
+    
+    public void setPuntuacion(int puntuacion) {
+        this.puntuacion = puntuacion;
+    }
+    
+    /**
+     * Evalúa si una respuesta es correcta (para preguntas evaluables)
+     * @param respuesta Respuesta a evaluar
+     * @return true si la respuesta es correcta, false en caso contrario
+     */
+    public boolean evaluarRespuesta(String respuesta) {
+        if (respuestaCorrecta == null) {
+            return false; // No se puede evaluar
+        }
+        
+        if (tipo == TipoPregunta.VERDADERO_FALSO) {
+            return respuesta.equalsIgnoreCase(respuestaCorrecta);
+        } else if (tipo == TipoPregunta.OPCION_MULTIPLE) {
+            return respuesta.equals(respuestaCorrecta);
+        } else if (tipo == TipoPregunta.RESPUESTA_CORTA) {
+            return respuesta.trim().equalsIgnoreCase(respuestaCorrecta.trim());
+        }
+        
+        return false;
+    }
+    
+    @Override
+    public String toString() {
+        return "Pregunta{" +
+                "id=" + id +
+                ", texto='" + texto + '\'' +
+                ", tipo=" + tipo +
+                ", obligatoria=" + obligatoria +
+                ", opciones=" + opciones.size() +
+                '}';
+    }
+}
+[/file]
+
+[file ('app/src/survey/Respuesta.java', false, 'UTF-8')]
+package survey;
+
+import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Clase que representa una respuesta a una encuesta o cuestionario
+ */
+public class Respuesta implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
+    private int id;
+    private int encuestaId;
+    private String usuario;
+    private String fechaRespuesta;
+    private Map<Integer, String> respuestas; // preguntaId -> respuesta
+    private boolean completada;
+    private boolean aprobada; // Para respuestas que requieren revisión
+    
+    /**
+     * Constructor por defecto
+     */
+    public Respuesta() {
+        this.respuestas = new HashMap<>();
+        this.fechaRespuesta = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+        this.completada = false;
+        this.aprobada = false;
+    }
+    
+    /**
+     * Constructor con parámetros principales
+     * @param id ID de la respuesta
+     * @param encuestaId ID de la encuesta
+     * @param usuario Usuario que responde
+     */
+    public Respuesta(int id, int encuestaId, String usuario) {
+        this();
+        this.id = id;
+        this.encuestaId = encuestaId;
+        this.usuario = usuario;
+    }
+    
+    // Getters y Setters
+    
+    public int getId() {
+        return id;
+    }
+    
+    public void setId(int id) {
+        this.id = id;
+    }
+    
+    public int getEncuestaId() {
+        return encuestaId;
+    }
+    
+    public void setEncuestaId(int encuestaId) {
+        this.encuestaId = encuestaId;
+    }
+    
+    public String getUsuario() {
+        return usuario;
+    }
+    
+    public void setUsuario(String usuario) {
+        this.usuario = usuario;
+    }
+    
+    public String getFechaRespuesta() {
+        return fechaRespuesta;
+    }
+    
+    public void setFechaRespuesta(String fechaRespuesta) {
+        this.fechaRespuesta = fechaRespuesta;
+    }
+    
+    public Map<Integer, String> getRespuestas() {
+        return respuestas;
+    }
+    
+    public void setRespuesta(int preguntaId, String respuesta) {
+        this.respuestas.put(preguntaId, respuesta);
+    }
+    
+    public String getRespuesta(int preguntaId) {
+        return this.respuestas.get(preguntaId);
+    }
+    
+    public boolean isCompletada() {
+        return completada;
+    }
+    
+    public void setCompletada(boolean completada) {
+        this.completada = completada;
+    }
+    
+    public boolean isAprobada() {
+        return aprobada;
+    }
+    
+    public void setAprobada(boolean aprobada) {
+        this.aprobada = aprobada;
+    }
+    
+    /**
+     * Calcula el porcentaje de respuestas completadas
+     * @param totalPreguntas Número total de preguntas en la encuesta
+     * @return Porcentaje de completado (0-100)
+     */
+    public int calcularPorcentajeCompletado(int totalPreguntas) {
+        if (totalPreguntas == 0) {
+            return 0;
+        }
+        return (int) (((double) respuestas.size() / totalPreguntas) * 100);
+    }
+    
+    @Override
+    public String toString() {
+        return "Respuesta{" +
+                "id=" + id +
+                ", encuestaId=" + encuestaId +
+                ", usuario='" + usuario + '\'' +
+                ", fechaRespuesta='" + fechaRespuesta + '\'' +
+                ", respuestas=" + respuestas.size() +
+                ", completada=" + completada +
+                ", aprobada=" + aprobada +
+                '}';
+    }
+}
+[/file]
+
+[file ('app/src/survey/Cuestionario.java', false, 'UTF-8')]
+package survey;
+
+import java.io.Serializable;
+
+/**
+ * Clase que representa un cuestionario evaluable
+ * Extiende la funcionalidad de Encuesta para incluir aspectos evaluables
+ */
+public class Cuestionario extends Encuesta implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
+    private int tiempoLimite; // en minutos
+    private int puntuacionMinima; // para aprobar
+    private boolean mostrarResultadosInmediatos;
+    private boolean aleatorio;
+    
+    /**
+     * Constructor por defecto
+     */
+    public Cuestionario() {
+        super();
+        this.tiempoLimite = 30;
+        this.puntuacionMinima = 60;
+        this.mostrarResultadosInmediatos = true;
+        this.aleatorio = false;
+    }
+    
+    /**
+     * Constructor con parámetros principales
+     * @param id ID del cuestionario
+     * @param titulo Título del cuestionario
+     * @param descripcion Descripción del cuestionario
+     * @param creador Usuario creador
+     */
+    public Cuestionario(int id, String titulo, String descripcion, String creador) {
+        super(id, titulo, descripcion, creador);
+        this.tiempoLimite = 30;
+        this.puntuacionMinima = 60;
+        this.mostrarResultadosInmediatos = true;
+        this.aleatorio = false;
+    }
+    
+    // Getters y Setters adicionales
+    
+    public int getTiempoLimite() {
+        return tiempoLimite;
+    }
+    
+    public void setTiempoLimite(int tiempoLimite) {
+        this.tiempoLimite = tiempoLimite;
+    }
+    
+    public int getPuntuacionMinima() {
+        return puntuacionMinima;
+    }
+    
+    public void setPuntuacionMinima(int puntuacionMinima) {
+        this.puntuacionMinima = puntuacionMinima;
+    }
+    
+    public boolean isMostrarResultadosInmediatos() {
+        return mostrarResultadosInmediatos;
+    }
+    
+    public void setMostrarResultadosInmediatos(boolean mostrarResultadosInmediatos) {
+        this.mostrarResultadosInmediatos = mostrarResultadosInmediatos;
+    }
+    
+    public boolean isAleatorio() {
+        return aleatorio;
+    }
+    
+    public void setAleatorio(boolean aleatorio) {
+        this.aleatorio = aleatorio;
+    }
+    
+    /**
+     * Calcula la puntuación máxima posible del cuestionario
+     * @return Puntuación máxima
+     */
+    public int calcularPuntuacionMaxima() {
+        int total = 0;
+        for (Pregunta pregunta : getPreguntas()) {
+            total += pregunta.getPuntuacion();
+        }
+        return total;
+    }
+    
+    /**
+     * Evalúa las respuestas de un usuario y calcula su puntuación
+     * @param respuesta Respuesta a evaluar
+     * @return Puntuación obtenida
+     */
+    public int evaluarRespuesta(Respuesta respuesta) {
+        int puntuacion = 0;
+        
+        for (Pregunta pregunta : getPreguntas()) {
+            String respuestaUser = respuesta.getRespuesta(pregunta.getId());
+            if (respuestaUser != null && pregunta.evaluarRespuesta(respuestaUser)) {
+                puntuacion += pregunta.getPuntuacion();
+            }
+        }
+        
+        return puntuacion;
+    }
+    
+    /**
+     * Determina si una puntuación es suficiente para aprobar
+     * @param puntuacion Puntuación a evaluar
+     * @return true si aprueba, false en caso contrario
+     */
+    public boolean esAprobado(int puntuacion) {
+        int maximo = calcularPuntuacionMaxima();
+        if (maximo == 0) {
+            return false;
+        }
+        
+        double porcentaje = ((double) puntuacion / maximo) * 100;
+        return porcentaje >= puntuacionMinima;
+    }
+    
+    @Override
+    public String toString() {
+        return "Cuestionario{" +
+                "id=" + getId() +
+                ", titulo='" + getTitulo() + '\'' +
+                ", creador='" + getCreador() + '\'' +
+                ", tiempoLimite=" + tiempoLimite +
+                ", puntuacionMinima=" + puntuacionMinima +
+                ", preguntas=" + getPreguntas().size() +
+                '}';
+    }
+}
+[/file]
+
+[file ('app/src/survey/SurveyManager.java', false, 'UTF-8')]
+package survey;
+
+import java.io.*;
+import java.util.*;
+
+/**
+ * Gestor centralizado para encuestas y cuestionarios
+ * Implementa patrón Singleton
+ */
+public class SurveyManager {
+    private static SurveyManager instance;
+    
+    private Map<Integer, Encuesta> encuestas;
+    private Map<Integer, Map<Integer, Respuesta>> respuestas; // encuestaId -> (respuestaId -> Respuesta)
+    private int nextEncuestaId;
+    private int nextRespuestaId;
+    private int nextPreguntaId;
+    
+    private static final String DATA_FILE = "encuestas.dat";
+    
+    /**
+     * Constructor privado (Singleton)
+     */
+    private SurveyManager() {
+        encuestas = new HashMap<>();
+        respuestas = new HashMap<>();
+        nextEncuestaId = 1;
+        nextRespuestaId = 1;
+        nextPreguntaId = 1;
+        cargarDatos();
+    }
+    
+    /**
+     * Obtiene la instancia única del gestor
+     * @return Instancia del gestor de encuestas
+     */
+    public static synchronized SurveyManager getInstance() {
+        if (instance == null) {
+            instance = new SurveyManager();
+        }
+        return instance;
+    }
+    
+    /**
+     * Obtiene todas las encuestas
+     * @return Lista de encuestas
+     */
+    public List<Encuesta> getEncuestas() {
+        return new ArrayList<>(encuestas.values());
+    }
+    
+    /**
+     * Obtiene las encuestas accesibles para un rol específico
+     * @param rol Rol a verificar acceso
+     * @return Lista de encuestas accesibles
+     */
+    public List<Encuesta> getEncuestasParaRol(String rol) {
+        List<Encuesta> result = new ArrayList<>();
+        
+        for (Encuesta encuesta : encuestas.values()) {
+            if (encuesta.tieneAcceso(rol)) {
+                result.add(encuesta);
+            }
+        }
+        
+        return result;
+    }
+    
+    /**
+     * Obtiene una encuesta por su ID
+     * @param id ID de la encuesta
+     * @return Encuesta o null si no existe
+     */
+    public Encuesta getEncuesta(int id) {
+        return encuestas.get(id);
+    }
+    
+    /**
+     * Guarda una nueva encuesta
+     * @param encuesta Encuesta a guardar
+     * @return ID asignado a la encuesta
+     */
+    public int guardarEncuesta(Encuesta encuesta) {
+        if (encuesta.getId() == 0) {
+            encuesta.setId(nextEncuestaId++);
+        }
+        
+        encuestas.put(encuesta.getId(), encuesta);
+        guardarDatos();
+        return encuesta.getId();
+    }
+    
+    /**
+     * Elimina una encuesta y sus respuestas
+     * @param id ID de la encuesta a eliminar
+     * @return true si se eliminó correctamente, false si no existía
+     */
+    public boolean eliminarEncuesta(int id) {
+        if (!encuestas.containsKey(id)) {
+            return false;
+        }
+        
+        encuestas.remove(id);
+        respuestas.remove(id);
+        guardarDatos();
+        return true;
+    }
+    
+    /**
+     * Obtiene todas las respuestas para una encuesta
+     * @param encuestaId ID de la encuesta
+     * @return Lista de respuestas
+     */
+    public List<Respuesta> getRespuestas(int encuestaId) {
+        Map<Integer, Respuesta> respuestasEncuesta = respuestas.get(encuestaId);
+        if (respuestasEncuesta == null) {
+            return new ArrayList<>();
+        }
+        
+        return new ArrayList<>(respuestasEncuesta.values());
+    }
+    
+    /**
+     * Obtiene una respuesta específica
+     * @param encuestaId ID de la encuesta
+     * @param respuestaId ID de la respuesta
+     * @return Respuesta o null si no existe
+     */
+    public Respuesta getRespuesta(int encuestaId, int respuestaId) {
+        Map<Integer, Respuesta> respuestasEncuesta = respuestas.get(encuestaId);
+        if (respuestasEncuesta == null) {
+            return null;
+        }
+        
+        return respuestasEncuesta.get(respuestaId);
+    }
+    
+    /**
+     * Guarda una respuesta
+     * @param respuesta Respuesta a guardar
+     * @return ID asignado a la respuesta
+     */
+    public int guardarRespuesta(Respuesta respuesta) {
+        if (respuesta.getId() == 0) {
+            respuesta.setId(nextRespuestaId++);
+        }
+        
+        Map<Integer, Respuesta> respuestasEncuesta = respuestas.computeIfAbsent(
+            respuesta.getEncuestaId(), k -> new HashMap<>());
+        
+        respuestasEncuesta.put(respuesta.getId(), respuesta);
+        guardarDatos();
+        return respuesta.getId();
+    }
+    
+    /**
+     * Elimina una respuesta
+     * @param encuestaId ID de la encuesta
+     * @param respuestaId ID de la respuesta
+     * @return true si se eliminó correctamente, false si no existía
+     */
+    public boolean eliminarRespuesta(int encuestaId, int respuestaId) {
+        Map<Integer, Respuesta> respuestasEncuesta = respuestas.get(encuestaId);
+        if (respuestasEncuesta == null) {
+            return false;
+        }
+        
+        boolean result = respuestasEncuesta.remove(respuestaId) != null;
+        if (result) {
+            guardarDatos();
+        }
+        return result;
+    }
+    
+    /**
+     * Obtiene el siguiente ID disponible para una pregunta
+     * @return ID para nueva pregunta
+     */
+    public int getNextPreguntaId() {
+        return nextPreguntaId++;
+    }
+    
+    /**
+     * Carga los datos desde archivo
+     */
+    @SuppressWarnings("unchecked")
+    private void cargarDatos() {
+        try {
+            File file = new File(DATA_FILE);
+            if (file.exists()) {
+                ObjectInputStream in = new ObjectInputStream(new FileInputStream(file));
+                encuestas = (Map<Integer, Encuesta>) in.readObject();
+                respuestas = (Map<Integer, Map<Integer, Respuesta>>) in.readObject();
+                nextEncuestaId = in.readInt();
+                nextRespuestaId = in.readInt();
+                nextPreguntaId = in.readInt();
+                in.close();
+                System.out.println("Datos de encuestas cargados correctamente desde " + DATA_FILE);
+            } else {
+                // Crear datos de ejemplo si no existe el archivo
+                crearDatosEjemplo();
+            }
+        } catch (Exception e) {
+            System.err.println("Error al cargar datos de encuestas: " + e.getMessage());
+            // Crear datos de ejemplo si hay error
+            crearDatosEjemplo();
+        }
+    }
+    
+    /**
+     * Guarda los datos en archivo
+     */
+    private void guardarDatos() {
+        try {
+            ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(DATA_FILE));
+            out.writeObject(encuestas);
+            out.writeObject(respuestas);
+            out.writeInt(nextEncuestaId);
+            out.writeInt(nextRespuestaId);
+            out.writeInt(nextPreguntaId);
+            out.close();
+        } catch (Exception e) {
+            System.err.println("Error al guardar datos de encuestas: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Crea datos de ejemplo para demostración
+     */
+    private void crearDatosEjemplo() {
+        System.out.println("Creando datos de ejemplo para encuestas...");
+        
+        // Encuesta de ejemplo
+        Encuesta encuesta = new Encuesta(nextEncuestaId++, "Satisfacción del Usuario", 
+                "Encuesta para evaluar la satisfacción con nuestra aplicación", "admin");
+        
+        Pregunta p1 = new Pregunta(nextPreguntaId++, "¿Cómo calificaría la facilidad de uso de la aplicación?", 
+                Pregunta.TipoPregunta.OPCION_MULTIPLE);
+        p1.addOpcion("Muy fácil");
+        p1.addOpcion("Fácil");
+        p1.addOpcion("Regular");
+        p1.addOpcion("Difícil");
+        p1.addOpcion("Muy difícil");
+        
+        Pregunta p2 = new Pregunta(nextPreguntaId++, "¿Encontró útil la documentación proporcionada?", 
+                Pregunta.TipoPregunta.VERDADERO_FALSO);
+        
+        Pregunta p3 = new Pregunta(nextPreguntaId++, "¿Qué características nuevas le gustaría ver en la aplicación?", 
+                Pregunta.TipoPregunta.RESPUESTA_LARGA);
+        
+        encuesta.addPregunta(p1);
+        encuesta.addPregunta(p2);
+        encuesta.addPregunta(p3);
+        
+        encuestas.put(encuesta.getId(), encuesta);
+        
+        // Cuestionario de ejemplo
+        Cuestionario cuestionario = new Cuestionario(nextEncuestaId++, "Evaluación de Conocimientos de Java", 
+                "Cuestionario para evaluar conocimientos básicos de Java", "admin");
+        cuestionario.setTiempoLimite(15);
+        
+        Pregunta q1 = new Pregunta(nextPreguntaId++, "¿Cuál es la palabra clave para definir una clase en Java?", 
+                Pregunta.TipoPregunta.RESPUESTA_CORTA);
+        q1.setRespuestaCorrecta("class");
+        
+        Pregunta q2 = new Pregunta(nextPreguntaId++, "¿Java es un lenguaje orientado a objetos?", 
+                Pregunta.TipoPregunta.VERDADERO_FALSO);
+        q2.setRespuestaCorrecta("true");
+        
+        Pregunta q3 = new Pregunta(nextPreguntaId++, "¿Cuál NO es un tipo primitivo en Java?", 
+                Pregunta.TipoPregunta.OPCION_MULTIPLE);
+        q3.addOpcion("int");
+        q3.addOpcion("boolean");
+        q3.addOpcion("String");
+        q3.addOpcion("char");
+        q3.setRespuestaCorrecta("String");
+        q3.setPuntuacion(2);
+        
+        cuestionario.addPregunta(q1);
+        cuestionario.addPregunta(q2);
+        cuestionario.addPregunta(q3);
+        
+        encuestas.put(cuestionario.getId(), cuestionario);
+        
+        guardarDatos();
+    }
+}
+[/file]
+[/template]

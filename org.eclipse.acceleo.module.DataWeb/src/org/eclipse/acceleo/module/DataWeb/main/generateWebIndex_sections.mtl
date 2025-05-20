@@ -1,0 +1,518 @@
+[comment encoding = UTF-8 /]
+[module generateWebIndex_sections('http://www.unex.es/dmss/dataweb')]
+
+[template public generateNavigation(app : Aplicacion)]
+<nav class="main-nav">
+    <div class="container nav-container">
+        <div class="nav-brand">
+            <a href="/" class="nav-logo">[app.nombre/]</a>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="#home" class="nav-link active">Inicio</a>
+            </li>
+            <li class="nav-item">
+                <a href="#roles" class="nav-link">Acceso por Roles</a>
+            </li>
+            <li class="nav-item">
+                <a href="#features" class="nav-link">Características</a>
+            </li>
+            <li class="nav-item">
+                <a href="#contact" class="nav-link">Contacto</a>
+            </li>
+        </ul>
+        <button class="nav-toggle" aria-label="Abrir menú">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </div>
+</nav>
+[/template]
+
+[template public generateHeroSection(app : Aplicacion)]
+<section id="home" class="hero-section mb-8">
+    <div class="hero-card card">
+        <div class="card-header">
+            <h2>Bienvenido a [app.nombre/]</h2>
+        </div>
+        <div class="card-body">
+            <p class="lead">Sistema moderno de gestión de datos con interfaces intuitivas y funcionalidades avanzadas.</p>
+            <div class="stats-grid grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+                <div class="stat-card">
+                    <div class="stat-number">[app.entidades->size()/]</div>
+                    <div class="stat-label">Entidades Gestionadas</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">[app.roles->size()/]</div>
+                    <div class="stat-label">Roles de Usuario</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">[app.paginas->size()/]</div>
+                    <div class="stat-label">Páginas Disponibles</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+[/template]
+
+[template public generateRolesSection(app : Aplicacion)]
+<section id="roles" class="roles-section mb-8">
+    <div class="card">
+        <div class="card-header">
+            <h2>Acceso por Roles de Usuario</h2>
+            <p>Seleccione su rol para acceder a las funcionalidades correspondientes</p>
+        </div>
+        <div class="card-body">
+            <div class="roles-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                [for (rol : Rol | app.roles)]
+                <div class="role-card card animate-target">
+                    <div class="card-header">
+                        <div class="role-icon">
+                            <svg class="role-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="8.5" cy="7" r="4"></circle>
+                                <path d="m22 2-5 10-5-5 10-5z"></path>
+                            </svg>
+                        </div>
+                        <h3>[rol.nombre/]</h3>
+                    </div>
+                    <div class="card-body">
+                        <p>[if (rol.descripcion.oclIsUndefined() = false)][rol.descripcion/][else]Panel de control especializado para usuarios con rol [rol.nombre/][/if]</p>
+                        <div class="role-stats">
+                            <div class="role-stat">
+                                <span class="role-stat-label">Páginas Accesibles:</span>
+                                <span class="role-stat-value">[rol.paginasAccesibles->size()/]</span>
+                            </div>
+                            <div class="role-stat">
+                                <span class="role-stat-label">Entidades Gestionadas:</span>
+                                <span class="role-stat-value">[rol.numeroEntidadesAccesibles/]</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <a href="[rol.nombre.toLowerCase()/]/dashboard.html" class="btn btn-primary btn-block">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                <polyline points="9,22 9,12 15,12 15,22"></polyline>
+                            </svg>
+                            Acceder como [rol.nombre/]
+                        </a>
+                    </div>
+                </div>
+                [/for]
+            </div>
+        </div>
+    </div>
+</section>
+[/template]
+
+[template public generateFeaturesSection(app : Aplicacion)]
+<section id="features" class="features-section mb-8">
+    <div class="card">
+        <div class="card-header">
+            <h2>Características del Sistema</h2>
+        </div>
+        <div class="card-body">
+            <div class="features-grid grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="feature-item animate-target">
+                    <div class="feature-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="9" y1="9" x2="15" y2="15"></line>
+                            <line x1="15" y1="9" x2="9" y2="15"></line>
+                        </svg>
+                    </div>
+                    <h3>Gestión CRUD Completa</h3>
+                    <p>Sistema completo de creación, lectura, actualización y eliminación de datos para todas las entidades.</p>
+                </div>
+                
+                <div class="feature-item animate-target">
+                    <div class="feature-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 12l2 2 4-4"></path>
+                            <path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3"></path>
+                            <path d="M3 12c1 0 3-1 3-3s-2-3-3-3-3 1-3 3 2 3 3 3"></path>
+                        </svg>
+                    </div>
+                    <h3>Control de Acceso por Roles</h3>
+                    <p>Sistema robusto de autenticación y autorización con diferentes niveles de acceso según el rol del usuario.</p>
+                </div>
+                
+                <div class="feature-item animate-target">
+                    <div class="feature-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 3v18h18"></path>
+                            <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"></path>
+                        </svg>
+                    </div>
+                    <h3>Encuestas y Cuestionarios</h3>
+                    <p>Herramientas integradas para crear encuestas y cuestionarios con análisis de resultados en tiempo real.</p>
+                </div>
+                
+                <div class="feature-item animate-target">
+                    <div class="feature-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                        </svg>
+                    </div>
+                    <h3>Integración Social y RSS</h3>
+                    <p>Conectividad con redes sociales y fuentes RSS para mantener el contenido actualizado y relevante.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+[/template]
+
+[template public generateSocialContent(app : Aplicacion)]
+<div class="content-grid grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <!-- Redes Sociales -->
+    [if (not app.redesSociales->isEmpty())]
+    <div class="social-section">
+        <div class="social-header">
+            <div class="social-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path>
+                </svg>
+            </div>
+            <h3>Síguenos en Redes Sociales</h3>
+        </div>
+        <div class="social-feeds">
+            [let maxRedSociales : Integer = if (app.redesSociales->size() > 2) then 2 else app.redesSociales->size() endif]
+            [for (i : Integer | Sequence{1..maxRedSociales})]
+            [let redSocial : RedSocial = app.redesSociales->asSequence()->at(i)]
+            <div class="social-feed">
+                <h4>[redSocial.tipo/]: @[redSocial.nombreCuenta/]</h4>
+                <div class="social-content">
+                    [redSocial.codigoEmbed/]
+                </div>
+            </div>
+            [/let]
+            [/for]
+            [/let]
+        </div>
+    </div>
+    [/if]
+    
+    <!-- Fuentes RSS -->
+    [if (not app.fuentesRSS->isEmpty())]
+    <div class="rss-section">
+        <div class="rss-header">
+            <div class="rss-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 11a9 9 0 0 1 9 9"></path>
+                    <path d="M4 4a16 16 0 0 1 16 16"></path>
+                    <circle cx="5" cy="19" r="1"></circle>
+                </svg>
+            </div>
+            <h3>Últimas Actualizaciones</h3>
+        </div>
+        <div class="rss-feeds">
+            [for (fuente : FuenteRSS | app.fuentesRSS)]
+            <div class="rss-feed">
+                <h4>[fuente.titulo/]</h4>
+                <div class="rss-content">
+                    <script type="text/javascript">
+                        document.write('<script src="https://feed2js.org//feed2js.php?src=' + encodeURIComponent('[fuente.url/]') + '&num=[fuente.numItems/]&desc=[if (fuente.mostrarDescripcion)]1[else]0[/if]&targ=y" type="text/javascript"><\/script>');
+                    </script>
+                    <noscript>
+                        <p>Para ver el contenido RSS necesitas tener JavaScript habilitado.</p>
+                    </noscript>
+                </div>
+            </div>
+            [/for]
+        </div>
+    </div>
+    [/if]
+</div>
+[/template]
+
+[template public generateInteractiveContent(app : Aplicacion)]
+<div class="interactive-content grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <!-- Encuestas -->
+    [if (not app.encuestas->isEmpty())]
+    <div class="card">
+        <div class="card-header">
+            <div class="flex items-center gap-3">
+                <div class="card-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14,2 14,8 20,8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10,9 9,9 8,9"></polyline>
+                    </svg>
+                </div>
+                <h3>Encuestas Disponibles</h3>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="content-list">
+                [for (encuesta : Encuesta | app.encuestas)]
+                <div class="content-item">
+                    <h4>[encuesta.titulo/]</h4>
+                    <p>[if (encuesta.descripcion.oclIsUndefined() = false)][encuesta.descripcion/][else]Participar en la encuesta [encuesta.titulo/][/if]</p>
+                    <a href="surveys/index.html" class="btn btn-outline btn-outline-primary btn-sm">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="9,11 12,14 22,4"></polyline>
+                            <path d="m21 12 v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                        </svg>
+                        Participar
+                    </a>
+                </div>
+                [/for]
+            </div>
+        </div>
+    </div>
+    [/if]
+    
+    <!-- Cuestionarios -->
+    [if (not app.cuestionarios->isEmpty())]
+    <div class="card">
+        <div class="card-header">
+            <div class="flex items-center gap-3">
+                <div class="card-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 11H3a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-6"></path>
+                        <path d="M9 15h6"></path>
+                        <path d="M12 3l3 3h-6l3-3z"></path>
+                    </svg>
+                </div>
+                <h3>Cuestionarios de Evaluación</h3>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="content-list">
+                [for (cuestionario : Cuestionario | app.cuestionarios)]
+                <div class="content-item">
+                    <h4>[cuestionario.titulo/]</h4>
+                    <p>[if (cuestionario.descripcion.oclIsUndefined() = false)][cuestionario.descripcion/][else]Evalúa tus conocimientos con el cuestionario [cuestionario.titulo/][/if]</p>
+                    <div class="quiz-info">
+                        <span class="badge badge-primary">[cuestionario.preguntas->size()/] preguntas</span>
+                    </div>
+                    <a href="quizzes/index.html" class="btn btn-outline btn-outline-primary btn-sm">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="m9 12 2 2 4-4"></path>
+                        </svg>
+                        Realizar
+                    </a>
+                </div>
+                [/for]
+            </div>
+        </div>
+    </div>
+    [/if]
+</div>
+[/template]
+
+[template public generateFooter(app : Aplicacion)]
+<footer class="app-footer">
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>[app.nombre/]</h3>
+                <p>[app.descripcion/]</p>
+                <p>Sistema moderno y eficiente para la gestión de datos empresariales.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Entidades Gestionadas</h3>
+                [let maxEntidades : Integer = if (app.entidades->size() > 5) then 5 else app.entidades->size() endif]
+                [for (i : Integer | Sequence{1..maxEntidades})]
+                [let entidad : Entidad = app.entidades->asSequence()->at(i)]
+                <a href="#">[entidad.nombre/]</a>
+                [/let]
+                [/for]
+                [if (app.entidades->size() > 5)]
+                <a href="#">Y [app.entidades->size() - 5/] más...</a>
+                [/if]
+                [/let]
+            </div>
+            <div class="footer-section">
+                <h3>Roles de Usuario</h3>
+                [for (rol : Rol | app.roles)]
+                <a href="[rol.nombre.toLowerCase()/]/dashboard.html">[rol.nombre/]</a>
+                [/for]
+            </div>
+            <div class="footer-section">
+                <h3>Enlaces Útiles</h3>
+                <a href="#ayuda">Centro de Ayuda</a>
+                <a href="#documentacion">Documentación</a>
+                <a href="#soporte">Soporte Técnico</a>
+                <a href="#contacto">Contacto</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 [app.nombre/]. Todos los derechos reservados.</p>
+        </div>
+    </div>
+</footer>
+[/template]
+
+[template public generateCustomCSS(app : Aplicacion)]
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, var(--primary-50) 0%, white 100%);
+        border-radius: var(--radius-xl);
+        overflow: hidden;
+    }
+    
+    .stats-grid {
+        margin-top: 2rem;
+    }
+    
+    .stat-card {
+        text-align: center;
+        padding: 1.5rem;
+        background: white;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-sm);
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary-600);
+        display: block;
+    }
+    
+    .stat-label {
+        font-size: 0.875rem;
+        color: var(--gray-600);
+        margin-top: 0.25rem;
+    }
+    
+    .role-card {
+        border: 1px solid var(--gray-200);
+        transition: var(--transition);
+    }
+    
+    .role-card:hover {
+        border-color: var(--primary-300);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .role-icon {
+        width: 3rem;
+        height: 3rem;
+        background: var(--primary-100);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+        color: var(--primary-600);
+    }
+    
+    .role-stats {
+        margin-top: 1rem;
+        font-size: 0.875rem;
+    }
+    
+    .role-stat {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+    }
+    
+    .role-stat-label {
+        color: var(--gray-600);
+    }
+    
+    .role-stat-value {
+        font-weight: 600;
+        color: var(--primary-600);
+    }
+    
+    .feature-item {
+        padding: 1.5rem;
+        text-align: center;
+    }
+    
+    .feature-icon {
+        width: 4rem;
+        height: 4rem;
+        background: var(--primary-100);
+        border-radius: var(--radius-lg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        color: var(--primary-600);
+    }
+    
+    .feature-item h3 {
+        margin: 1rem 0 0.5rem;
+        color: var(--gray-900);
+    }
+    
+    .feature-item p {
+        color: var(--gray-600);
+        font-size: 0.875rem;
+    }
+    
+    .content-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .content-item {
+        padding: 1rem;
+        border-radius: var(--radius);
+        background: var(--gray-50);
+        border-left: 3px solid var(--primary-500);
+    }
+    
+    .content-item h4 {
+        margin: 0 0 0.5rem;
+        color: var(--gray-900);
+    }
+    
+    .content-item p {
+        margin: 0 0 1rem;
+        color: var(--gray-600);
+        font-size: 0.875rem;
+    }
+    
+    .quiz-info {
+        margin-bottom: 1rem;
+    }
+    
+    .btn-block {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .card-icon {
+        width: 2rem;
+        height: 2rem;
+        color: var(--primary-600);
+    }
+    
+    .lead {
+        font-size: 1.125rem;
+        color: var(--gray-600);
+        margin-bottom: 1.5rem;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .stats-grid {
+            grid-template-columns: repeat(1, minmax(0, 1fr));
+        }
+        
+        .stat-number {
+            font-size: 1.5rem;
+        }
+        
+        .feature-icon {
+            width: 3rem;
+            height: 3rem;
+        }
+    }
+</style>
+[/template]

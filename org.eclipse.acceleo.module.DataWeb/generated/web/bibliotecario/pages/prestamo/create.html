@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biblioteca Universitaria - Crear Prestamo</title>
+    <meta name="description" content="Crear nuevo registro de Prestamo">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../../assets/css/style.css">
+    <link rel="icon" type="image/x-icon" href="../../../assets/icons/favicon.ico">
+</head>
+<body>
+    <header class="app-header">
+        <div class="container">
+            <h1>Crear Prestamo</h1>
+            <p>Añadir un nuevo registro de Prestamo al sistema</p>
+        </div>
+    </header>
+    
+    <nav class="main-nav">
+        <div class="container nav-container">
+            <div class="nav-brand">
+                <a href="../../../index.html" class="nav-logo">Biblioteca Universitaria</a>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="../../dashboard.html" class="nav-link">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a href="index.html" class="nav-link">Gestión Prestamo</a>
+                </li>
+                <li class="nav-item">
+                    <a href="list.html" class="nav-link">Listar</a>
+                </li>
+                <li class="nav-item">
+                    <a href="create.html" class="nav-link active">Crear</a>
+                </li>
+            </ul>
+            <button class="nav-toggle" aria-label="Abrir menú">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+    
+    <nav class="breadcrumb">
+        <div class="container">
+            <ul class="breadcrumb-list">
+                <li class="breadcrumb-item">
+                    <a href="../../../index.html" class="breadcrumb-link">Inicio</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="../../dashboard.html" class="breadcrumb-link">Bibliotecario</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="index.html" class="breadcrumb-link">Prestamo</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <span>Crear</span>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    
+    <main class="main-content">
+        <div class="container">
+            <div class="form-container">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Nuevo Prestamo</h2>
+                        <p>Complete el formulario para crear un nuevo registro</p>
+                    </div>
+                    <div class="card-body">
+                        <form id="createForm" class="create-form" data-validate>
+                            <div class="form-group">
+                                <label for="fechaPrestamo" class="form-label">
+                                    fechaPrestamo <span class="required">*</span>
+                                </label>
+                                <input type="date" id="fechaPrestamo" name="fechaPrestamo" class="form-control" required>
+                                <div class="field-help">
+                                    Ingrese el fechaprestamo
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="fechaDevolucion" class="form-label">
+                                    fechaDevolucion <span class="required">*</span>
+                                </label>
+                                <input type="date" id="fechaDevolucion" name="fechaDevolucion" class="form-control" required>
+                                <div class="field-help">
+                                    Ingrese el fechadevolucion
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="prestamo_usuario_ID" class="form-label">
+                                    prestamo_usuario <span class="required">*</span>
+                                </label>
+                                <select id="prestamo_usuario_ID" name="prestamo_usuario_ID" class="form-control" required>
+                                    <option value="">Seleccionar prestamo_usuario...</option>
+                                    <!-- Las opciones se cargarán dinámicamente -->
+                                </select>
+                                <div class="field-help">
+                                    Seleccione un prestamo_usuario existente
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="prestamo_libro_ID" class="form-label">
+                                    prestamo_libro <span class="required">*</span>
+                                </label>
+                                <select id="prestamo_libro_ID" name="prestamo_libro_ID" class="form-control" required>
+                                    <option value="">Seleccionar prestamo_libro...</option>
+                                    <!-- Las opciones se cargarán dinámicamente -->
+                                </select>
+                                <div class="field-help">
+                                    Seleccione un prestamo_libro existente
+                                </div>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-success" id="submitBtn">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="9,11 12,14 22,4"></polyline>
+                                        <path d="m21 12 v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                                    </svg>
+                                    Crear Prestamo
+                                </button>
+                                <a href="list.html" class="btn btn-secondary">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="15,18 9,12 15,6"></polyline>
+                                    </svg>
+                                    Cancelar
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <footer class="app-footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2025 Biblioteca Universitaria - Crear Prestamo</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script src="../../../assets/js/app.js"></script>
+    <script src="../../../assets/js/data-manager.js"></script>
+    <script src="../../../assets/js/form-utilities.js"></script>
+    <script src="../../../assets/js/crud-manager.js"></script>
+    <script src="../../../assets/js/prestamo.js"></script>
+    
+    <script>
+        // Configuración específica para esta página
+        window.entityConfig = {
+            name: 'prestamo',
+            form: 'create',
+            fields: [
+                {
+                    name: 'fechaPrestamo',
+                    type: 'text',
+                    required: true
+                }
+,                {
+                    name: 'fechaDevolucion',
+                    type: 'text',
+                    required: true
+                }
+,
+                {
+                    name: 'prestamo_usuario_ID',
+                    type: 'select',
+                    required: true,
+                    reference: 'usuario'
+                }
+,                {
+                    name: 'prestamo_libro_ID',
+                    type: 'select',
+                    required: true,
+                    reference: 'libro'
+                }
+            ],
+            validationRules: {
+                'fechaPrestamo': {
+                    required: true
+                }
+,                'fechaDevolucion': {
+                    required: true
+                }
+,
+                'prestamo_usuario_ID': {
+                    required: true
+                }
+,                'prestamo_libro_ID': {
+                    required: true
+                }
+            }
+        };
+        
+        // Inicializar la página
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Cargar opciones para selects de referencias
+            await loadReferenceOptions('prestamo_usuario_ID', 'usuario');
+            await loadReferenceOptions('prestamo_libro_ID', 'libro');
+            
+            // Manejar envío del formulario
+            document.getElementById('createForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                if (validateForm('createForm', window.entityConfig.validationRules)) {
+                    createEntity();
+                }
+            });
+        });
+        
+        // Función para cargar opciones de referencia
+        async function loadReferenceOptions(selectId, entityName) {
+            try {
+                const dataManager = new DataManager(entityName);
+                const response = await dataManager.getAll();
+                
+                if (response && response.entities) {
+                    const select = document.getElementById(selectId);
+                    response.entities.forEach(function(entity) {
+                        const option = document.createElement('option');
+                        const keys = Object.keys(entity);
+                        option.value = entity[keys[0]];
+                        option.textContent = `${entity[keys[0]]} - ${entity[keys[1]] || 'Item'}`;
+                        select.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading reference options:', error);
+            }
+        }
+        
+        // Función para crear la entidad
+        async function createEntity() {
+            const form = document.getElementById('createForm');
+            const formData = new FormData(form);
+            const data = {};
+            
+            for (let [key, value] of formData.entries()) {
+                data[key] = value;
+            }
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.innerHTML;
+            
+            // Mostrar loading
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner"></span> Creando...';
+            
+            try {
+                const dataManager = new DataManager('prestamo');
+                const response = await dataManager.create(data);
+                
+                if (response && response.success) {
+                    window.app.showAlert('¡Prestamo creado correctamente!', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'list.html';
+                    }, 1500);
+                } else {
+                    window.app.showAlert('Error al crear Prestamo: ' + (response?.error || 'Error desconocido'), 'danger');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                }
+            } catch (error) {
+                window.app.showAlert('Error al crear Prestamo: ' + error.message, 'danger');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        }
+    </script>
+    
+    <style>
+        .form-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .create-form {
+            display: grid;
+            gap: 1.5rem;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-label {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--gray-700);
+        }
+        
+        .required {
+            color: var(--danger-600);
+            font-weight: 600;
+        }
+        
+        .form-control {
+            padding: 0.75rem;
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius);
+            transition: var(--transition);
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-500);
+            box-shadow: 0 0 0 3px var(--primary-100);
+        }
+        
+        .field-help {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            margin-top: 0.25rem;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--gray-200);
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid currentColor;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+            margin-right: 0.5rem;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .form-actions {
+                flex-direction: column;
+            }
+            
+            .form-actions .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</body>
+</html>

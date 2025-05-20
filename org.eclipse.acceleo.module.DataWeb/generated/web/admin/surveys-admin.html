@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administración de Encuestas</title>
+    <meta name="description" content="Panel de administración de encuestas del sistema">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="icon" type="image/x-icon" href="../assets/icons/favicon.ico">
+</head>
+<body>
+    <header class="app-header">
+        <div class="container">
+            <h1>Administración de Encuestas</h1>
+            <p>Panel de control para la gestión de encuestas y sus resultados</p>
+        </div>
+    </header>
+    
+    <nav class="main-nav">
+        <div class="container nav-container">
+            <div class="nav-brand">
+                <a href="../index.html" class="nav-logo">Administración</a>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="../index.html" class="nav-link">Inicio</a>
+                </li>
+                <li class="nav-item">
+                    <a href="surveys-admin.html" class="nav-link active">Encuestas</a>
+                </li>
+                <li class="nav-item">
+                    <a href="quizzes-admin.html" class="nav-link">Cuestionarios</a>
+                </li>
+                <li class="nav-item">
+                    <a href="create-survey.html" class="nav-link">Crear Nueva</a>
+                </li>
+            </ul>
+            <button class="nav-toggle" aria-label="Abrir menú">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+    
+    <main class="main-content">
+        <div class="container">
+            <!-- Resumen general -->
+            <section class="admin-overview mb-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Resumen de Encuestas</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="stats-grid grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div class="stat-card">
+                                <div class="stat-icon">📊</div>
+                                <div class="stat-content">
+                                    <div class="stat-number">1</div>
+                                    <div class="stat-label">Encuestas Activas</div>
+                                </div>
+                            </div>
+                            
+                            <div class="stat-card">
+                                <div class="stat-icon">📝</div>
+                                <div class="stat-content">
+                                    <div class="stat-number" id="total-responses">--</div>
+                                    <div class="stat-label">Respuestas Totales</div>
+                                </div>
+                            </div>
+                            
+                            <div class="stat-card">
+                                <div class="stat-icon">⏳</div>
+                                <div class="stat-content">
+                                    <div class="stat-number" id="pending-responses">--</div>
+                                    <div class="stat-label">Respuestas Pendientes</div>
+                                </div>
+                            </div>
+                            
+                            <div class="stat-card">
+                                <div class="stat-icon">✓</div>
+                                <div class="stat-content">
+                                    <div class="stat-number" id="approved-responses">--</div>
+                                    <div class="stat-label">Respuestas Aprobadas</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Encuestas disponibles -->
+            <section class="surveys-section mb-6">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="flex justify-between items-center">
+                            <h2>Encuestas Disponibles</h2>
+                            <a href="create-survey.html" class="btn btn-success">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="12" y1="8" x2="12" y2="16"></line>
+                                    <line x1="8" y1="12" x2="16" y2="12"></line>
+                                </svg>
+                                Crear Nueva Encuesta
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="surveys-grid grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div class="survey-card" data-survey="preferenciasBiblioteca">
+                                <div class="survey-header">
+                                    <h3>Encuesta de Preferencias</h3>
+                                    <span class="survey-badge">Activa</span>
+                                </div>
+                                <div class="survey-details">
+                                    <p>Ayúdanos a conocer tus preferencias de lectura</p>
+                                    <div class="survey-stats">
+                                        <div class="stat-item">
+                                            <span class="stat-label">Respuestas:</span>
+                                            <span class="stat-value" id="responses-preferenciasBiblioteca">--</span>
+                                        </div>
+                                        <div class="stat-item">
+                                            <span class="stat-label">Pendientes:</span>
+                                            <span class="stat-value pending" id="pending-preferenciasBiblioteca">--</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="survey-actions">
+                                    <button class="btn btn-info btn-sm" onclick="viewSurveyResults('preferenciasBiblioteca')">
+                                        Ver Resultados
+                                    </button>
+                                    <button class="btn btn-warning btn-sm" onclick="editSurvey('preferenciasBiblioteca')">
+                                        Editar
+                                    </button>
+                                    <button class="btn btn-danger btn-sm" onclick="deleteSurvey('preferenciasBiblioteca')">
+                                        Eliminar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Respuestas pendientes de aprobación -->
+            <section class="pending-responses mb-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Respuestas Pendientes de Aprobación</h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="pendingResponsesTable">
+                            <div class="loading">
+                                <div class="loading-spinner"></div>
+                                <span>Cargando respuestas pendientes...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Asignación de encuestas a roles -->
+            <section class="role-assignments mb-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Asignación de Encuestas a Roles</h2>
+                    </div>
+                    <div class="card-body">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Encuesta</th>
+                                    <th>Administrador</th>
+                                    <th>Bibliotecario</th>
+                                    <th>Estudiante</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Encuesta de Preferencias</td>
+                                    <td>
+                                        <div class="role-toggle">
+                                            <input type="checkbox" id="role_preferenciasBiblioteca_Administrador" 
+                                                   class="role-checkbox"
+                                                   data-survey="preferenciasBiblioteca" 
+                                                   data-role="Administrador"
+                                                   checked>
+                                            <label for="role_preferenciasBiblioteca_Administrador" class="role-label"></label>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="role-toggle">
+                                            <input type="checkbox" id="role_preferenciasBiblioteca_Bibliotecario" 
+                                                   class="role-checkbox"
+                                                   data-survey="preferenciasBiblioteca" 
+                                                   data-role="Bibliotecario"
+                                                   >
+                                            <label for="role_preferenciasBiblioteca_Bibliotecario" class="role-label"></label>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="role-toggle">
+                                            <input type="checkbox" id="role_preferenciasBiblioteca_Estudiante" 
+                                                   class="role-checkbox"
+                                                   data-survey="preferenciasBiblioteca" 
+                                                   data-role="Estudiante"
+                                                   >
+                                            <label for="role_preferenciasBiblioteca_Estudiante" class="role-label"></label>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="mt-4">
+                            <button id="saveRoleAssignments" class="btn btn-primary">Guardar Asignaciones</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+    
+    <!-- Modal para mostrar resultados -->
+    <div id="resultsModal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3>Resultados de la Encuesta</h3>
+                <button class="modal-close" onclick="closeResultsModal()">×</button>
+            </div>
+            <div class="modal-body" id="resultsModalBody">
+                <!-- El contenido se cargará dinámicamente -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeResultsModal()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+    
+    <footer class="app-footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2025 Administración. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script src="../assets/js/app.js"></script>
+    <script src="../assets/js/admin-surveys.js"></script>
+    
+    <style>
+        .stats-grid {
+            margin-top: 1rem;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            border: 1px solid var(--gray-200);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .stat-icon {
+            font-size: 2rem;
+            margin-right: 1rem;
+        }
+        
+        .stat-number {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            line-height: 1;
+        }
+        
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            margin-top: 0.25rem;
+        }
+        
+        .survey-card {
+            background: white;
+            border-radius: var(--radius);
+            border: 1px solid var(--gray-200);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+        
+        .survey-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .survey-header {
+            padding: 1.25rem;
+            background: var(--gray-50);
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .survey-header h3 {
+            margin: 0;
+            font-size: 1.125rem;
+            color: var(--gray-900);
+        }
+        
+        .survey-badge {
+            background: var(--primary-100);
+            color: var(--primary-700);
+            padding: 0.25rem 0.5rem;
+            border-radius: var(--radius);
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .survey-details {
+            padding: 1.25rem;
+        }
+        
+        .survey-details p {
+            margin: 0 0 1rem;
+            color: var(--gray-600);
+            font-size: 0.875rem;
+        }
+        
+        .survey-stats {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            background: var(--gray-50);
+            padding: 0.75rem;
+            border-radius: var(--radius);
+            min-width: 100px;
+        }
+        
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--gray-600);
+        }
+        
+        .stat-value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+        
+        .stat-value.pending {
+            color: var(--warning-600);
+        }
+        
+        .survey-actions {
+            padding: 1.25rem;
+            background: var(--gray-50);
+            border-top: 1px solid var(--gray-200);
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .role-toggle {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .role-checkbox {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .role-label {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+            background-color: var(--gray-300);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .role-label:before {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 16px;
+            height: 16px;
+            background-color: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+        }
+        
+        .role-checkbox:checked + .role-label {
+            background-color: var(--primary-500);
+        }
+        
+        .role-checkbox:checked + .role-label:before {
+            transform: translateX(20px);
+        }
+        
+        .response-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: white;
+            border-radius: var(--radius);
+            border: 1px solid var(--gray-200);
+            margin-bottom: 0.75rem;
+        }
+        
+        .response-info {
+            flex: 1;
+        }
+        
+        .response-meta {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            margin-top: 0.25rem;
+        }
+        
+        .response-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--gray-600);
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 3px solid var(--gray-200);
+            border-radius: 50%;
+            border-top-color: var(--primary-500);
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-xl);
+            width: 90%;
+            max-height: 90vh;
+            overflow: auto;
+            animation: slideIn 0.3s;
+            position: relative;
+        }
+        
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-header h3 {
+            margin: 0;
+            color: var(--gray-900);
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--gray-600);
+            cursor: pointer;
+        }
+        
+        .modal-body {
+            padding: 1.5rem;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+        
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+        }
+        
+        .response-detail h3 {
+            margin-top: 0;
+            color: var(--gray-900);
+        }
+        
+        .answers-list {
+            margin-top: 1.5rem;
+        }
+        
+        .answer-item {
+            padding: 0.75rem;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius);
+            margin-bottom: 0.75rem;
+        }
+        
+        .answer-value {
+            margin-top: 0.5rem;
+            background: var(--gray-50);
+            padding: 0.75rem;
+            border-radius: var(--radius);
+            font-size: 0.9rem;
+        }
+        
+        .approval-actions {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+        
+        .results-overview {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .result-stat {
+            background: var(--gray-50);
+            padding: 1rem;
+            border-radius: var(--radius);
+            text-align: center;
+        }
+        
+        .result-stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-600);
+        }
+        
+        .result-stat-label {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            margin-top: 0.25rem;
+        }
+        
+        .question-result-item {
+            margin-bottom: 1.5rem;
+            background: white;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+        
+        .question-result-header {
+            background: var(--gray-50);
+            padding: 1rem;
+            font-weight: 600;
+            border-bottom: 1px solid var(--gray-200);
+        }
+        
+        .answer-distribution {
+            padding: 1rem;
+        }
+        
+        .answer-option {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--gray-100);
+        }
+        
+        .answer-option:last-child {
+            border-bottom: none;
+        }
+        
+        .option-text {
+            flex: 1;
+        }
+        
+        .option-count {
+            color: var(--primary-600);
+            margin: 0 1rem;
+            font-weight: 500;
+        }
+        
+        .option-percentage {
+            font-weight: 600;
+            min-width: 3rem;
+            text-align: right;
+        }
+        
+        .responses-list {
+            margin-top: 1.5rem;
+        }
+        
+        .response-summary {
+            background: white;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius);
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .response-summary.approved {
+            border-left: 4px solid var(--success-500);
+        }
+        
+        .response-summary.pending {
+            border-left: 4px solid var(--warning-500);
+        }
+        
+        .response-header {
+            flex: 1;
+        }
+        
+        .response-user {
+            font-weight: 500;
+            color: var(--gray-900);
+        }
+        
+        .response-status {
+            margin-left: 1rem;
+            font-size: 0.875rem;
+        }
+        
+        .response-date {
+            color: var(--gray-600);
+            font-size: 0.75rem;
+            margin-left: 1rem;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        @media (max-width: 768px) {
+            .results-overview {
+                grid-template-columns: 1fr;
+            }
+            
+            .response-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .response-actions {
+                margin-top: 1rem;
+                width: 100%;
+                justify-content: flex-end;
+            }
+            
+            .survey-stats {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .response-summary {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .response-summary button {
+                margin-top: 1rem;
+                width: 100%;
+            }
+        }
+    </style>
+</body>
+</html>

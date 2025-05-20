@@ -1,0 +1,21 @@
+[comment encoding = UTF-8 /]
+[module generateWebCSS('http://www.unex.es/dmss/dataweb')]
+
+[import org::eclipse::acceleo::module::DataWeb::main::generateWebCSS_variables/]
+[import org::eclipse::acceleo::module::DataWeb::main::generateWebCSS_layout/]
+[import org::eclipse::acceleo::module::DataWeb::main::generateWebCSS_components/]
+[import org::eclipse::acceleo::module::DataWeb::main::generateWebCSS_utilities/]
+
+[template public generateWebCSS(app : Aplicacion)]
+[file ('web/assets/css/style.css', false, 'UTF-8')]
+/* ==========================================================================
+   [app.nombre/] - Sistema de Gestión de Datos
+   Estilos CSS Modernos y Responsivos
+   ========================================================================== */
+
+[generateCSSVariables(app)/]
+[generateCSSLayout(app)/]
+[generateCSSComponents(app)/]
+[generateCSSUtilities(app)/]
+[/file]
+[/template]

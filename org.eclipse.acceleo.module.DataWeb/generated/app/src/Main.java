@@ -1,0 +1,100 @@
+import view.MenuPrincipal;
+import dao.DAOFactory;
+import auth.AuthManager;
+import config.AppConfig;
+import view.util.ConsoleUtils;
+
+/**
+ * Clase principal para iniciar la aplicación
+ */
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Iniciando aplicación...");
+        
+        // Cargar configuración
+        ConsoleUtils.mostrarInfo("Cargando configuración...");
+        AppConfig.getInstance();
+        
+        // Inicializar servicios
+        ConsoleUtils.mostrarInfo("Inicializando servicios...");
+        AuthManager.getInstance();
+        DAOFactory.initialize();
+        
+        // Verificar compatibilidad
+        verificarCompatibilidad();
+        
+        // Mostrar mensaje de bienvenida
+        mostrarBienvenida();
+        
+        // Iniciar aplicación
+        MenuPrincipal menu = new MenuPrincipal();
+        menu.mostrarMenu();
+    }
+    
+    /**
+     * Verifica la compatibilidad del entorno de ejecución
+     */
+    private static void verificarCompatibilidad() {
+        try {
+            String javaVersion = System.getProperty("java.version");
+            String osName = System.getProperty("os.name");
+            String osVersion = System.getProperty("os.version");
+            
+            ConsoleUtils.mostrarInfo("Sistema detectado: " + osName + " " + osVersion);
+            ConsoleUtils.mostrarInfo("Versión de Java: " + javaVersion);
+            
+            // Verificar versión mínima de Java
+            if (javaVersion.startsWith("1.")) {
+                int minorVersion = Integer.parseInt(javaVersion.substring(2, 3));
+                if (minorVersion < 8) {
+                    ConsoleUtils.mostrarAdvertencia("Se recomienda Java 8 o superior para una experiencia óptima");
+                }
+            }
+            
+            // Verificar soporte para ANSI (colores)
+            boolean supportsAnsi = true;
+            if (osName.toLowerCase().contains("windows")) {
+                double winVersion = Double.parseDouble(osVersion);
+                if (winVersion < 10.0) {
+                    supportsAnsi = false;
+                }
+            }
+            
+            if (!supportsAnsi) {
+                AppConfig.getInstance().setProperty("display.showColors", "false");
+                AppConfig.getInstance().saveConfiguration();
+                ConsoleUtils.mostrarAdvertencia("Su sistema puede no mostrar correctamente los colores. Se han desactivado.");
+            }
+            
+        } catch (Exception e) {
+            ConsoleUtils.mostrarAdvertencia("No se pudo verificar la compatibilidad del sistema");
+        }
+    }
+    
+    /**
+     * Muestra un mensaje de bienvenida
+     */
+    private static void mostrarBienvenida() {
+        ConsoleUtils.limpiarPantalla();
+        
+        // Mostrar logo ASCII
+        System.out.println(ConsoleUtils.ANSI_BLUE);
+        System.out.println("  _____                                      _           ");
+        System.out.println(" / ____|                                    (_)          ");
+        System.out.println("| |  __  ___ _ __   ___ _ __ __ _  ___ _ __  _  ___  ___ ");
+        System.out.println("| | |_ |/ _ \\ '_ \\ / _ \\ '__/ _` |/ __| '_ \\| |/ _ \\/ _ \\");
+        System.out.println("| |__| |  __/ | | |  __/ | | (_| | (__| | | | |  __/ | | |");
+        System.out.println(" \\_____|\\___/_| |_|\\___|_|  \\__,_|\\___|_| |_|_|\\___|_| |_|");
+        System.out.println(ConsoleUtils.ANSI_RESET);
+        
+        System.out.println("\nBienvenido a la aplicación generada con el framework Acceleo");
+        System.out.println("Versión: " + AppConfig.getInstance().getProperty("app.version", "1.0.0"));
+        
+        // Mostrar fecha y hora actual
+        String fecha = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new java.util.Date());
+        System.out.println("\nFecha y hora actual: " + fecha);
+        
+        System.out.println("\nPresione Enter para continuar...");
+        new java.util.Scanner(System.in).nextLine();
+    }
+}

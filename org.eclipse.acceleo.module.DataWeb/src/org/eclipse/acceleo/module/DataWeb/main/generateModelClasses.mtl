@@ -1,0 +1,429 @@
+[comment encoding = UTF-8 /]
+[module generateModelClasses('http://www.unex.es/dmss/dataweb')]
+
+[template public generateModelClasses(app : Aplicacion)]
+[file ('app/src/model/ModelFactory.java', false, 'UTF-8')]
+package model;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Supplier;
+
+/**
+ * Factoría para la creación de instancias de modelos
+ * Implementa el patrón Factory para centralizar la creación de objetos
+ */
+public class ModelFactory {
+    private static final Map<String, Object> instances = new HashMap<>();
+    private static final Map<String, Supplier<?>> builders = new HashMap<>();
+    
+    static {
+        // Registramos los proveedores para cada tipo de modelo
+        [for (entidad : Entidad | app.entidades)]
+        builders.put([entidad.nombre/].class.getName(), [entidad.nombre/]::new);
+        [/for]
+    }
+    
+    /**
+     * Obtiene una instancia del modelo especificado
+     * Si no existe, la crea y almacena
+     * @param <T> Tipo de modelo
+     * @param modelClass Clase del modelo
+     * @return Instancia del modelo
+     * @throws RuntimeException si no se puede crear la instancia
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T getModel(Class<T> modelClass) {
+        String className = modelClass.getName();
+        if (!instances.containsKey(className)) {
+            try {
+                // Verificar si tenemos un builder registrado
+                if (builders.containsKey(className)) {
+                    instances.put(className, builders.get(className).get());
+                } else {
+                    // Fallback a la creación por reflexión
+                    instances.put(className, modelClass.getDeclaredConstructor().newInstance());
+                }
+            } catch (Exception e) {
+                throw new RuntimeException("Error al crear instancia de " + className, e);
+            }
+        }
+        return (T) instances.get(className);
+    }
+    
+    /**
+     * Crea una nueva instancia del modelo sin almacenarla
+     * @param <T> Tipo de modelo
+     * @param modelClass Clase del modelo
+     * @return Nueva instancia del modelo
+     * @throws RuntimeException si no se puede crear la instancia
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T createModel(Class<T> modelClass) {
+        String className = modelClass.getName();
+        try {
+            // Verificar si tenemos un builder registrado
+            if (builders.containsKey(className)) {
+                return (T) builders.get(className).get();
+            } else {
+                // Fallback a la creación por reflexión
+                return modelClass.getDeclaredConstructor().newInstance();
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error al crear instancia de " + className, e);
+        }
+    }
+    
+    /**
+     * Registra un proveedor personalizado para un tipo de modelo
+     * @param <T> Tipo de modelo
+     * @param modelClass Clase del modelo
+     * @param builder Proveedor de instancias
+     */
+    public static <T> void registerBuilder(Class<T> modelClass, Supplier<T> builder) {
+        builders.put(modelClass.getName(), builder);
+    }
+    
+    /**
+     * Elimina una instancia almacenada
+     * @param <T> Tipo de modelo
+     * @param modelClass Clase del modelo
+     */
+    public static <T> void removeModel(Class<T> modelClass) {
+        instances.remove(modelClass.getName());
+    }
+    
+    /**
+     * Limpia todas las instancias almacenadas
+     */
+    public static void clearModels() {
+        instances.clear();
+    }
+}
+[/file]
+
+[file ('app/src/model/ValidacionException.java', false, 'UTF-8')]
+package model;
+
+/**
+ * Excepción personalizada para errores de validación en los modelos
+ */
+public class ValidacionException extends RuntimeException {
+    private static final long serialVersionUID = 1L;
+    
+    public ValidacionException(String mensaje) {
+        super(mensaje);
+    }
+    
+    public ValidacionException(String mensaje, Throwable causa) {
+        super(mensaje, causa);
+    }
+}
+[/file]
+
+[for (entidad : Entidad | app.entidades)]
+[file ('app/src/model/'+entidad.nombre+'.java', false, 'UTF-8')]
+package model;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.text.ParseException;
+import java.util.Date;
+
+/**
+ * Clase modelo para la entidad [entidad.nombre/]
+ * Representa [if (entidad.tableName.oclIsUndefined() = false)][entidad.tableName/][else]la tabla [entidad.nombre/][/if] en la base de datos
+ */
+public class [entidad.nombre/] implements Serializable, Cloneable {
+    private static final long serialVersionUID = 1L;
+    
+    // Atributos
+    [for (atrib : Atributo | entidad.atributos)]
+    private [if (atrib.tipo = TipoAtributo::INTEGER)]Integer[elseif (atrib.tipo = TipoAtributo::BOOLEAN)]boolean[elseif (atrib.tipo = TipoAtributo::DECIMAL)]double[else]String[/if] [atrib.nombre/];
+    [/for]
+    
+    // Referencias a otras entidades
+    [for (ref : Referencia | entidad.referencias)]
+    private [ref.target.nombre/] [ref.nombre/];
+    [/for]
+    
+    /**
+     * Constructor por defecto
+     * Inicializa los valores por defecto para todos los campos
+     */
+    public [entidad.nombre/]() {
+        // Inicialización de valores por defecto
+        [for (atrib : Atributo | entidad.atributos)]
+        [if (atrib.tipo = TipoAtributo::INTEGER)]
+        this.[atrib.nombre/] = 0;
+        [elseif (atrib.tipo = TipoAtributo::BOOLEAN)]
+        this.[atrib.nombre/] = false;
+        [elseif (atrib.tipo = TipoAtributo::DECIMAL)]
+        this.[atrib.nombre/] = 0.0;
+        [else]
+        this.[atrib.nombre/] = "";
+        [/if]
+        [/for]
+    }
+    
+    /**
+     * Constructor con todos los atributos (sin referencias)
+     */
+    public [entidad.nombre/]([for (atrib : Atributo | entidad.atributos) separator(', ')][if (atrib.tipo = TipoAtributo::INTEGER)]Integer[elseif (atrib.tipo = TipoAtributo::BOOLEAN)]boolean[elseif (atrib.tipo = TipoAtributo::DECIMAL)]double[else]String[/if] [atrib.nombre/][/for]) {
+        [for (atrib : Atributo | entidad.atributos)]
+        this.[atrib.nombre/] = [atrib.nombre/];
+        [/for]
+        
+        // Validamos los datos
+        validarDatos();
+    }
+    
+    // Getters y setters
+    [for (atrib : Atributo | entidad.atributos)]
+    /**
+     * Obtiene el valor de [atrib.nombre/]
+     * [if (atrib.isPrimaryKey)]Este es el identificador principal de la entidad[/if]
+     * @return El valor de [atrib.nombre/]
+     */
+    public [if (atrib.tipo = TipoAtributo::INTEGER)]Integer[elseif (atrib.tipo = TipoAtributo::BOOLEAN)]boolean[elseif (atrib.tipo = TipoAtributo::DECIMAL)]double[else]String[/if] get[atrib.nombre.toUpperFirst()/]() {
+        return [atrib.nombre/];
+    }
+    
+    /**
+     * Establece el valor de [atrib.nombre/]
+     * [if (atrib.isPrimaryKey)]Este es el identificador principal de la entidad[/if]
+     * @param [atrib.nombre/] Nuevo valor
+     * [if (atrib.tipo = TipoAtributo::STRING)]
+     * @throws ValidacionException Si el valor es null[if (atrib.isPrimaryKey)] o vacío[/if]
+     [/if]
+     */
+    public void set[atrib.nombre.toUpperFirst()/]([if (atrib.tipo = TipoAtributo::INTEGER)]Integer[elseif (atrib.tipo = TipoAtributo::BOOLEAN)]boolean[elseif (atrib.tipo = TipoAtributo::DECIMAL)]double[else]String[/if] [atrib.nombre/]) {
+        [if (atrib.tipo = TipoAtributo::STRING)]
+        // Validación básica para strings
+        if ([atrib.nombre/] == null) {
+            throw new ValidacionException("El atributo [atrib.nombre/] no puede ser null");
+        }
+        [if (atrib.isPrimaryKey)]
+        if ([atrib.nombre/].trim().isEmpty()) {
+            throw new ValidacionException("El identificador [atrib.nombre/] no puede estar vacío");
+        }
+        [/if]
+        [/if]
+        
+        this.[atrib.nombre/] = [atrib.nombre/];
+    }
+    
+    [/for]
+    
+    // Getters y setters para las referencias
+    [for (ref : Referencia | entidad.referencias)]
+    /**
+     * Obtiene la referencia a [ref.nombre/] ([ref.target.nombre/])
+     * @return La entidad [ref.target.nombre/] referenciada
+     */
+    public [ref.target.nombre/] get[ref.nombre.toUpperFirst()/]() {
+        return [ref.nombre/];
+    }
+    
+    /**
+     * Establece la referencia a [ref.nombre/] ([ref.target.nombre/])
+     * @param [ref.nombre/] Nueva entidad referenciada
+     */
+    public void set[ref.nombre.toUpperFirst()/]([ref.target.nombre/] [ref.nombre/]) {
+        this.[ref.nombre/] = [ref.nombre/];
+    }
+    
+    [/for]
+    
+    /**
+     * Valida los datos de la entidad
+     * @throws ValidacionException Si algún dato no cumple con las restricciones
+     */
+    public void validarDatos() throws ValidacionException {
+        // Validaciones generales
+        [for (atrib : Atributo | entidad.atributos)]
+        [if (atrib.tipo = TipoAtributo::STRING)]
+        if ([atrib.nombre/] == null) {
+            throw new ValidacionException("El atributo [atrib.nombre/] no puede ser null");
+        }
+        [if (atrib.isPrimaryKey)]
+        if ([atrib.nombre/].trim().isEmpty()) {
+            throw new ValidacionException("El identificador [atrib.nombre/] no puede estar vacío");
+        }
+        [/if]
+        [elseif (atrib.tipo = TipoAtributo::INTEGER)]
+        [if (atrib.isPrimaryKey)]
+        if ([atrib.nombre/] <= 0) {
+            throw new ValidacionException("El identificador [atrib.nombre/] debe ser mayor que cero");
+        }
+        [/if]
+        [elseif (atrib.tipo = TipoAtributo::DECIMAL)]
+        [if (atrib.nombre.toLowerCase().contains('precio') or atrib.nombre.toLowerCase().contains('cost') or atrib.nombre.toLowerCase().contains('valor') or atrib.nombre.toLowerCase().contains('monto') or atrib.nombre.toLowerCase().contains('importe'))]
+        if ([atrib.nombre/] < 0) {
+            throw new ValidacionException("El valor de [atrib.nombre/] no puede ser negativo");
+        }
+        [/if]
+        [/if]
+        [/for]
+        
+        // Validaciones específicas de campos tipo fecha
+        [for (atrib : Atributo | entidad.atributos)]
+        [if (atrib.tipo = TipoAtributo::STRING and (atrib.nombre.toLowerCase().contains('fecha') or atrib.nombre.toLowerCase().contains('date')))]
+        if (![atrib.nombre/].isEmpty()) {
+            try {
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                dateFormat.setLenient(false);
+                dateFormat.parse([atrib.nombre/]);
+            } catch (ParseException e) {
+                throw new ValidacionException("El formato de [atrib.nombre/] no es válido. Use formato yyyy-MM-dd");
+            }
+        }
+        [/if]
+        [/for]
+    }
+    
+    /**
+     * Verifica si esta entidad es igual a otro objeto
+     * @param obj Objeto a comparar
+     * @return true si son iguales, false en caso contrario
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        
+        [entidad.nombre/] other = ([entidad.nombre/]) obj;
+        
+        // Comparación por identificador primario
+        [if (entidad.atributos->exists(a | a.isPrimaryKey))]
+        return [for (atrib : Atributo | entidad.atributos->select(a | a.isPrimaryKey)) separator(' && ')]
+            [if (atrib.tipo = TipoAtributo::STRING)]
+            Objects.equals(this.[atrib.nombre/], other.[atrib.nombre/])
+            [else]
+            this.[atrib.nombre/] == other.[atrib.nombre/]
+            [/if]
+        [/for];
+        [else]
+        // Si no hay identificador primario, comparamos todos los atributos
+        return [for (atrib : Atributo | entidad.atributos) separator(' && ')]
+            [if (atrib.tipo = TipoAtributo::STRING)]
+            Objects.equals(this.[atrib.nombre/], other.[atrib.nombre/])
+            [else]
+            this.[atrib.nombre/] == other.[atrib.nombre/]
+            [/if]
+        [/for];
+        [/if]
+    }
+    
+    /**
+     * Calcula el código hash de esta entidad
+     * @return Código hash basado en los atributos de la entidad
+     */
+    @Override
+    public int hashCode() {
+        [if (entidad.atributos->exists(a | a.isPrimaryKey))]
+        return Objects.hash([for (atrib : Atributo | entidad.atributos->select(a | a.isPrimaryKey)) separator(', ')][atrib.nombre/][/for]);
+        [else]
+        return Objects.hash([for (atrib : Atributo | entidad.atributos) separator(', ')][atrib.nombre/][/for]);
+        [/if]
+    }
+    
+    /**
+     * Crea una copia profunda de esta entidad
+     * @return Copia de la entidad
+     */
+    @Override
+    public [entidad.nombre/] clone() {
+        try {
+            [entidad.nombre/] clone = ([entidad.nombre/]) super.clone();
+            
+            // No es necesario clonar tipos primitivos o String (son inmutables)
+            
+            // Clonar referencias si es necesario
+            [for (ref : Referencia | entidad.referencias)]
+            if (this.[ref.nombre/] != null && this.[ref.nombre/] instanceof Cloneable) {
+                try {
+                    // Intentamos clonar usando el método clone()
+                    clone.[ref.nombre/] = ([ref.target.nombre/]) this.[ref.nombre/].clone();
+                } catch (Exception e) {
+                    // Si no se puede clonar, asignamos la referencia original
+                    clone.[ref.nombre/] = this.[ref.nombre/];
+                }
+            }
+            [/for]
+            
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException("Error al clonar [entidad.nombre/]", e);
+        }
+    }
+    
+    /**
+     * Genera una representación en texto de la entidad
+     * @return Representación textual de la entidad
+     */
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("[entidad.nombre/] {");
+        
+        // Incluimos todos los atributos
+        [for (i : Integer | Sequence{1..entidad.atributos->size()})]
+        sb.append(" [entidad.atributos->at(i).nombre/]=").append([entidad.atributos->at(i).nombre/]);
+        [if (i < entidad.atributos->size())]
+        sb.append(",");
+        [/if]
+        [/for]
+        
+        // Incluimos las referencias, solo mostrando sus IDs
+        [for (ref : Referencia | entidad.referencias)]
+        sb.append(", [ref.nombre/]=");
+        if ([ref.nombre/] != null) {
+            sb.append([ref.nombre/].get[ref.target.atributos->select(a | a.isPrimaryKey)->first().nombre.toUpperFirst()/]());
+        } else {
+            sb.append("null");
+        }
+        [/for]
+        
+        sb.append("}");
+        return sb.toString();
+    }
+    
+    /**
+	 * Convierte la entidad a un formato adecuado para mostrar al usuario
+	 * @return Cadena de texto con la información principal de la entidad
+	 */
+	public String toDisplayString() {
+	    StringBuilder sb = new StringBuilder();
+	    
+	    // Mostramos el identificador y algunos atributos clave para identificación
+	    [if (entidad.atributos->exists(a | a.isPrimaryKey))]
+	    sb.append("[entidad.nombre/] #").append(get[entidad.atributos->select(a | a.isPrimaryKey)->first().nombre.toUpperFirst()/]());
+	    [else]
+	    sb.append("[entidad.nombre/]");
+	    [/if]
+	    
+	    // Añadimos 1-3 atributos representativos
+	    [let stringAttrs : Sequence(Atributo) = entidad.atributos->reject(a | a.isPrimaryKey)->select(a | a.tipo = TipoAtributo::STRING)->asSequence()]
+	    [if (not stringAttrs->isEmpty())]
+	    sb.append(": ");
+	    [let maxAttrs : Integer = if (stringAttrs->size() > 3) then 3 else stringAttrs->size() endif]
+	    [for (i : Integer | Sequence{1..maxAttrs})]
+	    sb.append(get[stringAttrs->at(i).nombre.toUpperFirst()/]());
+	    [if (i < maxAttrs)]
+	    sb.append(" - ");
+	    [/if]
+	    [/for]
+	    [/let]
+	    [/if]
+	    [/let]
+	    
+	    return sb.toString();
+	}
+}
+[/file]
+[/for]
+[/template]

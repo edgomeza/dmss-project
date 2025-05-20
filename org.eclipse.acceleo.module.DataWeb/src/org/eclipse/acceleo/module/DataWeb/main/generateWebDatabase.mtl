@@ -1,0 +1,128 @@
+[comment encoding = UTF-8 /]
+[module generateWebDatabase('http://www.unex.es/dmss/dataweb')]
+
+[template public generateWebDatabase(app : Aplicacion)]
+[file ('web/database.sql', false, 'UTF-8')]
+-- Script de creación de base de datos para [app.nombre/]
+CREATE DATABASE IF NOT EXISTS [app.nombre.toLower().replace(' ', '_')/];
+USE [app.nombre.toLower().replace(' ', '_')/];
+
+-- Creación de tablas
+[for (entidad : Entidad | app.entidades)]
+CREATE TABLE IF NOT EXISTS [entidad.tableName/] (
+    [for (atrib : Atributo | entidad.atributos) separator(',\n    ')]
+    [atrib.nombre/] [if (atrib.tipo = TipoAtributo::INTEGER)]INT[elseif (atrib.tipo = TipoAtributo::BOOLEAN)]BOOLEAN[elseif (atrib.tipo = TipoAtributo::DECIMAL)]DECIMAL(10,2)[else]VARCHAR(255)[/if][if (atrib.isPrimaryKey)] PRIMARY KEY[/if]
+    [/for]
+    [if (not entidad.referencias->isEmpty() and not entidad.atributos->isEmpty())],
+    [/if]
+    [for (ref : Referencia | entidad.referencias) separator(',\n    ')]
+    [ref.nombre/]_ID [if (ref.target.atributos->select(a | a.isPrimaryKey)->first().tipo = TipoAtributo::INTEGER)]INT[else]VARCHAR(255)[/if],
+    FOREIGN KEY ([ref.nombre/]_ID) REFERENCES [ref.target.tableName/]([ref.target.atributos->select(a | a.isPrimaryKey)->first().nombre/])
+    [/for]
+);
+
+[/for]
+
+-- Creación de tablas para encuestas y cuestionarios
+CREATE TABLE IF NOT EXISTS ENCUESTAS (
+    id_encuesta INT PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(255) NOT NULL,
+    titulo VARCHAR(255) NOT NULL,
+    descripcion TEXT,
+    tipo_representacion VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS PREGUNTAS_ENCUESTA (
+    id_pregunta INT PRIMARY KEY AUTO_INCREMENT,
+    id_encuesta INT NOT NULL,
+    tipo VARCHAR(50) NOT NULL,
+    texto TEXT NOT NULL,
+    FOREIGN KEY (id_encuesta) REFERENCES ENCUESTAS(id_encuesta) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS OPCIONES_PREGUNTA (
+    id_opcion INT PRIMARY KEY AUTO_INCREMENT,
+    id_pregunta INT NOT NULL,
+    texto VARCHAR(255) NOT NULL,
+    valor VARCHAR(255) NOT NULL,
+    FOREIGN KEY (id_pregunta) REFERENCES PREGUNTAS_ENCUESTA(id_pregunta) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS RESPUESTAS_ENCUESTA (
+    id_respuesta INT PRIMARY KEY AUTO_INCREMENT,
+    id_pregunta INT NOT NULL,
+    respuesta TEXT,
+    fecha_respuesta DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_pregunta) REFERENCES PREGUNTAS_ENCUESTA(id_pregunta) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS CUESTIONARIOS (
+    id_cuestionario INT PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(255) NOT NULL,
+    titulo VARCHAR(255) NOT NULL,
+    descripcion TEXT
+);
+
+CREATE TABLE IF NOT EXISTS PREGUNTAS_CUESTIONARIO (
+    id_pregunta INT PRIMARY KEY AUTO_INCREMENT,
+    id_cuestionario INT NOT NULL,
+    tipo VARCHAR(50) NOT NULL,
+    texto TEXT NOT NULL,
+    respuesta_correcta TEXT NOT NULL,
+    FOREIGN KEY (id_cuestionario) REFERENCES CUESTIONARIOS(id_cuestionario) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS OPCIONES_CUESTIONARIO (
+    id_opcion INT PRIMARY KEY AUTO_INCREMENT,
+    id_pregunta INT NOT NULL,
+    texto VARCHAR(255) NOT NULL,
+    valor VARCHAR(255) NOT NULL,
+    es_correcta BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (id_pregunta) REFERENCES PREGUNTAS_CUESTIONARIO(id_pregunta) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS RESPUESTAS_CUESTIONARIO (
+    id_respuesta INT PRIMARY KEY AUTO_INCREMENT,
+    id_pregunta INT NOT NULL,
+    respuesta TEXT,
+    es_correcta BOOLEAN DEFAULT FALSE,
+    fecha_respuesta DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_pregunta) REFERENCES PREGUNTAS_CUESTIONARIO(id_pregunta) ON DELETE CASCADE
+);
+
+-- Creación de tablas para usuarios y roles
+CREATE TABLE IF NOT EXISTS ROLES (
+    id_rol INT PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(255) NOT NULL,
+    descripcion TEXT
+);
+
+CREATE TABLE IF NOT EXISTS USUARIOS (
+    id_usuario INT PRIMARY KEY AUTO_INCREMENT,
+    nombre_usuario VARCHAR(255) NOT NULL UNIQUE,
+    contrasena VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    id_rol INT NOT NULL,
+    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_rol) REFERENCES ROLES(id_rol)
+);
+
+-- Datos iniciales
+INSERT INTO ROLES (nombre, descripcion) VALUES
+[for (rol : Rol | app.roles) separator(',\n')]
+('[rol.nombre/]', '[if (rol.descripcion.oclIsUndefined() = false)][rol.descripcion/][else]Rol de [rol.nombre/][/if]')
+[/for];
+
+-- Insertar datos de ejemplo para encuestas
+[for (encuesta : Encuesta | app.encuestas)]
+INSERT INTO ENCUESTAS (nombre, titulo, descripcion, tipo_representacion) VALUES
+('[encuesta.nombre/]', '[encuesta.titulo/]', '[if (encuesta.descripcion.oclIsUndefined() = false)][encuesta.descripcion/][else]Encuesta [encuesta.nombre/][/if]', '[encuesta.tipoRepresentacion/]');
+[/for]
+
+-- Insertar datos de ejemplo para cuestionarios
+[for (cuestionario : Cuestionario | app.cuestionarios)]
+INSERT INTO CUESTIONARIOS (nombre, titulo, descripcion) VALUES
+('[cuestionario.nombre/]', '[cuestionario.titulo/]', '[if (cuestionario.descripcion.oclIsUndefined() = false)][cuestionario.descripcion/][else]Cuestionario [cuestionario.nombre/][/if]');
+[/for]
+[/file]
+[/template]

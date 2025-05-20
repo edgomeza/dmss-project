@@ -1,0 +1,2896 @@
+[comment encoding = UTF-8 /]
+[module generateViewClasses('http://www.unex.es/dmss/dataweb')]
+
+[template public generateViewClasses(app : Aplicacion)]
+[file ('app/src/view/MenuPrincipal.java', false, 'UTF-8')]
+package view;
+
+import java.util.Scanner;
+import java.io.IOException;
+import dao.DAOFactory;
+import view.util.ConsoleUtils;
+import auth.AuthManager;
+import auth.Usuario;
+import config.AppConfig;
+import view.admin.AdminMenuView;
+import view.settings.ConfiguracionView;
+
+/**
+ * Menú principal de la aplicación
+ * Punto de entrada para la interfaz de usuario en consola
+ */
+public class MenuPrincipal {
+    private Scanner scanner;
+    private AuthManager authManager;
+    private AppConfig appConfig;
+    
+    /**
+     * Constructor
+     * Inicializa los componentes necesarios
+     */
+    public MenuPrincipal() {
+        scanner = new Scanner(System.in);
+        authManager = AuthManager.getInstance();
+        appConfig = AppConfig.getInstance();
+        
+        // Inicializamos el DAOFactory para cargar los datos
+        DAOFactory.initialize();
+    }
+    
+    /**
+     * Muestra el menú principal y gestiona la navegación
+     */
+    public void mostrarMenu() {
+        boolean salir = false;
+        boolean primeraVez = true;
+        
+        while (!salir) {
+            // Primera ejecución o no hay usuario autenticado, mostrar login
+            if (primeraVez || !authManager.isAuthenticated()) {
+                primeraVez = false;
+                LoginView loginView = new LoginView();
+                boolean loginExitoso = loginView.mostrar();
+                
+                if (!loginExitoso && !authManager.isAuthenticated()) {
+                    // Si no se pudo iniciar sesión y no había sesión previa, mostrar opciones limitadas
+                    salir = mostrarMenuInvitado();
+                    continue;
+                }
+            }
+            
+            mostrarCabecera();
+            mostrarOpciones();
+            
+            int opcion = ConsoleUtils.leerOpcion(scanner, 0, 7);
+            
+            switch (opcion) {
+                case 0:
+                    salir = true;
+                    mostrarMensajeDespedida();
+                    break;
+                case 1:
+                    if (authManager.isAuthenticated()) {
+                        String rolActivo = authManager.getUsuarioActual().getRolActivo();
+                        int rolId = obtenerIdRol(rolActivo);
+                        if (rolId > 0) {
+                            mostrarMenuRol(rolId);
+                        } else {
+                            ConsoleUtils.mostrarError("Rol no válido: " + rolActivo);
+                            ConsoleUtils.pausar(scanner);
+                        }
+                    } else {
+                        ConsoleUtils.mostrarError("Debe iniciar sesión primero");
+                        ConsoleUtils.pausar(scanner);
+                    }
+                    break;
+                case 2:
+                    new EncuestaView().mostrar();
+                    break;
+                case 3:
+                    if (authManager.tieneRol("Administrador")) {
+                        new AdminMenuView().mostrar();
+                    } else {
+                        ConsoleUtils.mostrarError("Acceso denegado. Se requiere rol de Administrador.");
+                        ConsoleUtils.pausar(scanner);
+                    }
+                    break;
+                case 4:
+                    // Dashboard (estadísticas)
+                    new DashboardView().mostrar();
+                    break;
+                case 5:
+                    // Configuración
+                    new ConfiguracionView().mostrar();
+                    break;
+                case 6:
+                    // Cerrar sesión
+                    authManager.logout();
+                    ConsoleUtils.mostrarExito("Sesión cerrada correctamente");
+                    ConsoleUtils.pausar(scanner);
+                    primeraVez = true;
+                    break;
+                case 7:
+                    // Información de la aplicación
+                    mostrarInformacionApp();
+                    break;
+                default:
+                    ConsoleUtils.mostrarError("Opción no válida. Por favor, seleccione una opción del menú.");
+                    ConsoleUtils.pausar(scanner);
+                    break;
+            }
+        }
+    }
+    
+    /**
+     * Muestra un menú limitado para usuarios no autenticados
+     * @return true si se debe salir de la aplicación, false en caso contrario
+     */
+    private boolean mostrarMenuInvitado() {
+        ConsoleUtils.limpiarPantalla();
+        ConsoleUtils.mostrarTitulo("[app.nombre/]");
+        System.out.println("[app.descripcion/]\n");
+        ConsoleUtils.mostrarLinea();
+        
+        System.out.println("\nMenú de invitado:");
+        System.out.println("1. Iniciar sesión");
+        System.out.println("2. Información de la aplicación");
+        System.out.println("0. Salir");
+        
+        int opcion = ConsoleUtils.leerOpcion(scanner, 0, 2);
+        
+        switch (opcion) {
+            case 0:
+                mostrarMensajeDespedida();
+                return true;
+            case 1:
+                LoginView loginView = new LoginView();
+                return !loginView.mostrar(); // Si el login falla, volver a mostrar menú invitado
+            case 2:
+                mostrarInformacionApp();
+                return false;
+            default:
+                return false;
+        }
+    }
+    
+    /**
+     * Muestra la cabecera del menú principal
+     */
+    private void mostrarCabecera() {
+        ConsoleUtils.limpiarPantalla();
+        ConsoleUtils.mostrarTitulo("[app.nombre/]");
+        
+        if (authManager.isAuthenticated()) {
+            Usuario usuario = authManager.getUsuarioActual();
+            System.out.println("Bienvenido/a, " + usuario.getNombre() + " (" + usuario.getRolActivo() + ")");
+            
+            // Mostrar último acceso si está disponible
+            String ultimoAcceso = appConfig.getSessionValue("lastLogin");
+            if (ultimoAcceso != null) {
+                System.out.println("Último acceso: " + ultimoAcceso);
+            }
+        }
+        
+        System.out.println("[app.descripcion/]");
+        ConsoleUtils.mostrarLinea();
+    }
+    
+    /**
+     * Muestra las opciones disponibles en el menú principal
+     */
+    private void mostrarOpciones() {
+        System.out.println("\nMenú principal:");
+        System.out.println("1. Acceder como " + (authManager.isAuthenticated() ? authManager.getUsuarioActual().getRolActivo() : "usuario"));
+        System.out.println("2. Encuestas y cuestionarios");
+        
+        if (authManager.tieneRol("Administrador")) {
+            System.out.println("3. Administración");
+        } else {
+            System.out.println("3. Administración (acceso restringido)");
+        }
+        
+        System.out.println("4. Dashboard");
+        System.out.println("5. Configuración");
+        System.out.println("6. Cerrar sesión");
+        System.out.println("7. Acerca de la aplicación");
+        System.out.println("0. Salir");
+        
+        ConsoleUtils.mostrarLinea();
+        System.out.print("\nSeleccione una opción ['['/]0-7]: ");
+    }
+    
+    /**
+     * Obtiene el ID de un rol por su nombre
+     * @param rolNombre Nombre del rol
+     * @return ID del rol, o -1 si no se encuentra
+     */
+    private int obtenerIdRol(String rolNombre) {
+        [for (rol : Rol | app.roles)]
+        if ("[rol.nombre/]".equals(rolNombre)) {
+            return [i/];
+        }
+        [/for]
+        return -1;
+    }
+    
+    /**
+     * Muestra el menú correspondiente al rol seleccionado
+     * @param rolId Identificador del rol seleccionado
+     */
+    private void mostrarMenuRol(int rolId) {
+        // En lugar de usar referencias específicas a cada MenuRol, usamos una lógica más genérica
+        try {
+            // Obtener el nombre del rol
+            String rolNombre = obtenerNombreRol(rolId);
+            if (rolNombre == null) {
+                ConsoleUtils.mostrarError("Rol no válido");
+                ConsoleUtils.pausar(scanner);
+                return;
+            }
+            
+            // Usar reflexión para crear la instancia del MenuRol adecuado
+            String className = "view.MenuRol" + rolNombre;
+            try {
+                Class<?> menuClass = Class.forName(className);
+                Object menuInstance = menuClass.getDeclaredConstructor().newInstance();
+                
+                // Invocar el método mostrarMenu() en la instancia creada
+                menuClass.getMethod("mostrarMenu").invoke(menuInstance);
+            } catch (ClassNotFoundException e) {
+                // Si la clase no existe, mostramos un mensaje más amigable
+                ConsoleUtils.mostrarError("La vista para el rol '" + rolNombre + "' no está disponible");
+                ConsoleUtils.pausar(scanner);
+            } catch (Exception e) {
+                ConsoleUtils.mostrarError("Error al cargar la vista: " + e.getMessage());
+                ConsoleUtils.pausar(scanner);
+            }
+        } catch (Exception e) {
+            ConsoleUtils.mostrarError("No se puede mostrar el menú para el rol seleccionado: " + e.getMessage());
+            ConsoleUtils.pausar(scanner);
+        }
+    }
+    
+    /**
+     * Obtiene el nombre de un rol por su ID
+     * @param rolId ID del rol
+     * @return Nombre del rol, o null si no se encuentra
+     */
+    private String obtenerNombreRol(int rolId) {
+        [for (rol : Rol | app.roles)]
+        if ([i/] == rolId) {
+            return "[rol.nombre/]";
+        }
+        [/for]
+        return null;
+    }
+    
+    /**
+     * Muestra información sobre la aplicación
+     */
+    private void mostrarInformacionApp() {
+        ConsoleUtils.limpiarPantalla();
+        ConsoleUtils.mostrarTitulo("Acerca de [app.nombre/]");
+        
+        System.out.println("[app.descripcion/]");
+        System.out.println("\nVersión: " + appConfig.getProperty("app.version", "1.0.0"));
+        System.out.println("Desarrollado como parte del proyecto de generación de aplicaciones");
+        
+        System.out.println("\nFuncionalidades principales:");
+        System.out.println("- Sistema de gestión de roles y usuarios");
+        System.out.println("- Gestión CRUD completa para entidades");
+        System.out.println("- Sistema de encuestas y cuestionarios evaluables");
+        System.out.println("- Filtrado, ordenación y búsqueda avanzada");
+        System.out.println("- Notificaciones y alertas");
+        System.out.println("- Estadísticas y reportes");
+        
+        System.out.println("\nRoles disponibles:");
+        [for (rol : Rol | app.roles)]
+        System.out.println("- [rol.nombre/]");
+        [/for]
+        
+        System.out.println("\nRedes sociales:");
+        [for (red : RedSocial | app.redesSociales)]
+        System.out.println("- [red.tipo/]: @[red.nombreCuenta/]");
+        [/for]
+        
+        ConsoleUtils.pausar(scanner);
+    }
+    
+    /**
+     * Muestra un mensaje de despedida al salir de la aplicación
+     */
+    private void mostrarMensajeDespedida() {
+        ConsoleUtils.limpiarPantalla();
+        ConsoleUtils.mostrarTitulo("¡Hasta pronto!");
+        System.out.println("Gracias por utilizar [app.nombre/]");
+        System.out.println("\nPresione Enter para finalizar...");
+        scanner.nextLine();
+    }
+}
+[/file]
+
+[file ('app/src/view/DashboardView.java', false, 'UTF-8')]
+package view;
+
+import java.util.Scanner;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.ArrayList;
+import view.util.ConsoleUtils;
+import dao.DAOFactory;
+import dao.IDAO;
+import auth.AuthManager;
+import survey.SurveyManager;
+import survey.Encuesta;
+import survey.Respuesta;
+
+/**
+ * Vista del dashboard con resúmenes y estadísticas
+ */
+public class DashboardView {
+    private Scanner scanner;
+    private AuthManager authManager;
+    
+    /**
+     * Constructor
+     */
+    public DashboardView() {
+        scanner = new Scanner(System.in);
+        authManager = AuthManager.getInstance();
+    }
+    
+    /**
+     * Muestra el dashboard con estadísticas y resúmenes
+     */
+    public void mostrar() {
+        if (!authManager.isAuthenticated()) {
+            ConsoleUtils.mostrarError("Debe iniciar sesión para acceder al dashboard");
+            ConsoleUtils.pausar(scanner);
+            return;
+        }
+        
+        ConsoleUtils.limpiarPantalla();
+        ConsoleUtils.mostrarTitulo("Dashboard");
+        
+        // Mostrar información del usuario
+        String usuario = authManager.getUsuarioActual().getNombre();
+        String rol = authManager.getUsuarioActual().getRolActivo();
+        System.out.println("Usuario: " + usuario);
+        System.out.println("Rol actual: " + rol);
+        
+        // Mostrar estadísticas de encuestas
+        mostrarEstadisticasEncuestas();
+        
+        // Mostrar estadísticas de entidades
+        mostrarEstadisticasEntidades();
+        
+        // Mostrar acciones rápidas
+        mostrarAccionesRapidas();
+        
+        // Esperar a que el usuario pulse Enter
+        ConsoleUtils.pausar(scanner);
+    }
+    
+    /**
+     * Muestra estadísticas relacionadas con encuestas y cuestionarios
+     */
+    private void mostrarEstadisticasEncuestas() {
+        ConsoleUtils.mostrarSubtitulo("Estadísticas de Encuestas y Cuestionarios");
+        
+        SurveyManager surveyManager = SurveyManager.getInstance();
+        List<Encuesta> encuestas = surveyManager.getEncuestas();
+        
+        int totalEncuestas = 0;
+        int totalCuestionarios = 0;
+        int totalRespuestas = 0;
+        int misTotalRespuestas = 0;
+        String username = authManager.getUsuarioActual().getUsername();
+        
+        for (Encuesta encuesta : encuestas) {
+            if (encuesta.getClass().getSimpleName().equals("Encuesta")) {
+                totalEncuestas++;
+            } else {
+                totalCuestionarios++;
+            }
+            
+            List<Respuesta> respuestas = surveyManager.getRespuestas(encuesta.getId());
+            totalRespuestas += respuestas.size();
+            
+            for (Respuesta respuesta : respuestas) {
+                if (respuesta.getUsuario().equals(username)) {
+                    misTotalRespuestas++;
+                }
+            }
+        }
+        
+        // Mostrar tarjetas con estadísticas
+        System.out.println("┌─────────────────────────┐  ┌─────────────────────────┐  ┌─────────────────────────┐");
+        System.out.println("│  Total Encuestas: " + String.format("%-5d", totalEncuestas) + "  │  │  Total Cuestionarios: " + 
+                          String.format("%-2d", totalCuestionarios) + "  │  │  Total Respuestas: " + String.format("%-4d", totalRespuestas) + "  │");
+        System.out.println("└─────────────────────────┘  └─────────────────────────┘  └─────────────────────────┘");
+        
+        // Encuestas pendientes
+        int encuestasPendientes = 0;
+        for (Encuesta encuesta : encuestas) {
+            if (encuesta.isActiva()) {
+                boolean respondida = false;
+                List<Respuesta> respuestas = surveyManager.getRespuestas(encuesta.getId());
+                
+                for (Respuesta respuesta : respuestas) {
+                    if (respuesta.getUsuario().equals(username) && respuesta.isCompletada()) {
+                        respondida = true;
+                        break;
+                    }
+                }
+                
+                if (!respondida) {
+                    encuestasPendientes++;
+                }
+            }
+        }
+        
+        if (encuestasPendientes > 0) {
+            ConsoleUtils.mostrarAdvertencia("Tienes " + encuestasPendientes + " encuestas pendientes por responder");
+        }
+    }
+    
+    /**
+     * Muestra estadísticas relacionadas con las entidades del sistema
+     */
+    private void mostrarEstadisticasEntidades() {
+        ConsoleUtils.mostrarSubtitulo("Estadísticas de Entidades");
+        
+        // Obtener conteo de entidades
+        Map<String, Integer> conteoEntidades = new HashMap<>();
+        
+        // En lugar de usar entidades específicas, utilizamos las entidades genéricas del modelo
+        // Esto evita errores cuando las entidades específicas no están disponibles
+        try {
+            // Para cada entidad en el modelo, obtenemos su conteo y lo mostramos
+            for (Object dao : DAOFactory.getAllDAOs()) {
+                if (dao instanceof IDAO) {
+                    IDAO<?, ?> idao = (IDAO<?, ?>) dao;
+                    String nombreEntidad = dao.getClass().getSimpleName().replace("DAO", "");
+                    conteoEntidades.put(nombreEntidad, idao.count());
+                }
+            }
+        } catch (Exception e) {
+            ConsoleUtils.mostrarAdvertencia("No se pudieron cargar las estadísticas de entidades: " + e.getMessage());
+        }
+        
+        // Si no hay entidades registradas, mostramos un mensaje general
+        if (conteoEntidades.isEmpty()) {
+            System.out.println("No hay información de entidades disponible");
+        } else {
+            // Mostrar estadísticas en una tabla
+            System.out.println("┌─────────────────────────┬───────────┐");
+            System.out.println("│ Entidad                 │ Registros │");
+            System.out.println("├─────────────────────────┼───────────┤");
+            
+            for (Map.Entry<String, Integer> entry : conteoEntidades.entrySet()) {
+                System.out.println("│ " + entry.getKey() + String.format("%-" + (23 - entry.getKey().length()) + "s", " ") + 
+                                  "│ " + String.format("%-9d", entry.getValue()) + "│");
+            }
+            
+            System.out.println("└─────────────────────────┴───────────┘");
+        }
+    }
+    
+    /**
+     * Muestra acciones rápidas disponibles para el usuario
+     */
+    private void mostrarAccionesRapidas() {
+        ConsoleUtils.mostrarSubtitulo("Acciones Rápidas");
+        
+        System.out.println("1. Responder encuestas pendientes");
+        System.out.println("2. Ver mis respuestas anteriores");
+        
+        if (authManager.tieneRol("Administrador")) {
+            System.out.println("3. Crear nueva encuesta");
+            System.out.println("4. Administrar usuarios");
+        }
+        
+        System.out.println("0. Volver al menú principal");
+        
+        int opcion = ConsoleUtils.leerOpcion(scanner, 0, authManager.tieneRol("Administrador") ? 4 : 2);
+        
+        switch (opcion) {
+            case 0:
+                // Volver al menú principal
+                break;
+            case 1:
+                new EncuestaView().mostrar();
+                break;
+            case 2:
+                // Implementar vista directa a mis respuestas
+                ConsoleUtils.mostrarInfo("Funcionalidad no implementada directamente. Use el menú de encuestas.");
+                ConsoleUtils.pausar(scanner);
+                break;
+            case 3:
+                if (authManager.tieneRol("Administrador")) {
+                    // Implementar acceso directo a crear encuesta
+                    ConsoleUtils.mostrarInfo("Funcionalidad no implementada directamente. Use el menú de administración.");
+                    ConsoleUtils.pausar(scanner);
+                }
+                break;
+            case 4:
+                if (authManager.tieneRol("Administrador")) {
+                    // Implementar acceso directo a administrar usuarios
+                    ConsoleUtils.mostrarInfo("Funcionalidad no implementada directamente. Use el menú de administración.");
+                    ConsoleUtils.pausar(scanner);
+                }
+                break;
+        }
+    }
+}
+[/file]
+
+[file ('app/src/view/settings/ConfiguracionView.java', false, 'UTF-8')]
+package view.settings;
+
+import java.util.Scanner;
+import view.util.ConsoleUtils;
+import config.AppConfig;
+import auth.AuthManager;
+
+/**
+ * Vista para la configuración de la aplicación
+ */
+public class ConfiguracionView {
+    private Scanner scanner;
+    private AppConfig appConfig;
+    private AuthManager authManager;
+    
+    /**
+     * Constructor
+     */
+    public ConfiguracionView() {
+        scanner = new Scanner(System.in);
+        appConfig = AppConfig.getInstance();
+        authManager = AuthManager.getInstance();
+    }
+    
+    /**
+     * Muestra la pantalla de configuración
+     */
+    public void mostrar() {
+        boolean salir = false;
+        
+        while (!salir) {
+            ConsoleUtils.limpiarPantalla();
+            ConsoleUtils.mostrarTitulo("Configuración");
+            
+            System.out.println("1. Apariencia");
+            System.out.println("2. Preferencias de visualización");
+            
+            if (authManager.isAuthenticated()) {
+                System.out.println("3. Perfil de usuario");
+                System.out.println("4. Cambiar rol activo");
+            }
+            
+            System.out.println("0. Volver al menú principal");
+            
+            int maxOpcion = authManager.isAuthenticated() ? 4 : 2;
+            int opcion = ConsoleUtils.leerOpcion(scanner, 0, maxOpcion);
+            
+            switch (opcion) {
+                case 0:
+                    salir = true;
+                    break;
+                case 1:
+                    configurarApariencia();
+                    break;
+                case 2:
+                    configurarPreferencias();
+                    break;
+                case 3:
+                    if (authManager.isAuthenticated()) {
+                        configurarPerfil();
+                    }
+                    break;
+                case 4:
+                    if (authManager.isAuthenticated()) {
+                        cambiarRol();
+                    }
+                    break;
+            }
+        }
+    }
+    
+    /**
+     * Configura las opciones de apariencia
+     */
+    private void configurarApariencia() {
+        ConsoleUtils.limpiarPantalla();
+        ConsoleUtils.mostrarTitulo("Configuración de Apariencia");
+        
+        boolean modoOscuro = appConfig.isDarkModeEnabled();
+        System.out.println("Modo oscuro: " + (modoOscuro ? "Activado" : "Desactivado"));
+        
+        boolean cambiar = ConsoleUtils.leerBooleano(scanner, "¿Desea cambiar el modo de visualización?", false);
+        
+        if (cambiar) {
+            appConfig.setDarkMode(!modoOscuro);
+            appConfig.saveConfiguration();
+            
+            if (appConfig.isDarkModeEnabled()) {
+                ConsoleUtils.mostrarExito("Modo oscuro activado");
+            } else {
+                ConsoleUtils.mostrarExito("Modo claro activado");
+            }
+        }
+        
+        ConsoleUtils.pausar(scanner);
+    }
+    
+    /**
+     * Configura las preferencias de visualización
+     */
+    private void configurarPreferencias() {
+        ConsoleUtils.limpiarPantalla();
+        ConsoleUtils.mostrarTitulo("Preferencias de Visualización");
+        
+        int tamanioPaginacion = appConfig.getPaginationSize();
+        System.out.println("Elementos por página: " + tamanioPaginacion);
+        
+        String formatoFecha = appConfig.getProperty("display.dateFormat", "yyyy-MM-dd");
+        System.out.println("Formato de fecha: " + formatoFecha);
+        
+        boolean mostrarColores = Boolean.parseBoolean(appConfig.getProperty("display.showColors", "true"));
+        System.out.println("Mostrar colores: " + (mostrarColores ? "Sí" : "No"));
+        
+        System.out.println("\nSeleccione qué desea configurar:");
+        System.out.println("1. Elementos por página");
+        System.out.println("2. Formato de fecha");
+        System.out.println("3. Mostrar colores");
+        System.out.println("0. Volver");
+        
+        int opcion = ConsoleUtils.leerOpcion(scanner, 0, 3);
+        
+        switch (opcion) {
+            case 0:
+                return;
+            case 1:
+                int nuevoTamanio = ConsoleUtils.leerEntero(scanner, "Nuevo tamaño de paginación", 
+                        valor -> valor > 0 && valor <= 50, tamanioPaginacion);
+                appConfig.setPaginationSize(nuevoTamanio);
+                ConsoleUtils.mostrarExito("Tamaño de paginación actualizado a " + nuevoTamanio);
+                break;
+            case 2:
+                System.out.println("Formatos disponibles:");
+                System.out.println("1. yyyy-MM-dd (por defecto)");
+                System.out.println("2. dd/MM/yyyy");
+                System.out.println("3. MM/dd/yyyy");
+                
+                int formatoOpcion = ConsoleUtils.leerOpcion(scanner, 1, 3);
+                String nuevoFormato = formatoFecha;
+                
+                switch (formatoOpcion) {
+                    case 1:
+                        nuevoFormato = "yyyy-MM-dd";
+                        break;
+                    case 2:
+                        nuevoFormato = "dd/MM/yyyy";
+                        break;
+                    case 3:
+                        nuevoFormato = "MM/dd/yyyy";
+                        break;
+                }
+                
+                appConfig.setProperty("display.dateFormat", nuevoFormato);
+                ConsoleUtils.mostrarExito("Formato de fecha actualizado a " + nuevoFormato);
+                break;
+            case 3:
+                boolean nuevoValor = ConsoleUtils.leerBooleano(scanner, "¿Desea mostrar colores?", mostrarColores);
+                appConfig.setProperty("display.showColors", String.valueOf(nuevoValor));
+                ConsoleUtils.mostrarExito("Configuración de colores actualizada");
+                break;
+        }
+        
+        appConfig.saveConfiguration();
+        ConsoleUtils.pausar(scanner);
+    }
+    
+    /**
+     * Configura el perfil del usuario actual
+     */
+    private void configurarPerfil() {
+        if (!authManager.isAuthenticated()) {
+            ConsoleUtils.mostrarError("Debe iniciar sesión para configurar el perfil");
+            ConsoleUtils.pausar(scanner);
+            return;
+        }
+        
+        ConsoleUtils.limpiarPantalla();
+        ConsoleUtils.mostrarTitulo("Perfil de Usuario");
+        
+        auth.Usuario usuario = authManager.getUsuarioActual();
+        
+        System.out.println("Nombre de usuario: " + usuario.getUsername());
+        System.out.println("Nombre: " + usuario.getNombre());
+        System.out.println("Email: " + usuario.getEmail());
+        System.out.println("Rol activo: " + usuario.getRolActivo());
+        System.out.println("Roles asignados: " + String.join(", ", usuario.getRoles()));
+        
+        System.out.println("\nSeleccione qué desea modificar:");
+        System.out.println("1. Nombre");
+        System.out.println("2. Email");
+        System.out.println("3. Contraseña");
+        System.out.println("0. Volver");
+        
+        int opcion = ConsoleUtils.leerOpcion(scanner, 0, 3);
+        
+        switch (opcion) {
+            case 0:
+                return;
+            case 1:
+                String nuevoNombre = ConsoleUtils.leerString(scanner, "Nuevo nombre", 
+                        valor -> !valor.isEmpty(), usuario.getNombre());
+                
+                usuario.setNombre(nuevoNombre);
+                authManager.actualizarUsuario(usuario);
+                ConsoleUtils.mostrarExito("Nombre actualizado correctamente");
+                break;
+            case 2:
+                String nuevoEmail = ConsoleUtils.leerString(scanner, "Nuevo email", 
+                        valor -> !valor.isEmpty() && valor.contains("@"), usuario.getEmail());
+                
+                usuario.setEmail(nuevoEmail);
+                authManager.actualizarUsuario(usuario);
+                ConsoleUtils.mostrarExito("Email actualizado correctamente");
+                break;
+            case 3:
+                String passwordActual = ConsoleUtils.leerString(scanner, "Contraseña actual", null, "");
+                
+                if (passwordActual.equals(usuario.getPassword())) {
+                    String nuevaPassword = ConsoleUtils.leerString(scanner, "Nueva contraseña", 
+                            valor -> !valor.isEmpty(), "");
+                    String confirmacion = ConsoleUtils.leerString(scanner, "Confirmar contraseña", 
+                            valor -> !valor.isEmpty(), "");
+                    
+                    if (nuevaPassword.equals(confirmacion)) {
+                        usuario.setPassword(nuevaPassword);
+                        authManager.actualizarUsuario(usuario);
+                        ConsoleUtils.mostrarExito("Contraseña actualizada correctamente");
+                    } else {
+                        ConsoleUtils.mostrarError("Las contraseñas no coinciden");
+                    }
+                } else {
+                    ConsoleUtils.mostrarError("Contraseña actual incorrecta");
+                }
+                break;
+        }
+        
+        ConsoleUtils.pausar(scanner);
+    }
+    
+    /**
+     * Permite cambiar el rol activo del usuario
+     */
+    private void cambiarRol() {
+        if (!authManager.isAuthenticated()) {
+            ConsoleUtils.mostrarError("Debe iniciar sesión para cambiar de rol");
+            ConsoleUtils.pausar(scanner);
+            return;
+        }
+        
+        ConsoleUtils.limpiarPantalla();
+        ConsoleUtils.mostrarTitulo("Cambiar Rol Activo");
+        
+        auth.Usuario usuario = authManager.getUsuarioActual();
+        String rolActual = usuario.getRolActivo();
+        
+        System.out.println("Rol actual: " + rolActual);
+        System.out.println("\nRoles disponibles:");
+        
+        String['['/]] roles = usuario.getRoles().toArray(new String['['/]0]);
+        for (int i = 0; i < roles.length; i++) {
+            String indicador = roles['['/]i].equals(rolActual) ? " (actual)" : "";
+            System.out.println((i + 1) + ". " + roles['['/]i] + indicador);
+        }
+        
+        int opcion = ConsoleUtils.leerEntero(scanner, "\nSeleccione un rol", 
+                valor -> valor >= 1 && valor <= roles.length, 1);
+        
+        String nuevoRol = roles['['/]opcion - 1];
+        if (!nuevoRol.equals(rolActual)) {
+            usuario.setRolActivo(nuevoRol);
+            authManager.actualizarUsuario(usuario);
+            ConsoleUtils.mostrarExito("Rol cambiado a: " + nuevoRol);
+        } else {
+            ConsoleUtils.mostrarInfo("No se ha realizado ningún cambio");
+        }
+        
+        ConsoleUtils.pausar(scanner);
+    }
+}
+[/file]
+
+[file ('app/src/view/admin/AdminMenuView.java', false, 'UTF-8')]
+package view.admin;
+
+import java.util.Scanner;
+import view.util.ConsoleUtils;
+import auth.AuthManager;
+import survey.SurveyManager;
+
+/**
+ * Vista para el menú de administración
+ */
+public class AdminMenuView {
+    private Scanner scanner;
+    private AuthManager authManager;
+    
+    /**
+     * Constructor
+     */
+    public AdminMenuView() {
+        scanner = new Scanner(System.in);
+        authManager = AuthManager.getInstance();
+    }
+    
+    /**
+     * Muestra el menú de administración
+     */
+    public void mostrar() {
+        if (!authManager.tieneRol("Administrador")) {
+            ConsoleUtils.mostrarError("Acceso denegado. Se requiere rol de Administrador.");
+            ConsoleUtils.pausar(scanner);
+            return;
+        }
+        
+        boolean salir = false;
+        
+        while (!salir) {
+            ConsoleUtils.limpiarPantalla();
+            ConsoleUtils.mostrarTitulo("Panel de Administración");
+            
+            System.out.println("1. Gestión de usuarios");
+            System.out.println("2. Gestión de encuestas y cuestionarios");
+            System.out.println("3. Gestión de entidades");
+            System.out.println("4. Configuración del sistema");
+            System.out.println("5. Estadísticas y reportes");
+            System.out.println("0. Volver al menú principal");
+            
+            int opcion = ConsoleUtils.leerOpcion(scanner, 0, 5);
+            
+            switch (opcion) {
+                case 0:
+                    salir = true;
+                    break;
+                case 1:
+                    gestionUsuarios();
+                    break;
+                case 2:
+                    new EncuestaAdminView().mostrar();
+                    break;
+                case 3:
+                    gestionEntidades();
+                    break;
+                case 4:
+                    configuracionSistema();
+                    break;
+                case 5:
+                    estadisticas();
+                    break;
+            }
+        }
+    }
+    
+    /**
+     * Muestra el menú de gestión de usuarios
+     */
+    private void gestionUsuarios() {
+        ConsoleUtils.limpiarPantalla();
+        ConsoleUtils.mostrarTitulo("Gestión de Usuarios");
+        
+        System.out.println("1. Listar usuarios");
+        System.out.println("2. Crear nuevo usuario");
+        System.out.println("3. Editar usuario");
+        System.out.println("4. Eliminar usuario");
+        System.out.println("5. Gestión de roles");
+        System.out.println("0. Volver");
+        
+        int opcion = ConsoleUtils.leerOpcion(scanner, 0, 5);
+        
+        switch (opcion) {
+            case 0:
+                break;
+            default:
+                ConsoleUtils.mostrarInfo("Funcionalidad no implementada");
+                ConsoleUtils.pausar(scanner);
+                break;
+        }
+    }
+    
+    /**
+     * Muestra el menú de gestión de entidades
+     */
+    private void gestionEntidades() {
+        ConsoleUtils.limpiarPantalla();
+        ConsoleUtils.mostrarTitulo("Gestión de Entidades");
+        
+        System.out.println("Seleccione una entidad:");
+        
+        [for (entidad : Entidad | app.entidades)]
+        System.out.println("[i/]. [entidad.nombre/]");
+        [/for]
+        
+        System.out.println("0. Volver");
+        
+        int opcion = ConsoleUtils.leerOpcion(scanner, 0, [app.entidades->size()/]);
+        
+        if (opcion == 0) {
+            return;
+        } else if (opcion >= 1 && opcion <= [app.entidades->size()/]) {
+            ConsoleUtils.mostrarInfo("Funcionalidad no implementada directamente. Utilice la navegación por roles.");
+            ConsoleUtils.pausar(scanner);
+        }
+    }
+    
+    /**
+     * Muestra el menú de configuración del sistema
+     */
+    private void configuracionSistema() {
+        ConsoleUtils.limpiarPantalla();
+        ConsoleUtils.mostrarTitulo("Configuración del Sistema");
+        
+        System.out.println("1. Importar datos");
+        System.out.println("2. Exportar datos");
+        System.out.println("3. Reiniciar sistema");
+        System.out.println("4. Configuración de seguridad");
+        System.out.println("0. Volver");
+        
+        int opcion = ConsoleUtils.leerOpcion(scanner, 0, 4);
+        
+        switch (opcion) {
+            case 0:
+                break;
+            default:
+                ConsoleUtils.mostrarInfo("Funcionalidad no implementada");
+                ConsoleUtils.pausar(scanner);
+                break;
+        }
+    }
+    
+    /**
+     * Muestra el menú de estadísticas y reportes
+     */
+    private void estadisticas() {
+        ConsoleUtils.limpiarPantalla();
+        ConsoleUtils.mostrarTitulo("Estadísticas y Reportes");
+        
+        System.out.println("1. Estadísticas de usuarios");
+        System.out.println("2. Estadísticas de encuestas");
+        System.out.println("3. Estadísticas de entidades");
+        System.out.println("4. Generar informe completo");
+        System.out.println("0. Volver");
+        
+        int opcion = ConsoleUtils.leerOpcion(scanner, 0, 4);
+        
+        switch (opcion) {
+            case 0:
+                break;
+            case 2:
+                // Esta funcionalidad sí está implementada en la vista de administración de encuestas
+                new EncuestaAdminView().mostrar();
+                break;
+            default:
+                ConsoleUtils.mostrarInfo("Funcionalidad no implementada");
+                ConsoleUtils.pausar(scanner);
+                break;
+        }
+    }
+}
+[/file]
+
+[file ('app/src/view/util/ConsoleUtils.java', false, 'UTF-8')]
+package view.util;
+
+import java.util.Scanner;
+import java.util.Collections;
+import java.util.List;
+import java.text.SimpleDateFormat;
+import java.text.ParseException;
+import java.util.Date;
+import java.util.function.Predicate;
+import java.io.IOException;
+import config.AppConfig;
+
+/**
+ * Utilidades para la interfaz de consola
+ * Proporciona métodos comunes para toda la interfaz de usuario
+ */
+public class ConsoleUtils {
+    // Constantes para colores ANSI
+    public static final String ANSI_RESET = "\u001B['['/]0m";
+    public static final String ANSI_BLACK = "\u001B['['/]30m";
+    public static final String ANSI_RED = "\u001B['['/]31m";
+    public static final String ANSI_GREEN = "\u001B['['/]32m";
+    public static final String ANSI_YELLOW = "\u001B['['/]33m";
+    public static final String ANSI_BLUE = "\u001B['['/]34m";
+    public static final String ANSI_PURPLE = "\u001B['['/]35m";
+    public static final String ANSI_CYAN = "\u001B['['/]36m";
+    public static final String ANSI_WHITE = "\u001B['['/]37m";
+    
+    // Constantes para fondos ANSI
+    public static final String ANSI_BLACK_BACKGROUND = "\u001B['['/]40m";
+    public static final String ANSI_RED_BACKGROUND = "\u001B['['/]41m";
+    public static final String ANSI_GREEN_BACKGROUND = "\u001B['['/]42m";
+    public static final String ANSI_YELLOW_BACKGROUND = "\u001B['['/]43m";
+    public static final String ANSI_BLUE_BACKGROUND = "\u001B['['/]44m";
+    public static final String ANSI_PURPLE_BACKGROUND = "\u001B['['/]45m";
+    public static final String ANSI_CYAN_BACKGROUND = "\u001B['['/]46m";
+    public static final String ANSI_WHITE_BACKGROUND = "\u001B['['/]47m";
+    
+    // Estilos
+    public static final String ANSI_BOLD = "\u001B['['/]1m";
+    public static final String ANSI_UNDERLINE = "\u001B['['/]4m";
+    
+    // Caracteres para barras de progreso
+    private static final String PROGRESS_EMPTY = "░";
+    private static final String PROGRESS_FULL = "█";
+    
+    /**
+     * Limpia la pantalla de la consola
+     */
+    public static void limpiarPantalla() {
+        try {
+            final String os = System.getProperty("os.name");
+            if (os.contains("Windows")) {
+                try {
+                    new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
+                } catch (IOException | InterruptedException e) {
+                    // Si hay error, fallback a imprimir líneas en blanco
+                    for (int i = 0; i < 50; i++) {
+                        System.out.println();
+                    }
+                }
+            } else {
+                // En sistemas UNIX-like
+                System.out.print("\033['['/]H\033['['/]2J");
+                System.out.flush();
+            }
+        } catch (Exception e) {
+            // Fallback a imprimir líneas en blanco
+            for (int i = 0; i < 50; i++) {
+                System.out.println();
+            }
+        }
+    }
+    
+    /**
+     * Verifica si los colores deben mostrarse según la configuración
+     * @return true si los colores deben mostrarse, false en caso contrario
+     */
+    private static boolean shouldShowColors() {
+        try {
+            return Boolean.parseBoolean(AppConfig.getInstance().getProperty("display.showColors", "true"));
+        } catch (Exception e) {
+            return true; // Por defecto mostrar colores
+        }
+    }
+    
+    /**
+     * Obtiene el string con color si está habilitado, o sin color si no
+     * @param text Texto a colorear
+     * @param colorCode Código de color ANSI
+     * @return Texto coloreado o normal
+     */
+    private static String getColoredText(String text, String colorCode) {
+        if (shouldShowColors()) {
+            return colorCode + text + ANSI_RESET;
+        }
+        return text;
+    }
+    
+    /**
+     * Muestra un título formateado
+     * @param titulo Texto del título
+     */
+    public static void mostrarTitulo(String titulo) {
+        int longitud = titulo.length() + 4;
+        StringBuilder borde = new StringBuilder();
+        for (int i = 0; i < longitud; i++) {
+            borde.append("=");
+        }
+        
+        String bordeStr = getColoredText(borde.toString(), ANSI_BOLD + ANSI_BLUE);
+        String tituloStr = getColoredText("  " + titulo + "  ", ANSI_BOLD + ANSI_BLUE);
+        
+        System.out.println("\n" + bordeStr);
+        System.out.println(tituloStr);
+        System.out.println(bordeStr + "\n");
+    }
+    
+    /**
+     * Muestra un subtítulo formateado
+     * @param subtitulo Texto del subtítulo
+     */
+    public static void mostrarSubtitulo(String subtitulo) {
+        String texto = getColoredText("-- " + subtitulo + " --", ANSI_BOLD + ANSI_CYAN);
+        System.out.println("\n" + texto);
+        mostrarLinea();
+    }
+    
+    /**
+     * Muestra una línea separadora
+     */
+    public static void mostrarLinea() {
+        String linea = getColoredText("----------------------------------------", ANSI_BOLD);
+        System.out.println(linea);
+    }
+    
+    /**
+     * Muestra un mensaje de éxito
+     * @param mensaje Mensaje a mostrar
+     */
+    public static void mostrarExito(String mensaje) {
+        String texto = getColoredText("✓ " + mensaje, ANSI_GREEN);
+        System.out.println(texto);
+    }
+    
+    /**
+     * Muestra un mensaje de error
+     * @param mensaje Mensaje a mostrar
+     */
+    public static void mostrarError(String mensaje) {
+        String texto = getColoredText("✗ " + mensaje, ANSI_RED);
+        System.out.println(texto);
+    }
+    
+    /**
+     * Muestra un mensaje de advertencia
+     * @param mensaje Mensaje a mostrar
+     */
+    public static void mostrarAdvertencia(String mensaje) {
+        String texto = getColoredText("⚠ " + mensaje, ANSI_YELLOW);
+        System.out.println(texto);
+    }
+    
+    /**
+     * Muestra un mensaje informativo
+     * @param mensaje Mensaje a mostrar
+     */
+    public static void mostrarInfo(String mensaje) {
+        String texto = getColoredText("ℹ " + mensaje, ANSI_BLUE);
+        System.out.println(texto);
+    }
+    
+    /**
+     * Lee una opción numérica del usuario dentro de un rango
+     * @param scanner Scanner para leer la entrada
+     * @param min Valor mínimo aceptable
+     * @param max Valor máximo aceptable
+     * @return Opción seleccionada
+     */
+    public static int leerOpcion(Scanner scanner, int min, int max) {
+        try {
+            String input = scanner.nextLine();
+            if (input.isEmpty()) {
+                return -1;  // Valor especial para entrada vacía
+            }
+            
+            int opcion = Integer.parseInt(input);
+            if (opcion >= min && opcion <= max) {
+                return opcion;
+            } else {
+                mostrarError("Opción fuera de rango (" + min + "-" + max + ")");
+                return -1;
+            }
+        } catch (NumberFormatException e) {
+            mostrarError("Por favor, introduzca un número válido");
+            return -1;
+        }
+    }
+    
+    /**
+     * Lee un valor entero del usuario
+     * @param scanner Scanner para leer la entrada
+     * @param mensaje Mensaje de solicitud
+     * @param predicate Predicado de validación (opcional)
+     * @param defaultValue Valor por defecto si la entrada está vacía
+     * @return Valor leído
+     */
+    public static int leerEntero(Scanner scanner, String mensaje, Predicate<Integer> predicate, Integer defaultValue) {
+        while (true) {
+            try {
+                System.out.print(mensaje);
+                if (defaultValue != null) {
+                    System.out.print(" ['['/]" + defaultValue + "]: ");
+                } else {
+                    System.out.print(": ");
+                }
+                
+                String input = scanner.nextLine();
+                if (input.isEmpty() && defaultValue != null) {
+                    return defaultValue;
+                }
+                
+                int valor = Integer.parseInt(input);
+                if (predicate == null || predicate.test(valor)) {
+                    return valor;
+                } else {
+                    mostrarError("El valor no cumple con los requisitos");
+                }
+            } catch (NumberFormatException e) {
+                mostrarError("Por favor, introduzca un número entero válido");
+            }
+        }
+    }
+    
+    /**
+     * Lee un valor decimal del usuario
+     * @param scanner Scanner para leer la entrada
+     * @param mensaje Mensaje de solicitud
+     * @param predicate Predicado de validación (opcional)
+     * @param defaultValue Valor por defecto si la entrada está vacía
+     * @return Valor leído
+     */
+    public static double leerDecimal(Scanner scanner, String mensaje, Predicate<Double> predicate, Double defaultValue) {
+        while (true) {
+            try {
+                System.out.print(mensaje);
+                if (defaultValue != null) {
+                    System.out.print(" ['['/]" + defaultValue + "]: ");
+                } else {
+                    System.out.print(": ");
+                }
+                
+                String input = scanner.nextLine();
+                if (input.isEmpty() && defaultValue != null) {
+                    return defaultValue;
+                }
+                
+                double valor = Double.parseDouble(input);
+                if (predicate == null || predicate.test(valor)) {
+                    return valor;
+                } else {
+                    mostrarError("El valor no cumple con los requisitos");
+                }
+            } catch (NumberFormatException e) {
+                mostrarError("Por favor, introduzca un número decimal válido");
+            }
+        }
+    }
+    
+    /**
+     * Lee un valor booleano del usuario
+     * @param scanner Scanner para leer la entrada
+     * @param mensaje Mensaje de solicitud
+     * @param defaultValue Valor por defecto si la entrada está vacía
+     * @return Valor leído
+     */
+    public static boolean leerBooleano(Scanner scanner, String mensaje, Boolean defaultValue) {
+        while (true) {
+            System.out.print(mensaje);
+            if (defaultValue != null) {
+                System.out.print(" ['['/]" + (defaultValue ? "s" : "n") + "]: ");
+            } else {
+                System.out.print(" (s/n): ");
+            }
+            
+            String input = scanner.nextLine().toLowerCase();
+            if (input.isEmpty() && defaultValue != null) {
+                return defaultValue;
+            }
+            
+            if (input.startsWith("s") || input.startsWith("y") || input.equals("1") || input.equals("true")) {
+                return true;
+            } else if (input.startsWith("n") || input.equals("0") || input.equals("false")) {
+                return false;
+            } else {
+                mostrarError("Por favor, responda 's' para Sí o 'n' para No");
+            }
+        }
+    }
+    
+    /**
+     * Lee una cadena del usuario
+     * @param scanner Scanner para leer la entrada
+     * @param mensaje Mensaje de solicitud
+     * @param predicate Predicado de validación (opcional)
+     * @param defaultValue Valor por defecto si la entrada está vacía
+     * @return Valor leído
+     */
+    public static String leerString(Scanner scanner, String mensaje, Predicate<String> predicate, String defaultValue) {
+        while (true) {
+            System.out.print(mensaje);
+            if (defaultValue != null && !defaultValue.isEmpty()) {
+                System.out.print(" ['['/]" + defaultValue + "]: ");
+            } else {
+                System.out.print(": ");
+            }
+            
+            String input = scanner.nextLine();
+            if (input.isEmpty() && defaultValue != null) {
+                return defaultValue;
+            }
+            
+            if (predicate == null || predicate.test(input)) {
+                return input;
+            } else {
+                mostrarError("El valor no cumple con los requisitos");
+            }
+        }
+    }
+    
+    /**
+     * Lee una fecha del usuario en formato yyyy-MM-dd
+     * @param scanner Scanner para leer la entrada
+     * @param mensaje Mensaje de solicitud
+     * @param predicate Predicado de validación (opcional)
+     * @param defaultValue Valor por defecto si la entrada está vacía
+     * @return Valor leído
+     */
+    public static String leerFecha(Scanner scanner, String mensaje, Predicate<Date> predicate, String defaultValue) {
+        // Obtener formato de fecha configurado
+        String formatoFecha = AppConfig.getInstance().getProperty("display.dateFormat", "yyyy-MM-dd");
+        SimpleDateFormat dateFormat = new SimpleDateFormat(formatoFecha);
+        dateFormat.setLenient(false);
+        
+        while (true) {
+            System.out.print(mensaje + " (" + formatoFecha + ")");
+            if (defaultValue != null && !defaultValue.isEmpty()) {
+                System.out.print(" ['['/]" + defaultValue + "]: ");
+            } else {
+                System.out.print(": ");
+            }
+            
+            String input = scanner.nextLine();
+            if (input.isEmpty() && defaultValue != null) {
+                return defaultValue;
+            }
+            
+            try {
+                Date fecha = dateFormat.parse(input);
+                if (predicate == null || predicate.test(fecha)) {
+                    return dateFormat.format(fecha);
+                } else {
+                    mostrarError("La fecha no cumple con los requisitos");
+                }
+            } catch (ParseException e) {
+                mostrarError("Por favor, introduzca una fecha válida en formato " + formatoFecha);
+            }
+        }
+    }
+    
+    /**
+     * Espera a que el usuario pulse Enter para continuar
+     * @param scanner Scanner para leer la entrada
+     */
+    public static void pausar(Scanner scanner) {
+        System.out.println("\nPresione Enter para continuar...");
+        scanner.nextLine();
+    }
+    
+    /**
+     * Muestra un elemento de una lista con formato
+     * @param index Índice del elemento
+     * @param elemento Texto del elemento
+     */
+    public static void mostrarElementoLista(int index, String elemento) {
+        String indexStr = getColoredText("['['/]" + index + "]", ANSI_BOLD);
+        System.out.println(indexStr + " " + elemento);
+    }
+    
+    /**
+     * Muestra una tabla de datos simple
+     * @param headers Cabeceras de la tabla
+     * @param data Datos de la tabla (filas)
+     */
+    public static void mostrarTabla(String['['/]] headers, List<String['['/]]> data) {
+        // Calcular el ancho de cada columna
+        int['['/]] anchos = new int['['/]headers.length];
+        for (int i = 0; i < headers.length; i++) {
+            anchos['['/]i] = headers['['/]i].length();
+        }
+        
+        for (String['['/]] fila : data) {
+            for (int i = 0; i < fila.length && i < headers.length; i++) {
+                if (fila['['/]i] != null && fila['['/]i].length() > anchos['['/]i]) {
+                    anchos['['/]i] = fila['['/]i].length();
+                }
+            }
+        }
+        
+        // Construir la línea separadora
+        StringBuilder separador = new StringBuilder("+");
+        for (int ancho : anchos) {
+            for (int i = 0; i < ancho + 2; i++) {
+                separador.append("-");
+            }
+            separador.append("+");
+        }
+        
+        // Mostrar cabecera
+        System.out.println(separador.toString());
+        System.out.print("|");
+        for (int i = 0; i < headers.length; i++) {
+            System.out.print(getColoredText(" " + String.format("%-" + anchos['['/]i] + "s", headers['['/]i]) + " ", ANSI_BOLD) + "|");
+        }
+        System.out.println();
+        System.out.println(separador.toString());
+        
+        // Mostrar datos
+        for (String['['/]] fila : data) {
+            System.out.print("|");
+            for (int i = 0; i < headers.length; i++) {
+                String valor = (i < fila.length && fila['['/]i] != null) ? fila['['/]i] : "";
+                System.out.print(" " + String.format("%-" + anchos['['/]i] + "s", valor) + " |");
+            }
+            System.out.println();
+        }
+        
+        System.out.println(separador.toString());
+    }
+
+    /**
+     * Muestra un mensaje tras la creación de un elemento
+     * @param entidad Nombre de la entidad creada
+     */
+    public static void mostrarCreacion(String entidad) {
+        mostrarExito(entidad + " creado correctamente");
+    }
+    
+    /**
+     * Muestra un mensaje tras la actualización de un elemento
+     * @param entidad Nombre de la entidad actualizada
+     */
+    public static void mostrarActualizacion(String entidad) {
+        mostrarExito(entidad + " actualizado correctamente");
+    }
+    
+    /**
+     * Muestra un mensaje tras el borrado de un elemento
+     * @param entidad Nombre de la entidad borrada
+     */
+    public static void mostrarBorrado(String entidad) {
+        mostrarExito(entidad + " borrado correctamente");
+    }
+    
+    /**
+     * Muestra los detalles de un elemento de forma tabular
+     * @param titulo   Descripción de lo que se muestra (e.g. nombre de la entidad)
+     * @param headers  Cabeceras de las columnas
+     * @param values   Valores correspondientes a cada cabecera
+     */
+    public static void mostrarDetalle(String titulo, String['['/]] headers, String['['/]] values) {
+        mostrarSubtitulo("Detalle de " + titulo);
+        mostrarTabla(headers, Collections.singletonList(values));
+    }
+    
+    /**
+     * Muestra una barra de progreso
+     * @param progreso Valor actual de progreso (0-100)
+     * @param longitud Longitud de la barra
+     */
+    public static void mostrarBarraProgreso(int progreso, int longitud) {
+        if (progreso < 0) progreso = 0;
+        if (progreso > 100) progreso = 100;
+        
+        int completados = (int) Math.round(progreso * longitud / 100.0);
+        int pendientes = longitud - completados;
+        
+        StringBuilder barra = new StringBuilder("['['/]");
+        for (int i = 0; i < completados; i++) {
+            barra.append(PROGRESS_FULL);
+        }
+        for (int i = 0; i < pendientes; i++) {
+            barra.append(PROGRESS_EMPTY);
+        }
+        barra.append("] ").append(progreso).append("%");
+        
+        System.out.print("\r" + barra);
+        
+        if (progreso == 100) {
+            System.out.println();
+        }
+    }
+    
+    /**
+     * Muestra una notificación con estilo y temporizador
+     * @param mensaje Mensaje a mostrar
+     * @param tipo Tipo de notificación (info, exito, error, advertencia)
+     * @param duracionMs Duración en milisegundos (0 para no esperar)
+     */
+    public static void mostrarNotificacion(String mensaje, String tipo, int duracionMs) {
+        String icono;
+        String color;
+        
+        switch (tipo.toLowerCase()) {
+            case "exito":
+                icono = "✓";
+                color = ANSI_GREEN;
+                break;
+            case "error":
+                icono = "✗";
+                color = ANSI_RED;
+                break;
+            case "advertencia":
+                icono = "⚠";
+                color = ANSI_YELLOW;
+                break;
+            case "info":
+            default:
+                icono = "ℹ";
+                color = ANSI_BLUE;
+                break;
+        }
+        
+        StringBuilder notificacion = new StringBuilder();
+        notificacion.append("\n┌").append("─".repeat(mensaje.length() + 6)).append("┐\n");
+        notificacion.append("│  ").append(getColoredText(icono + " " + mensaje, color)).append("  │\n");
+        notificacion.append("└").append("─".repeat(mensaje.length() + 6)).append("┘\n");
+        
+        System.out.println(notificacion.toString());
+        
+        if (duracionMs > 0) {
+            try {
+                Thread.sleep(duracionMs);
+            } catch (InterruptedException e) {
+                // Ignorar
+            }
+        }
+    }
+    
+    /**
+     * Resalta un texto de búsqueda dentro de un contenido
+     * @param contenido Texto completo
+     * @param busqueda Texto a resaltar
+     * @return Texto con la búsqueda resaltada
+     */
+    public static String resaltarTexto(String contenido, String busqueda) {
+        if (busqueda == null || busqueda.isEmpty() || contenido == null || contenido.isEmpty()) {
+            return contenido;
+        }
+        
+        StringBuilder result = new StringBuilder();
+        String lowerContenido = contenido.toLowerCase();
+        String lowerBusqueda = busqueda.toLowerCase();
+        
+        int startIndex = 0;
+        int index;
+        
+        while ((index = lowerContenido.indexOf(lowerBusqueda, startIndex)) != -1) {
+            // Añadir el texto hasta la coincidencia
+            result.append(contenido.substring(startIndex, index));
+            
+            // Añadir el texto resaltado
+            String match = contenido.substring(index, index + busqueda.length());
+            result.append(getColoredText(match, ANSI_YELLOW + ANSI_BOLD));
+            
+            // Actualizar índice
+            startIndex = index + busqueda.length();
+        }
+        
+        // Añadir el resto del texto
+        if (startIndex < contenido.length()) {
+            result.append(contenido.substring(startIndex));
+        }
+        
+        return result.toString();
+    }
+    
+    /**
+     * Muestra un menú de ayuda contextual
+     * @param titulo Título de la ayuda
+     * @param contenido Contenido de la ayuda
+     */
+    public static void mostrarAyuda(String titulo, String contenido) {
+        ConsoleUtils.limpiarPantalla();
+        ConsoleUtils.mostrarTitulo("Ayuda: " + titulo);
+        System.out.println(contenido);
+        System.out.println("\nPresione Enter para volver...");
+        new Scanner(System.in).nextLine();
+    }
+    
+    /**
+     * Muestra un diálogo de confirmación para acciones destructivas
+     * @param scanner Scanner para leer la entrada
+     * @param mensaje Mensaje de confirmación
+     * @return true si se confirma, false en caso contrario
+     */
+    public static boolean confirmarAccionDestructiva(Scanner scanner, String mensaje) {
+        mostrarAdvertencia("ATENCIÓN: Esta acción no se puede deshacer");
+        System.out.println(getColoredText(mensaje, ANSI_RED + ANSI_BOLD));
+        
+        System.out.print("Para confirmar, escriba 'CONFIRMAR': ");
+        String input = scanner.nextLine();
+        
+        return "CONFIRMAR".equals(input);
+    }
+}
+[/file]
+
+[file ('app/src/view/admin/EncuestaAdminView.java', false, 'UTF-8')]
+package view.admin;
+
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Scanner;
+import view.util.ConsoleUtils;
+import survey.*;
+import auth.AuthManager;
+
+/**
+ * Vista para la administración de encuestas
+ */
+public class EncuestaAdminView {
+    private Scanner scanner;
+    private SurveyManager surveyManager;
+    
+    /**
+     * Constructor
+     */
+    public EncuestaAdminView() {
+        scanner = new Scanner(System.in);
+        surveyManager = SurveyManager.getInstance();
+    }
+    
+    /**
+     * Muestra el menú principal de administración de encuestas
+     */
+    public void mostrar() {
+        boolean salir = false;
+        
+        while (!salir) {
+            ConsoleUtils.limpiarPantalla();
+            ConsoleUtils.mostrarTitulo("Administración de Encuestas y Cuestionarios");
+            
+            System.out.println("1. Listar encuestas y cuestionarios");
+            System.out.println("2. Crear nueva encuesta");
+            System.out.println("3. Crear nuevo cuestionario evaluable");
+            System.out.println("4. Ver resultados de encuestas");
+            System.out.println("5. Aprobar respuestas pendientes");
+            System.out.println("0. Volver al menú principal");
+            
+            int opcion = ConsoleUtils.leerOpcion(scanner, 0, 5);
+            
+            switch (opcion) {
+                case 0:
+                    salir = true;
+                    break;
+                case 1:
+                    listarEncuestas();
+                    break;
+                case 2:
+                    crearEncuesta(false);
+                    break;
+                case 3:
+                    crearEncuesta(true);
+                    break;
+                case 4:
+                    verResultados();
+                    break;
+                case 5:
+                    aprobarRespuestas();
+                    break;
+                default:
+                    ConsoleUtils.mostrarError("Opción inválida");
+                    ConsoleUtils.pausar(scanner);
+                    break;
+            }
+        }
+    }
+    
+    /**
+     * Muestra el listado de encuestas con opciones para editar/eliminar
+     */
+    private void listarEncuestas() {
+        ConsoleUtils.limpiarPantalla();
+        ConsoleUtils.mostrarTitulo("Listado de Encuestas y Cuestionarios");
+        
+        List<Encuesta> encuestas = surveyManager.getEncuestas();
+        
+        if (encuestas.isEmpty()) {
+            ConsoleUtils.mostrarAdvertencia("No hay encuestas ni cuestionarios registrados");
+            ConsoleUtils.pausar(scanner);
+            return;
+        }
+        
+        for (int i = 0; i < encuestas.size(); i++) {
+            Encuesta encuesta = encuestas.get(i);
+            String tipo = (encuesta instanceof Cuestionario) ? "Cuestionario" : "Encuesta";
+            String estado = encuesta.isActiva() ? "Activa" : "Inactiva";
+            
+            System.out.println((i + 1) + ". ['['/]" + tipo + "] " + encuesta.getTitulo() + " (" + estado + ")");
+        }
+        
+        ConsoleUtils.mostrarLinea();
+        System.out.println("\nOpciones:");
+        System.out.println("1. Ver/Editar encuesta");
+        System.out.println("2. Eliminar encuesta");
+        System.out.println("0. Volver");
+        
+        int opcion = ConsoleUtils.leerOpcion(scanner, 0, 2);
+        
+        if (opcion == 0) {
+            return;
+        }
+        
+        int indice = ConsoleUtils.leerEntero(scanner, "Seleccione el número de la encuesta", 
+                valor -> valor >= 1 && valor <= encuestas.size(), null);
+        
+        if (indice >= 1 && indice <= encuestas.size()) {
+            Encuesta encuesta = encuestas.get(indice - 1);
+            
+            if (opcion == 1) {
+                editarEncuesta(encuesta);
+            } else if (opcion == 2) {
+                eliminarEncuesta(encuesta);
+            }
+        }
+    }
+    
+    /**
+     * Crea una nueva encuesta o cuestionario
+     * @param esCuestionario true para crear un cuestionario, false para encuesta
+     */
+    private void crearEncuesta(boolean esCuestionario) {
+        ConsoleUtils.limpiarPantalla();
+        String tipo = esCuestionario ? "Cuestionario" : "Encuesta";
+        ConsoleUtils.mostrarTitulo("Crear Nuevo " + tipo);
+        
+        String titulo = ConsoleUtils.leerString(scanner, "Título", texto -> !texto.isEmpty(), null);
+        String descripcion = ConsoleUtils.leerString(scanner, "Descripción", null, "");
+        
+        Encuesta encuesta;
+        if (esCuestionario) {
+            Cuestionario cuestionario = new Cuestionario();
+            cuestionario.setTitulo(titulo);
+            cuestionario.setDescripcion(descripcion);
+            
+            int tiempoLimite = ConsoleUtils.leerEntero(scanner, "Tiempo límite (minutos)", 
+                    valor -> valor > 0, 30);
+            int puntuacionMinima = ConsoleUtils.leerEntero(scanner, "Puntuación mínima para aprobar (%)", 
+                    valor -> valor > 0 && valor <= 100, 60);
+            boolean mostrarResultados = ConsoleUtils.leerBooleano(scanner, 
+                    "¿Mostrar resultados inmediatamente?", true);
+            
+            cuestionario.setTiempoLimite(tiempoLimite);
+            cuestionario.setPuntuacionMinima(puntuacionMinima);
+            cuestionario.setMostrarResultadosInmediatos(mostrarResultados);
+            
+            encuesta = cuestionario;
+        } else {
+            encuesta = new Encuesta();
+            encuesta.setTitulo(titulo);
+            encuesta.setDescripcion(descripcion);
+        }
+        
+        // Establecer creador
+        String creador = AuthManager.getInstance().getUsuarioActual().getUsername();
+        encuesta.setCreador(creador);
+        
+        // Añadir roles permitidos
+        boolean limitarRoles = ConsoleUtils.leerBooleano(scanner, "¿Limitar acceso por roles?", false);
+        if (limitarRoles) {
+            // Obtener roles del sistema
+            String['['/]] roles = {"Administrador"}; // Aquí habría que obtener los roles del sistema
+            
+            for (String rol : roles) {
+                boolean permitir = ConsoleUtils.leerBooleano(scanner, "¿Permitir acceso a " + rol + "?", false);
+                if (permitir) {
+                    encuesta.addRolPermitido(rol);
+                }
+            }
+        }
+        
+        // Añadir preguntas
+        boolean salir = false;
+        while (!salir) {
+            ConsoleUtils.mostrarSubtitulo("Añadir Preguntas");
+            System.out.println("Preguntas actuales: " + encuesta.getPreguntas().size());
+            
+            System.out.println("\n1. Añadir pregunta de opción múltiple");
+            System.out.println("2. Añadir pregunta verdadero/falso");
+            System.out.println("3. Añadir pregunta de respuesta corta");
+            System.out.println("4. Añadir pregunta de respuesta larga");
+            System.out.println("5. Guardar " + tipo);
+            System.out.println("0. Cancelar");
+            
+            int opcion = ConsoleUtils.leerOpcion(scanner, 0, 5);
+            
+            switch (opcion) {
+                case 0:
+                    // Cancelar
+                    ConsoleUtils.mostrarInfo("Operación cancelada");
+                    return;
+                case 5:
+                    // Guardar
+                    if (encuesta.getPreguntas().isEmpty()) {
+                        ConsoleUtils.mostrarError("Debe añadir al menos una pregunta");
+                    } else {
+                        salir = true;
+                    }
+                    break;
+                default:
+                    // Añadir pregunta
+                    if (opcion >= 1 && opcion <= 4) {
+                        añadirPregunta(encuesta, opcion, esCuestionario);
+                    }
+                    break;
+            }
+        }
+        
+        // Guardar encuesta
+        surveyManager.guardarEncuesta(encuesta);
+        ConsoleUtils.mostrarExito(tipo + " creado correctamente");
+        ConsoleUtils.pausar(scanner);
+    }
+    
+    /**
+     * Añade una nueva pregunta a una encuesta
+     * @param encuesta Encuesta a la que añadir la pregunta
+     * @param tipoPregunta Tipo de pregunta (1-4)
+     * @param esCuestionario true si es un cuestionario evaluable
+     */
+    private void añadirPregunta(Encuesta encuesta, int tipoPregunta, boolean esCuestionario) {
+        ConsoleUtils.mostrarSubtitulo("Nueva Pregunta");
+        
+        String texto = ConsoleUtils.leerString(scanner, "Texto de la pregunta", 
+                texto2 -> !texto2.isEmpty(), null);
+        
+        Pregunta.TipoPregunta tipo;
+        switch (tipoPregunta) {
+            case 1:
+                tipo = Pregunta.TipoPregunta.OPCION_MULTIPLE;
+                break;
+            case 2:
+                tipo = Pregunta.TipoPregunta.VERDADERO_FALSO;
+                break;
+            case 3:
+                tipo = Pregunta.TipoPregunta.RESPUESTA_CORTA;
+                break;
+            case 4:
+            default:
+                tipo = Pregunta.TipoPregunta.RESPUESTA_LARGA;
+                break;
+        }
+        
+        Pregunta pregunta = new Pregunta(surveyManager.getNextPreguntaId(), texto, tipo);
+        
+        boolean obligatoria = ConsoleUtils.leerBooleano(scanner, "¿Es obligatoria?", true);
+        pregunta.setObligatoria(obligatoria);
+        
+        // Añadir opciones si es de opción múltiple
+        if (tipo == Pregunta.TipoPregunta.OPCION_MULTIPLE) {
+            boolean finOpciones = false;
+            List<String> opciones = new ArrayList<>();
+            
+            while (!finOpciones) {
+                String opcion = ConsoleUtils.leerString(scanner, "Añadir opción (vacío para terminar)", 
+                        null, "");
+                
+                if (opcion.isEmpty()) {
+                    if (opciones.size() < 2) {
+                        ConsoleUtils.mostrarError("Debe añadir al menos 2 opciones");
+                    } else {
+                        finOpciones = true;
+                        for (String op : opciones) {
+                            pregunta.addOpcion(op);
+                        }
+                    }
+                } else {
+                    opciones.add(opcion);
+                    ConsoleUtils.mostrarInfo("Opción añadida: " + opcion);
+                }
+            }
+        }
+        
+        // Si es cuestionario, pedir respuesta correcta
+        if (esCuestionario) {
+            if (tipo == Pregunta.TipoPregunta.OPCION_MULTIPLE) {
+                ConsoleUtils.mostrarSubtitulo("Seleccione la respuesta correcta");
+                
+                List<String> opciones = pregunta.getOpciones();
+                for (int i = 0; i < opciones.size(); i++) {
+                    System.out.println((i + 1) + ". " + opciones.get(i));
+                }
+                
+                int indice = ConsoleUtils.leerEntero(scanner, "Opción correcta", 
+                        valor -> valor >= 1 && valor <= opciones.size(), 1);
+                
+                pregunta.setRespuestaCorrecta(String.valueOf(indice - 1));
+            } else if (tipo == Pregunta.TipoPregunta.VERDADERO_FALSO) {
+                boolean correcta = ConsoleUtils.leerBooleano(scanner, "¿La respuesta correcta es Verdadero?", true);
+                pregunta.setRespuestaCorrecta(String.valueOf(correcta));
+            } else if (tipo == Pregunta.TipoPregunta.RESPUESTA_CORTA) {
+                String respuesta = ConsoleUtils.leerString(scanner, "Respuesta correcta", 
+                        texto2 -> !texto2.isEmpty(), null);
+                pregunta.setRespuestaCorrecta(respuesta);
+            }
+            
+            int puntuacion = ConsoleUtils.leerEntero(scanner, "Puntuación de la pregunta", 
+                    valor -> valor > 0, 1);
+            pregunta.setPuntuacion(puntuacion);
+        }
+        
+        encuesta.addPregunta(pregunta);
+        ConsoleUtils.mostrarExito("Pregunta añadida correctamente");
+    }
+    
+    /**
+     * Edita una encuesta existente
+     * @param encuesta Encuesta a editar
+     */
+    private void editarEncuesta(Encuesta encuesta) {
+        boolean salir = false;
+        
+        while (!salir) {
+            ConsoleUtils.limpiarPantalla();
+            ConsoleUtils.mostrarTitulo("Editar " + 
+                    (encuesta instanceof Cuestionario ? "Cuestionario" : "Encuesta"));
+            
+            boolean esCuestionario = encuesta instanceof Cuestionario;
+            
+            System.out.println("Título: " + encuesta.getTitulo());
+            System.out.println("Descripción: " + encuesta.getDescripcion());
+            System.out.println("Creador: " + encuesta.getCreador());
+            System.out.println("Estado: " + (encuesta.isActiva() ? "Activo" : "Inactivo"));
+            System.out.println("Fecha creación: " + encuesta.getFechaCreacion());
+            
+            if (esCuestionario) {
+                Cuestionario cuestionario = (Cuestionario) encuesta;
+                System.out.println("Tiempo límite: " + cuestionario.getTiempoLimite() + " minutos");
+                System.out.println("Puntuación mínima: " + cuestionario.getPuntuacionMinima() + "%");
+            }
+            
+            ConsoleUtils.mostrarLinea();
+            System.out.println("\nPreguntas (" + encuesta.getPreguntas().size() + "):");
+            List<Pregunta> preguntas = encuesta.getPreguntas();
+            
+            for (int i = 0; i < preguntas.size(); i++) {
+                Pregunta p = preguntas.get(i);
+                System.out.println((i + 1) + ". ['['/]" + p.getTipo() + "] " + p.getTexto());
+            }
+            
+            ConsoleUtils.mostrarLinea();
+            System.out.println("\nOpciones:");
+            System.out.println("1. Editar datos básicos");
+            System.out.println("2. Añadir pregunta");
+            System.out.println("3. Editar pregunta");
+            System.out.println("4. Eliminar pregunta");
+            System.out.println("5. Activar/Desactivar");
+            System.out.println("6. Gestionar roles permitidos");
+            System.out.println("0. Volver");
+            
+            int opcion = ConsoleUtils.leerOpcion(scanner, 0, 6);
+            
+            switch (opcion) {
+                case 0:
+                    salir = true;
+                    break;
+                case 1:
+                    editarDatosBasicos(encuesta);
+                    break;
+                case 2:
+                    añadirPregunta(encuesta, 
+                        ConsoleUtils.leerEntero(scanner, "Tipo de pregunta (1-4)", valor -> valor >= 1 && valor <= 4, 1), 
+                        esCuestionario);
+                    surveyManager.guardarEncuesta(encuesta);
+                    break;
+                case 3:
+                    // Editar pregunta se implementaría aquí
+                    ConsoleUtils.mostrarInfo("Funcionalidad no implementada");
+                    ConsoleUtils.pausar(scanner);
+                    break;
+                case 4:
+                    eliminarPregunta(encuesta);
+                    break;
+                case 5:
+                    encuesta.setActiva(!encuesta.isActiva());
+                    surveyManager.guardarEncuesta(encuesta);
+                    ConsoleUtils.mostrarExito(encuesta.isActiva() ? "Activada" : "Desactivada");
+                    ConsoleUtils.pausar(scanner);
+                    break;
+                case 6:
+                    // Gestionar roles permitidos se implementaría aquí
+                    ConsoleUtils.mostrarInfo("Funcionalidad no implementada");
+                    ConsoleUtils.pausar(scanner);
+                    break;
+            }
+        }
+    }
+    
+    /**
+     * Edita los datos básicos de una encuesta
+     * @param encuesta Encuesta a editar
+     */
+    private void editarDatosBasicos(Encuesta encuesta) {
+        ConsoleUtils.mostrarSubtitulo("Editar Datos Básicos");
+        
+        String titulo = ConsoleUtils.leerString(scanner, "Título", null, encuesta.getTitulo());
+        String descripcion = ConsoleUtils.leerString(scanner, "Descripción", null, encuesta.getDescripcion());
+        
+        encuesta.setTitulo(titulo);
+        encuesta.setDescripcion(descripcion);
+        
+        if (encuesta instanceof Cuestionario) {
+            Cuestionario cuestionario = (Cuestionario) encuesta;
+            
+            int tiempoLimite = ConsoleUtils.leerEntero(scanner, "Tiempo límite (minutos)", 
+                    valor -> valor > 0, cuestionario.getTiempoLimite());
+            int puntuacionMinima = ConsoleUtils.leerEntero(scanner, "Puntuación mínima para aprobar (%)", 
+                    valor -> valor > 0 && valor <= 100, cuestionario.getPuntuacionMinima());
+            
+            cuestionario.setTiempoLimite(tiempoLimite);
+            cuestionario.setPuntuacionMinima(puntuacionMinima);
+        }
+        
+        surveyManager.guardarEncuesta(encuesta);
+        ConsoleUtils.mostrarExito("Datos actualizados correctamente");
+        ConsoleUtils.pausar(scanner);
+    }
+    
+    /**
+     * Elimina una pregunta de una encuesta
+     * @param encuesta Encuesta de la que eliminar la pregunta
+     */
+    private void eliminarPregunta(Encuesta encuesta) {
+        ConsoleUtils.mostrarSubtitulo("Eliminar Pregunta");
+        
+        List<Pregunta> preguntas = encuesta.getPreguntas();
+        
+        if (preguntas.isEmpty()) {
+            ConsoleUtils.mostrarAdvertencia("No hay preguntas para eliminar");
+            ConsoleUtils.pausar(scanner);
+            return;
+        }
+        
+        for (int i = 0; i < preguntas.size(); i++) {
+            Pregunta p = preguntas.get(i);
+            System.out.println((i + 1) + ". " + p.getTexto());
+        }
+        
+        int indice = ConsoleUtils.leerEntero(scanner, "Seleccione la pregunta a eliminar", 
+                valor -> valor >= 1 && valor <= preguntas.size(), null);
+        
+        if (indice >= 1 && indice <= preguntas.size()) {
+            boolean confirmacion = ConsoleUtils.leerBooleano(scanner, 
+                    "¿Está seguro de eliminar esta pregunta?", false);
+            
+            if (confirmacion) {
+                Pregunta p = preguntas.get(indice - 1);
+                encuesta.removePregunta(p);
+                surveyManager.guardarEncuesta(encuesta);
+                ConsoleUtils.mostrarExito("Pregunta eliminada correctamente");
+            } else {
+                ConsoleUtils.mostrarInfo("Operación cancelada");
+            }
+        }
+        
+        ConsoleUtils.pausar(scanner);
+    }
+    
+    /**
+     * Elimina una encuesta
+     * @param encuesta Encuesta a eliminar
+     */
+    private void eliminarEncuesta(Encuesta encuesta) {
+        ConsoleUtils.mostrarSubtitulo("Eliminar " + 
+                (encuesta instanceof Cuestionario ? "Cuestionario" : "Encuesta"));
+        
+        System.out.println("Título: " + encuesta.getTitulo());
+        System.out.println("Descripción: " + encuesta.getDescripcion());
+        System.out.println("Preguntas: " + encuesta.getPreguntas().size());
+        
+        ConsoleUtils.mostrarAdvertencia("Esta operación no se puede deshacer");
+        boolean confirmacion = ConsoleUtils.leerBooleano(scanner, 
+                "¿Está seguro de eliminar esta encuesta y todas sus respuestas?", false);
+        
+        if (confirmacion) {
+            surveyManager.eliminarEncuesta(encuesta.getId());
+            ConsoleUtils.mostrarExito("Encuesta eliminada correctamente");
+        } else {
+            ConsoleUtils.mostrarInfo("Operación cancelada");
+        }
+        
+        ConsoleUtils.pausar(scanner);
+    }
+    
+    /**
+     * Muestra los resultados de las encuestas y cuestionarios
+     */
+    private void verResultados() {
+        ConsoleUtils.limpiarPantalla();
+        ConsoleUtils.mostrarTitulo("Resultados de Encuestas y Cuestionarios");
+        
+        List<Encuesta> encuestas = surveyManager.getEncuestas();
+        
+        if (encuestas.isEmpty()) {
+            ConsoleUtils.mostrarAdvertencia("No hay encuestas ni cuestionarios registrados");
+            ConsoleUtils.pausar(scanner);
+            return;
+        }
+        
+        for (int i = 0; i < encuestas.size(); i++) {
+            Encuesta encuesta = encuestas.get(i);
+            List<Respuesta> respuestas = surveyManager.getRespuestas(encuesta.getId());
+            String tipo = (encuesta instanceof Cuestionario) ? "Cuestionario" : "Encuesta";
+            
+            System.out.println((i + 1) + ". ['['/]" + tipo + "] " + encuesta.getTitulo() + 
+                              " - Respuestas: " + respuestas.size());
+        }
+        
+        int indice = ConsoleUtils.leerEntero(scanner, "\nSeleccione una encuesta para ver resultados", 
+                valor -> valor >= 1 && valor <= encuestas.size(), null);
+        
+        if (indice >= 1 && indice <= encuestas.size()) {
+            Encuesta encuesta = encuestas.get(indice - 1);
+            mostrarResultadosEncuesta(encuesta);
+        }
+    }
+    
+    /**
+     * Muestra los resultados detallados de una encuesta
+     * @param encuesta Encuesta a mostrar
+     */
+    private void mostrarResultadosEncuesta(Encuesta encuesta) {
+        ConsoleUtils.limpiarPantalla();
+        ConsoleUtils.mostrarTitulo("Resultados: " + encuesta.getTitulo());
+        
+        List<Respuesta> respuestas = surveyManager.getRespuestas(encuesta.getId());
+        
+        if (respuestas.isEmpty()) {
+            ConsoleUtils.mostrarAdvertencia("No hay respuestas para esta encuesta");
+            ConsoleUtils.pausar(scanner);
+            return;
+        }
+        
+        System.out.println("Total de respuestas: " + respuestas.size());
+        System.out.println("Respuestas completadas: " + 
+                          respuestas.stream().filter(Respuesta::isCompletada).count());
+        
+        boolean esCuestionario = encuesta instanceof Cuestionario;
+        
+        if (esCuestionario) {
+            Cuestionario cuestionario = (Cuestionario) encuesta;
+            int totalCorrectas = 0;
+            int totalPuntuacion = 0;
+            
+            for (Respuesta r : respuestas) {
+                if (r.isCompletada()) {
+                    int puntuacion = cuestionario.evaluarRespuesta(r);
+                    totalPuntuacion += puntuacion;
+                    if (cuestionario.esAprobado(puntuacion)) {
+                        totalCorrectas++;
+                    }
+                }
+            }
+            
+            double aprobados = respuestas.isEmpty() ? 0 : 
+                              (double) totalCorrectas / respuestas.stream().filter(Respuesta::isCompletada).count() * 100;
+            double promedio = respuestas.isEmpty() ? 0 : 
+                             (double) totalPuntuacion / respuestas.stream().filter(Respuesta::isCompletada).count();
+            
+            System.out.println("Porcentaje de aprobados: " + String.format("%.2f", aprobados) + "%");
+            System.out.println("Puntuación promedio: " + String.format("%.2f", promedio) + 
+                              " de " + cuestionario.calcularPuntuacionMaxima());
+        }
+        
+        ConsoleUtils.mostrarLinea();
+        System.out.println("\nDetalle de resultados por pregunta:");
+        
+        List<Pregunta> preguntas = encuesta.getPreguntas();
+        
+        for (int i = 0; i < preguntas.size(); i++) {
+            Pregunta pregunta = preguntas.get(i);
+            System.out.println("\n" + (i + 1) + ". " + pregunta.getTexto());
+            
+            if (pregunta.getTipo() == Pregunta.TipoPregunta.OPCION_MULTIPLE) {
+                // Para opción múltiple mostrar estadísticas por opción
+                List<String> opciones = pregunta.getOpciones();
+                int['['/]] conteoOpciones = new int['['/]opciones.size()];
+                
+                for (Respuesta r : respuestas) {
+                    String resp = r.getRespuesta(pregunta.getId());
+                    if (resp != null) {
+                        try {
+                            int opcion = Integer.parseInt(resp);
+                            if (opcion >= 0 && opcion < conteoOpciones.length) {
+                                conteoOpciones['['/]opcion]++;
+                            }
+                        } catch (NumberFormatException e) {
+                            // Ignorar respuestas inválidas
+                        }
+                    }
+                }
+                
+                for (int j = 0; j < opciones.size(); j++) {
+                    double porcentaje = respuestas.isEmpty() ? 0 : 
+                                       (double) conteoOpciones['['/]j] / respuestas.size() * 100;
+                    System.out.println("   " + opciones.get(j) + ": " + 
+                                      conteoOpciones['['/]j] + " (" + String.format("%.2f", porcentaje) + "%)");
+                }
+            } else if (pregunta.getTipo() == Pregunta.TipoPregunta.VERDADERO_FALSO) {
+                // Para verdadero/falso mostrar conteo de cada respuesta
+                int verdadero = 0;
+                int falso = 0;
+                
+                for (Respuesta r : respuestas) {
+                    String resp = r.getRespuesta(pregunta.getId());
+                    if ("true".equals(resp)) {
+                        verdadero++;
+                    } else if ("false".equals(resp)) {
+                        falso++;
+                    }
+                }
+                
+                double porcVerdadero = respuestas.isEmpty() ? 0 : (double) verdadero / respuestas.size() * 100;
+                double porcFalso = respuestas.isEmpty() ? 0 : (double) falso / respuestas.size() * 100;
+                
+                System.out.println("   Verdadero: " + verdadero + " (" + String.format("%.2f", porcVerdadero) + "%)");
+                System.out.println("   Falso: " + falso + " (" + String.format("%.2f", porcFalso) + "%)");
+            } else {
+                // Para respuestas de texto, mostrar algunas respuestas de ejemplo
+                System.out.println("   Algunas respuestas:");
+                int mostrados = 0;
+                
+                for (Respuesta r : respuestas) {
+                    String resp = r.getRespuesta(pregunta.getId());
+                    if (resp != null && !resp.isEmpty()) {
+                        System.out.println("   - " + resp);
+                        mostrados++;
+                        if (mostrados >= 3) {
+                            break;
+                        }
+                    }
+                }
+                
+                if (mostrados == 0) {
+                    System.out.println("   (No hay respuestas para esta pregunta)");
+                }
+            }
+        }
+        
+        ConsoleUtils.pausar(scanner);
+    }
+    
+    /**
+     * Muestra la pantalla para aprobar respuestas pendientes
+     */
+    private void aprobarRespuestas() {
+        ConsoleUtils.limpiarPantalla();
+        ConsoleUtils.mostrarTitulo("Aprobar Respuestas Pendientes");
+        
+        List<Encuesta> encuestas = surveyManager.getEncuestas();
+        List<Respuesta> pendientes = new ArrayList<>();
+        
+        // Recolectar todas las respuestas pendientes de aprobación
+        for (Encuesta encuesta : encuestas) {
+            List<Respuesta> respuestas = surveyManager.getRespuestas(encuesta.getId());
+            for (Respuesta respuesta : respuestas) {
+                if (respuesta.isCompletada() && !respuesta.isAprobada()) {
+                    pendientes.add(respuesta);
+                }
+            }
+        }
+        
+        if (pendientes.isEmpty()) {
+            ConsoleUtils.mostrarInfo("No hay respuestas pendientes de aprobación");
+            ConsoleUtils.pausar(scanner);
+            return;
+        }
+        
+        System.out.println("Hay " + pendientes.size() + " respuestas pendientes de aprobación\n");
+        
+        for (int i = 0; i < pendientes.size(); i++) {
+            Respuesta respuesta = pendientes.get(i);
+            Encuesta encuesta = surveyManager.getEncuesta(respuesta.getEncuestaId());
+            
+            System.out.println((i + 1) + ". " + encuesta.getTitulo() + " - " + 
+                              respuesta.getUsuario() + " (" + respuesta.getFechaRespuesta() + ")");
+        }
+        
+        int indice = ConsoleUtils.leerEntero(scanner, "\nSeleccione una respuesta para revisar", 
+                valor -> valor >= 1 && valor <= pendientes.size(), null);
+        
+        if (indice >= 1 && indice <= pendientes.size()) {
+            Respuesta respuesta = pendientes.get(indice - 1);
+            revisarRespuesta(respuesta);
+        }
+    }
+    
+    /**
+     * Muestra los detalles de una respuesta para su revisión y aprobación
+     * @param respuesta Respuesta a revisar
+     */
+    private void revisarRespuesta(Respuesta respuesta) {
+        Encuesta encuesta = surveyManager.getEncuesta(respuesta.getEncuestaId());
+        
+        ConsoleUtils.limpiarPantalla();
+        ConsoleUtils.mostrarTitulo("Revisar Respuesta: " + encuesta.getTitulo());
+        
+        System.out.println("Usuario: " + respuesta.getUsuario());
+        System.out.println("Fecha: " + respuesta.getFechaRespuesta());
+        System.out.println("Estado: " + (respuesta.isAprobada() ? "Aprobada" : "Pendiente"));
+        
+        ConsoleUtils.mostrarLinea();
+        System.out.println("\nRespuestas:");
+        
+        for (Pregunta pregunta : encuesta.getPreguntas()) {
+            String resp = respuesta.getRespuesta(pregunta.getId());
+            System.out.println("\nPregunta: " + pregunta.getTexto());
+            
+            if (resp != null) {
+                if (pregunta.getTipo() == Pregunta.TipoPregunta.OPCION_MULTIPLE) {
+                    try {
+                        int opcion = Integer.parseInt(resp);
+                        if (opcion >= 0 && opcion < pregunta.getOpciones().size()) {
+                            System.out.println("Respuesta: " + pregunta.getOpciones().get(opcion));
+                        } else {
+                            System.out.println("Respuesta: (Inválida)");
+                        }
+                    } catch (NumberFormatException e) {
+                        System.out.println("Respuesta: (Inválida)");
+                    }
+                } else if (pregunta.getTipo() == Pregunta.TipoPregunta.VERDADERO_FALSO) {
+                    System.out.println("Respuesta: " + ("true".equals(resp) ? "Verdadero" : "Falso"));
+                } else {
+                    System.out.println("Respuesta: " + resp);
+                }
+                
+                // Si es cuestionario, mostrar corrección
+                if (encuesta instanceof Cuestionario && pregunta.getRespuestaCorrecta() != null) {
+                    boolean correcta = pregunta.evaluarRespuesta(resp);
+                    System.out.println("Evaluación: " + (correcta ? "Correcta" : "Incorrecta"));
+                }
+            } else {
+                System.out.println("Respuesta: (No respondida)");
+            }
+        }
+        
+        // Mostrar puntuación total si es un cuestionario
+        if (encuesta instanceof Cuestionario) {
+            Cuestionario cuestionario = (Cuestionario) encuesta;
+            int puntuacion = cuestionario.evaluarRespuesta(respuesta);
+            int maximo = cuestionario.calcularPuntuacionMaxima();
+            boolean aprobado = cuestionario.esAprobado(puntuacion);
+            
+            ConsoleUtils.mostrarLinea();
+            System.out.println("\nPuntuación: " + puntuacion + " de " + maximo + 
+                              " (" + String.format("%.2f", (double) puntuacion / maximo * 100) + "%)");
+            System.out.println("Resultado: " + (aprobado ? "Aprobado" : "No aprobado"));
+        }
+        
+        ConsoleUtils.mostrarLinea();
+        System.out.println("\nOpciones:");
+        System.out.println("1. Aprobar respuesta");
+        System.out.println("2. Rechazar respuesta");
+        System.out.println("0. Volver");
+        
+        int opcion = ConsoleUtils.leerOpcion(scanner, 0, 2);
+        
+        if (opcion == 1) {
+            respuesta.setAprobada(true);
+            surveyManager.guardarRespuesta(respuesta);
+            ConsoleUtils.mostrarExito("Respuesta aprobada correctamente");
+        } else if (opcion == 2) {
+            // Aquí se podría implementar un rechazo con comentarios
+            respuesta.setAprobada(false);
+            surveyManager.guardarRespuesta(respuesta);
+            ConsoleUtils.mostrarInfo("Respuesta marcada como no aprobada");
+        }
+        
+        ConsoleUtils.pausar(scanner);
+    }
+}
+[/file]
+
+[file ('app/src/view/EncuestaView.java', false, 'UTF-8')]
+package view;
+
+import java.util.List;
+import java.util.Scanner;
+import view.util.ConsoleUtils;
+import survey.*;
+import auth.AuthManager;
+import auth.Usuario;
+import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
+
+/**
+ * Vista para responder encuestas y cuestionarios
+ */
+public class EncuestaView {
+    private Scanner scanner;
+    private SurveyManager surveyManager;
+    private AuthManager authManager;
+    private Timer temporizador;
+    private boolean tiempoAgotado;
+    
+    /**
+     * Constructor
+     */
+    public EncuestaView() {
+        scanner = new Scanner(System.in);
+        surveyManager = SurveyManager.getInstance();
+        authManager = AuthManager.getInstance();
+        temporizador = null;
+        tiempoAgotado = false;
+    }
+    
+    /**
+     * Muestra la lista de encuestas disponibles para el usuario
+     */
+    public void mostrar() {
+        if (!authManager.isAuthenticated()) {
+            ConsoleUtils.mostrarError("Debe iniciar sesión para acceder a las encuestas");
+            ConsoleUtils.pausar(scanner);
+            return;
+        }
+        
+        boolean salir = false;
+        
+        while (!salir) {
+            ConsoleUtils.limpiarPantalla();
+            ConsoleUtils.mostrarTitulo("Encuestas y Cuestionarios");
+            
+            Usuario usuario = authManager.getUsuarioActual();
+            String rolActual = usuario.getRolActivo();
+            
+            List<Encuesta> encuestas = surveyManager.getEncuestasParaRol(rolActual);
+            
+            if (encuestas.isEmpty()) {
+                ConsoleUtils.mostrarAdvertencia("No hay encuestas disponibles para su rol actual");
+                ConsoleUtils.pausar(scanner);
+                return;
+            }
+            
+            System.out.println("Encuestas disponibles para el rol: " + rolActual + "\n");
+            
+            for (int i = 0; i < encuestas.size(); i++) {
+                Encuesta encuesta = encuestas.get(i);
+                if (encuesta.isActiva()) {
+                    String tipo = (encuesta instanceof Cuestionario) ? "Cuestionario" : "Encuesta";
+                    System.out.println((i + 1) + ". ['['/]" + tipo + "] " + encuesta.getTitulo());
+                }
+            }
+            
+            ConsoleUtils.mostrarLinea();
+            System.out.println("\nOpciones:");
+            System.out.println("1. Responder una encuesta");
+            System.out.println("2. Ver mis respuestas");
+            System.out.println("0. Volver al menú principal");
+            
+            int opcion = ConsoleUtils.leerOpcion(scanner, 0, 2);
+            
+            switch (opcion) {
+                case 0:
+                    salir = true;
+                    break;
+                case 1:
+                    int indice = ConsoleUtils.leerEntero(scanner, "Seleccione el número de la encuesta", 
+                            valor -> valor >= 1 && valor <= encuestas.size(), null);
+                    
+                    if (indice >= 1 && indice <= encuestas.size()) {
+                        Encuesta encuesta = encuestas.get(indice - 1);
+                        responderEncuesta(encuesta);
+                    }
+                    break;
+                case 2:
+                    verMisRespuestas();
+                    break;
+            }
+        }
+    }
+    
+    /**
+     * Muestra la interfaz para responder una encuesta o cuestionario
+     * @param encuesta Encuesta a responder
+     */
+    private void responderEncuesta(Encuesta encuesta) {
+        if (encuesta == null || !encuesta.isActiva()) {
+            ConsoleUtils.mostrarError("La encuesta seleccionada no está disponible");
+            ConsoleUtils.pausar(scanner);
+            return;
+        }
+        
+        ConsoleUtils.limpiarPantalla();
+        ConsoleUtils.mostrarTitulo(encuesta.getTitulo());
+        
+        System.out.println(encuesta.getDescripcion());
+        
+        // Verificar si el usuario ya ha completado esta encuesta
+        String username = authManager.getUsuarioActual().getUsername();
+        List<Respuesta> respuestasUsuario = surveyManager.getRespuestas(encuesta.getId());
+        boolean yaRespondida = false;
+        
+        for (Respuesta r : respuestasUsuario) {
+            if (r.getUsuario().equals(username) && r.isCompletada()) {
+                yaRespondida = true;
+                break;
+            }
+        }
+        
+        if (yaRespondida) {
+            ConsoleUtils.mostrarAdvertencia("Usted ya ha completado esta encuesta");
+            ConsoleUtils.pausar(scanner);
+            return;
+        }
+        
+        // Si es un cuestionario, iniciar temporizador
+        boolean esCuestionario = encuesta instanceof Cuestionario;
+        int tiempoLimite = 0;
+        
+        if (esCuestionario) {
+            Cuestionario cuestionario = (Cuestionario) encuesta;
+            tiempoLimite = cuestionario.getTiempoLimite();
+            System.out.println("\nTiempo límite: " + tiempoLimite + " minutos");
+            
+            // Iniciar temporizador
+            iniciarTemporizador(tiempoLimite);
+        }
+        
+        ConsoleUtils.pausar(scanner);
+        
+        // Crear respuesta
+        Respuesta respuesta = new Respuesta();
+        respuesta.setEncuestaId(encuesta.getId());
+        respuesta.setUsuario(username);
+        
+        // Guardar respuesta incompleta para poder continuarla después
+        int idRespuesta = surveyManager.guardarRespuesta(respuesta);
+        
+        // Mostrar preguntas
+        List<Pregunta> preguntas = encuesta.getPreguntas();
+        int totalPreguntas = preguntas.size();
+        int preguntasRespondidas = 0;
+        
+        for (int i = 0; i < preguntas.size() && !tiempoAgotado; i++) {
+            Pregunta pregunta = preguntas.get(i);
+            
+            ConsoleUtils.limpiarPantalla();
+            if (esCuestionario) {
+                ConsoleUtils.mostrarTitulo(encuesta.getTitulo() + " - Tiempo restante: variable minutos");
+            } else {
+                ConsoleUtils.mostrarTitulo(encuesta.getTitulo());
+            }
+            
+            // Mostrar progreso
+            int porcentaje = (int) (((double) i / totalPreguntas) * 100);
+            System.out.println("Progreso: " + i + " de " + totalPreguntas + " preguntas (" + porcentaje + "%)");
+            
+            System.out.println("\nPregunta " + (i + 1) + ":");
+            System.out.println(pregunta.getTexto());
+            
+            if (pregunta.isObligatoria()) {
+                System.out.println("(Obligatoria)");
+            }
+            
+            String respuestaTexto = "";
+            
+            switch (pregunta.getTipo()) {
+                case OPCION_MULTIPLE:
+                    List<String> opciones = pregunta.getOpciones();
+                    for (int j = 0; j < opciones.size(); j++) {
+                        System.out.println((j + 1) + ". " + opciones.get(j));
+                    }
+                    
+                    int opcion = ConsoleUtils.leerEntero(scanner, "Seleccione una opción", 
+                            valor -> valor >= 1 && valor <= opciones.size(), null);
+                    
+                    if (opcion >= 1 && opcion <= opciones.size()) {
+                        respuestaTexto = String.valueOf(opcion - 1);
+                    }
+                    break;
+                    
+                case VERDADERO_FALSO:
+                    System.out.println("1. Verdadero");
+                    System.out.println("2. Falso");
+                    
+                    int vf = ConsoleUtils.leerEntero(scanner, "Seleccione una opción", 
+                            valor -> valor >= 1 && valor <= 2, null);
+                    
+                    if (vf == 1) {
+                        respuestaTexto = "true";
+                    } else if (vf == 2) {
+                        respuestaTexto = "false";
+                    }
+                    break;
+                    
+                case RESPUESTA_CORTA:
+                    respuestaTexto = ConsoleUtils.leerString(scanner, "Su respuesta", 
+                            texto -> !pregunta.isObligatoria() || !texto.isEmpty(), "");
+                    break;
+                    
+                case RESPUESTA_LARGA:
+                    System.out.println("Escriba su respuesta (línea vacía para terminar):");
+                    StringBuilder sb = new StringBuilder();
+                    String linea;
+                    
+                    do {
+                        linea = scanner.nextLine();
+                        if (!linea.isEmpty()) {
+                            sb.append(linea).append("\n");
+                        }
+                    } while (!linea.isEmpty());
+                    
+                    respuestaTexto = sb.toString().trim();
+                    
+                    if (pregunta.isObligatoria() && respuestaTexto.isEmpty()) {
+                        System.out.println("La respuesta es obligatoria. Por favor, proporcione una respuesta.");
+                        i--; // Repetir pregunta
+                        continue;
+                    }
+                    break;
+            }
+            
+            // Guardar respuesta
+            if (!respuestaTexto.isEmpty() || !pregunta.isObligatoria()) {
+                respuesta.setRespuesta(pregunta.getId(), respuestaTexto);
+                preguntasRespondidas++;
+                
+                // Actualizar respuesta parcial en la base de datos
+                surveyManager.guardarRespuesta(respuesta);
+            } else {
+                System.out.println("La respuesta es obligatoria. Por favor, proporcione una respuesta.");
+                i--; // Repetir pregunta
+                ConsoleUtils.pausar(scanner);
+            }
+            
+            // Si se agotó el tiempo, salir del bucle
+            if (tiempoAgotado) {
+                ConsoleUtils.mostrarAdvertencia("\n¡Tiempo agotado! No se pueden responder más preguntas.");
+                break;
+            }
+        }
+        
+        // Detener temporizador si estaba activo
+        if (temporizador != null) {
+            temporizador.cancel();
+            temporizador = null;
+        }
+        
+        // Marcar como completada si se respondieron todas las preguntas o si se agotó el tiempo
+        boolean completada = preguntasRespondidas == totalPreguntas || tiempoAgotado;
+        respuesta.setCompletada(completada);
+        
+        // Si es encuesta normal, aprobar automáticamente
+        if (!esCuestionario) {
+            respuesta.setAprobada(true);
+        }
+        
+        // Guardar respuesta final
+        surveyManager.guardarRespuesta(respuesta);
+        
+        ConsoleUtils.limpiarPantalla();
+        ConsoleUtils.mostrarTitulo("Encuesta Completada");
+        
+        int porcentajeCompletado = respuesta.calcularPorcentajeCompletado(totalPreguntas);
+        System.out.println("Has respondido " + preguntasRespondidas + " de " + totalPreguntas + 
+                           " preguntas (" + porcentajeCompletado + "%)");
+        
+        if (completada) {
+            ConsoleUtils.mostrarExito("¡Encuesta completada con éxito!");
+            
+            // Si es cuestionario y están habilitados los resultados inmediatos, mostrar resultados
+            if (esCuestionario) {
+                Cuestionario cuestionario = (Cuestionario) encuesta;
+                if (cuestionario.isMostrarResultadosInmediatos()) {
+                    int puntuacion = cuestionario.evaluarRespuesta(respuesta);
+                    int maximo = cuestionario.calcularPuntuacionMaxima();
+                    double porcentaje = maximo > 0 ? ((double) puntuacion / maximo) * 100 : 0;
+                    boolean aprobado = cuestionario.esAprobado(puntuacion);
+                    
+                    System.out.println("\nResultados del cuestionario:");
+                    System.out.println("Puntuación obtenida: " + puntuacion + " de " + maximo + 
+                                       " (" + String.format("%.2f", porcentaje) + "%)");
+                    System.out.println("Resultado: " + (aprobado ? "APROBADO" : "NO APROBADO"));
+                    
+                    if (!aprobado) {
+                        System.out.println("Puntuación mínima requerida: " + cuestionario.getPuntuacionMinima() + "%");
+                    }
+                } else {
+                    System.out.println("\nLos resultados serán revisados por un administrador.");
+                }
+            }
+        } else {
+            ConsoleUtils.mostrarAdvertencia("Encuesta incompleta. Puedes continuarla más tarde.");
+        }
+        
+        ConsoleUtils.pausar(scanner);
+    }
+    
+    /**
+     * Inicia un temporizador para limitar el tiempo de respuesta
+     * @param minutos Tiempo límite en minutos
+     */
+    private void iniciarTemporizador(int minutos) {
+        tiempoAgotado = false;
+        
+        if (temporizador != null) {
+            temporizador.cancel();
+        }
+        
+        temporizador = new Timer();
+        temporizador.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                tiempoAgotado = true;
+                System.out.println("\n¡TIEMPO AGOTADO! Presione Enter para continuar...");
+            }
+        }, minutos * 60 * 1000);
+    }
+    
+    /**
+     * Muestra las respuestas del usuario actual
+     */
+    private void verMisRespuestas() {
+        ConsoleUtils.limpiarPantalla();
+        ConsoleUtils.mostrarTitulo("Mis Respuestas");
+        
+        String username = authManager.getUsuarioActual().getUsername();
+        List<Encuesta> encuestas = surveyManager.getEncuestas();
+        
+        boolean hayRespuestas = false;
+        
+        for (Encuesta encuesta : encuestas) {
+            List<Respuesta> respuestas = surveyManager.getRespuestas(encuesta.getId());
+            
+            for (Respuesta respuesta : respuestas) {
+                if (respuesta.getUsuario().equals(username)) {
+                    hayRespuestas = true;
+                    
+                    String estado = respuesta.isCompletada() 
+                                   ? (respuesta.isAprobada() ? "Aprobada" : "Pendiente de aprobación") 
+                                   : "Incompleta";
+                    
+                    System.out.println("\n" + encuesta.getTitulo());
+                    System.out.println("Fecha: " + respuesta.getFechaRespuesta());
+                    System.out.println("Estado: " + estado);
+                    
+                    // Si es cuestionario y está completado, mostrar puntuación
+                    if (encuesta instanceof Cuestionario && respuesta.isCompletada()) {
+                        Cuestionario cuestionario = (Cuestionario) encuesta;
+                        int puntuacion = cuestionario.evaluarRespuesta(respuesta);
+                        int maximo = cuestionario.calcularPuntuacionMaxima();
+                        double porcentaje = maximo > 0 ? ((double) puntuacion / maximo) * 100 : 0;
+                        boolean aprobado = cuestionario.esAprobado(puntuacion);
+                        
+                        System.out.println("Puntuación: " + puntuacion + " de " + maximo + 
+                                           " (" + String.format("%.2f", porcentaje) + "%)");
+                        System.out.println("Resultado: " + (aprobado ? "APROBADO" : "NO APROBADO"));
+                    }
+                    
+                    ConsoleUtils.mostrarLinea();
+                }
+            }
+        }
+        
+        if (!hayRespuestas) {
+            ConsoleUtils.mostrarInfo("No has respondido ninguna encuesta aún");
+        }
+        
+        ConsoleUtils.pausar(scanner);
+    }
+}
+[/file]
+
+[file ('app/src/view/LoginView.java', false, 'UTF-8')]
+package view;
+
+import java.util.Scanner;
+import auth.AuthManager;
+import auth.Usuario;
+import view.util.ConsoleUtils;
+import config.AppConfig;
+
+/**
+ * Vista para el inicio de sesión de usuarios
+ */
+public class LoginView {
+    private Scanner scanner;
+    private AuthManager authManager;
+    
+    /**
+     * Constructor
+     */
+    public LoginView() {
+        scanner = new Scanner(System.in);
+        authManager = AuthManager.getInstance();
+    }
+    
+    /**
+     * Muestra la pantalla de inicio de sesión
+     * @return true si el inicio de sesión fue exitoso, false en caso contrario
+     */
+    public boolean mostrar() {
+        ConsoleUtils.limpiarPantalla();
+        ConsoleUtils.mostrarTitulo("Inicio de Sesión");
+        
+        // Si ya hay un usuario autenticado, ofrecer cerrar sesión
+        if (authManager.isAuthenticated()) {
+            Usuario usuario = authManager.getUsuarioActual();
+            ConsoleUtils.mostrarInfo("Has iniciado sesión como " + usuario.getNombre() + 
+                                     " (" + usuario.getUsername() + ")");
+            ConsoleUtils.mostrarInfo("Rol actual: " + usuario.getRolActivo());
+            
+            System.out.println("\nOpciones:");
+            System.out.println("1. Continuar con la sesión actual");
+            System.out.println("2. Cambiar de rol");
+            System.out.println("3. Cerrar sesión");
+            
+            int opcion = ConsoleUtils.leerOpcion(scanner, 1, 3);
+            
+            switch (opcion) {
+                case 1:
+                    return true;
+                case 2:
+                    mostrarMenuCambioRol();
+                    return true;
+                case 3:
+                    authManager.logout();
+                    ConsoleUtils.mostrarExito("Sesión cerrada correctamente");
+                    ConsoleUtils.pausar(scanner);
+                    // Continuar con el inicio de sesión
+                    break;
+                default:
+                    return false;
+            }
+        }
+        
+        // Solicitar credenciales
+        String username = ConsoleUtils.leerString(scanner, "Nombre de usuario", null, "");
+        String password = ConsoleUtils.leerString(scanner, "Contraseña", null, "");
+        
+        // Intentar inicio de sesión
+        if (authManager.login(username, password)) {
+            ConsoleUtils.mostrarExito("Inicio de sesión exitoso");
+            Usuario usuario = authManager.getUsuarioActual();
+            ConsoleUtils.mostrarInfo("Bienvenido, " + usuario.getNombre() + " (" + usuario.getRolActivo() + ")");
+            ConsoleUtils.pausar(scanner);
+            
+            // Si el usuario tiene múltiples roles, mostrar selección
+            if (usuario.getRoles().size() > 1) {
+                mostrarMenuCambioRol();
+            }
+            
+            // Guardar preferencias de usuario
+            AppConfig.getInstance().setSessionValue("lastLogin", usuario.getUltimoAcceso());
+            return true;
+        } else {
+            ConsoleUtils.mostrarError("Credenciales incorrectas o usuario inactivo");
+            ConsoleUtils.pausar(scanner);
+            return false;
+        }
+    }
+    
+    /**
+     * Muestra el menú para cambiar de rol
+     */
+    private void mostrarMenuCambioRol() {
+        if (!authManager.isAuthenticated()) {
+            return;
+        }
+        
+        ConsoleUtils.limpiarPantalla();
+        ConsoleUtils.mostrarTitulo("Cambio de Rol");
+        
+        Usuario usuario = authManager.getUsuarioActual();
+        String['['/]] roles = usuario.getRoles().toArray(new String['['/]0]);
+        
+        System.out.println("Rol actual: " + usuario.getRolActivo());
+        System.out.println("\nSeleccione un nuevo rol:");
+        
+        for (int i = 0; i < roles.length; i++) {
+            ConsoleUtils.mostrarElementoLista(i + 1, roles['['/]i]);
+        }
+        
+        int opcion = ConsoleUtils.leerOpcion(scanner, 1, roles.length);
+        
+        if (opcion > 0 && opcion <= roles.length) {
+            String nuevoRol = roles['['/]opcion - 1];
+            usuario.setRolActivo(nuevoRol);
+            ConsoleUtils.mostrarExito("Rol cambiado a: " + nuevoRol);
+        }
+        
+        ConsoleUtils.pausar(scanner);
+    }
+}
+[/file]
+[/template]

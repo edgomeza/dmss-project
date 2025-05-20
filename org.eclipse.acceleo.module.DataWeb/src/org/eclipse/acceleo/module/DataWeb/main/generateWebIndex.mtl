@@ -1,0 +1,93 @@
+[comment encoding = UTF-8 /]
+[module generateWebIndex('http://www.unex.es/dmss/dataweb')]
+
+[import org::eclipse::acceleo::module::DataWeb::main::generateWebIndex_sections/]
+
+[template public generateWebIndex(app : Aplicacion)]
+[file ('web/index.html', false, 'UTF-8')]
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[app.nombre/] - Sistema de Gestión de Datos</title>
+    <meta name="description" content="[app.descripcion/]">
+    <meta name="keywords" content="gestión de datos, aplicación web, [app.nombre/]">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="icon" type="image/x-icon" href="assets/icons/favicon.ico">
+</head>
+<body>
+    <!-- Header Principal -->
+    <header class="app-header">
+        <div class="container">
+            <h1>[app.nombre/]</h1>
+            <p>[app.descripcion/]</p>
+        </div>
+    </header>
+    
+    <!-- Navegación Principal -->
+    [generateNavigation(app)/]
+    
+    <!-- Contenido Principal -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Sección Hero -->
+            [generateHeroSection(app)/]
+            
+            <!-- Sección de Roles -->
+            [generateRolesSection(app)/]
+            
+            <!-- Sección de Características -->
+            [generateFeaturesSection()/]
+            
+            <!-- Sección de Contenido Social -->
+            [generateSocialContent(app)/]
+            
+            <!-- Sección de Encuestas y Cuestionarios -->
+            [generateInteractiveContent(app)/]
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    [generateFooter(app)/]
+    
+    <!-- Scripts -->
+    <script src="assets/js/app.js"></script>
+    
+    <!-- CSS adicional para elementos específicos -->
+    [generateCustomCSS()/]
+	<script>
+	// Function to set the current role in localStorage
+	function selectRole(roleName) {
+	    localStorage.setItem('current_role', roleName);
+	    console.log('Role selected:', roleName);
+	    
+	    // Redirect to the role dashboard
+	    window.location.href = roleName.toLowerCase() + '/dashboard.html';
+	    return false; // Prevent default link behavior
+	}
+	
+	// Update all role selection links when page loads
+	document.addEventListener('DOMContentLoaded', function() {
+	    // Inicializar roles administrativos en el sistema
+	    initializeAdminRoles();
+	    
+	    // Find all role card links
+	    const roleLinks = document.querySelectorAll('.role-card .card-footer a');
+	    
+	    // Add onclick handler to set the role before navigating
+	    roleLinks.forEach(link => {
+	        const href = link.getAttribute('href');
+	        const roleName = href.split('/')['['/]0];
+	        
+	        link.setAttribute('onclick', `return selectRole('${roleName}')`);
+	    });
+	});
+	</script>
+</body>
+</html>
+[/file]
+[/template]

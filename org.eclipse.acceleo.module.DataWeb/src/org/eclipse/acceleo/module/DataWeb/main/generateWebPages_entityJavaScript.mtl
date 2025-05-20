@@ -1,0 +1,10 @@
+[comment encoding = UTF-8 /]
+[module generateWebPages_entityJavaScript('http://www.unex.es/dmss/dataweb')]
+
+[import org::eclipse::acceleo::module::DataWeb::main::generateWebPages_entityJS/]
+
+[template public generateEntityJavaScript(app : Aplicacion)]
+[for (entidad : Entidad | app.entidades)]
+[generateEntityJS(app, entidad)/]
+[/for]
+[/template]
