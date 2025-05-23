@@ -1,35 +1,71 @@
--- Script de creación de base de datos para Biblioteca Universitaria
-CREATE DATABASE IF NOT EXISTS biblioteca_universitaria;
-USE biblioteca_universitaria;
+-- Script de creación de base de datos para Sistema Bancario Digital
+CREATE DATABASE IF NOT EXISTS sistema_bancario digital;
+USE sistema_bancario digital;
 
 -- Creación de tablas
-CREATE TABLE IF NOT EXISTS LIBROS (
-    id_libro INT PRIMARY KEY
+CREATE TABLE IF NOT EXISTS CLIENTES (
+    id_cliente INT PRIMARY KEY
 ,
-        titulo VARCHAR(255)
+        dni VARCHAR(255)
 ,
-        autor VARCHAR(255)
+        nombre VARCHAR(255)
 ,
-        añoPublicacion INT
+        apellidos VARCHAR(255)
 ,
-        disponible BOOLEAN
+        email VARCHAR(255)
 ,
-    pertenece_categoria_ID INT,
-    FOREIGN KEY (pertenece_categoria_ID) REFERENCES CATEGORIAS(id_categoria)
+        telefono VARCHAR(255)
+,
+        fecha_registro VARCHAR(255)
+,
+        activo BOOLEAN
 );
 
-CREATE TABLE IF NOT EXISTS CATEGORIAS (
-    id_categoria INT PRIMARY KEY
+CREATE TABLE IF NOT EXISTS CUENTAS (
+    numero_cuenta VARCHAR(255) PRIMARY KEY
 ,
-        nombre_categoria VARCHAR(255)
+        tipo_cuenta VARCHAR(255)
+,
+        saldo DECIMAL(10,2)
+,
+        fecha_apertura VARCHAR(255)
+,
+        activa BOOLEAN
+,
+    cliente_titular_ID INT,
+    FOREIGN KEY (cliente_titular_ID) REFERENCES CLIENTES(id_cliente)
+);
+
+CREATE TABLE IF NOT EXISTS TRANSACCIONES (
+    id_transaccion INT PRIMARY KEY
+,
+        fecha_transaccion VARCHAR(255)
+,
+        tipo_transaccion VARCHAR(255)
+,
+        monto DECIMAL(10,2)
 ,
         descripcion VARCHAR(255)
+,
+        estado VARCHAR(255)
+,
+    cuenta_origen_ID VARCHAR(255),
+    FOREIGN KEY (cuenta_origen_ID) REFERENCES CUENTAS(numero_cuenta)
+,
+        cuenta_destino_ID VARCHAR(255),
+    FOREIGN KEY (cuenta_destino_ID) REFERENCES CUENTAS(numero_cuenta)
 );
 
-CREATE TABLE IF NOT EXISTS USUARIOS (
-    id_usuario INT PRIMARY KEY
+CREATE TABLE IF NOT EXISTS EMPLEADOS (
+    id_empleado INT PRIMARY KEY
 ,
-        nombre_usuario VARCHAR(255)
+        codigo_empleado VARCHAR(255)
+,
+        nombre VARCHAR(255)
+,
+        puesto VARCHAR(255)
+,
+        departamento VARCHAR(255)
 ,
         email VARCHAR(255)
 ,
@@ -39,15 +75,38 @@ CREATE TABLE IF NOT EXISTS USUARIOS (
 CREATE TABLE IF NOT EXISTS PRESTAMOS (
     id_prestamo INT PRIMARY KEY
 ,
-        fechaPrestamo VARCHAR(255)
+        monto_solicitado DECIMAL(10,2)
 ,
-        fechaDevolucion VARCHAR(255)
+        tasa_interes DECIMAL(10,2)
 ,
-    prestamo_usuario_ID INT,
-    FOREIGN KEY (prestamo_usuario_ID) REFERENCES USUARIOS(id_usuario)
+        plazo_meses INT
 ,
-        prestamo_libro_ID INT,
-    FOREIGN KEY (prestamo_libro_ID) REFERENCES LIBROS(id_libro)
+        estado_prestamo VARCHAR(255)
+,
+        fecha_solicitud VARCHAR(255)
+,
+        fecha_aprobacion VARCHAR(255)
+,
+    cliente_solicitante_ID INT,
+    FOREIGN KEY (cliente_solicitante_ID) REFERENCES CLIENTES(id_cliente)
+,
+        empleado_aprobador_ID INT,
+    FOREIGN KEY (empleado_aprobador_ID) REFERENCES EMPLEADOS(id_empleado)
+);
+
+CREATE TABLE IF NOT EXISTS TARJETAS_CREDITO (
+    numero_tarjeta VARCHAR(255) PRIMARY KEY
+,
+        limite_credito DECIMAL(10,2)
+,
+        saldo_actual DECIMAL(10,2)
+,
+        fecha_vencimiento VARCHAR(255)
+,
+        activa BOOLEAN
+,
+    cliente_propietario_ID INT,
+    FOREIGN KEY (cliente_propietario_ID) REFERENCES CLIENTES(id_cliente)
 );
 
 
@@ -137,17 +196,19 @@ CREATE TABLE IF NOT EXISTS USUARIOS (
 
 -- Datos iniciales
 INSERT INTO ROLES (nombre, descripcion) VALUES
-('Administrador', 'Acceso total al sistema')
+('AdministradorBanco', 'Acceso completo al sistema bancario')
 ,
-('Bibliotecario', 'Gestión de libros y préstamos')
+('GerenteOperaciones', 'Gestión de operaciones y transacciones')
 ,
-('Estudiante', 'Consulta de libros disponibles')
+('EmpleadoBanco', 'Operaciones básicas bancarias')
+,
+('Cliente', 'Acceso a servicios de cliente')
 ;
 
 -- Insertar datos de ejemplo para encuestas
 INSERT INTO ENCUESTAS (nombre, titulo, descripcion, tipo_representacion) VALUES
-('preferenciasBiblioteca', 'Encuesta de Preferencias', 'Ayúdanos a conocer tus preferencias de lectura', 'BARRAS');
+('preferenciasBancarias', 'Encuesta de Servicios Preferidos', 'Ayúdanos a conocer tus preferencias bancarias', 'CIRCULAR');
 
 -- Insertar datos de ejemplo para cuestionarios
 INSERT INTO CUESTIONARIOS (nombre, titulo, descripcion) VALUES
-('satisfaccionBiblioteca', 'Cuestionario de Satisfacción', 'Evalúa tu experiencia con la biblioteca');
+('satisfaccionCliente', 'Encuesta de Satisfacción Bancaria', 'Evalúa tu experiencia con nuestros servicios');

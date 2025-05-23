@@ -1,541 +1,621 @@
 /**
- * Administración de cuestionarios evaluables
+ * Administración de cuestionarios
  */
+
+// Roles reales del sistema generados desde el modelo
+const SYSTEM_ROLES = [
+    'AdministradorBanco'
+,     'GerenteOperaciones'
+,     'EmpleadoBanco'
+,     'Cliente'
+];
 
 class QuizAdmin {
     constructor() {
         this.init();
-        this.currentQuizReview = null;
+    }
+
+    async initSystemRoles() {
+        try {
+            console.log('Inicializando roles del sistema...');
+            
+            // Usar los roles generados del modelo
+            const systemRoles = SYSTEM_ROLES;
+            
+            // Hacer los roles disponibles globalmente para otros módulos
+            window.systemRoles = systemRoles;
+            
+            console.log('✅ Roles del sistema inicializados:', systemRoles);
+            return systemRoles;
+            
+        } catch (error) {
+            console.error('Error inicializando roles del sistema:', error);
+            const fallbackRoles = SYSTEM_ROLES.length > 0 ? SYSTEM_ROLES : ['Admin', 'Usuario'];
+            window.systemRoles = fallbackRoles;
+            return fallbackRoles;
+        }
     }
 
     async init() {
-        await this.loadQuizStats();
-        await this.loadPendingReviews();
-        this.loadQuizRoleAssignments();
-        this.setupRoleAssignments();
-    }
-
-    async loadQuizStats() {
         try {
-            const quizElements = document.querySelectorAll('[data-quiz]');
-            const totalElement = document.getElementById('total-quiz-responses');
-            const pendingElement = document.getElementById('pending-quiz-reviews');
-            const averageElement = document.getElementById('quiz-average-score');
+            console.log("Inicializando QuizAdmin...");
             
-            let totalResponses = 0;
-            let totalPending = 0;
-            let scoreSum = 0;
-            let scoreCount = 0;
+            // Inicializar la base de datos primero
+            const db = await this.initDB();
+            console.log("Base de datos inicializada:", db);
             
-            for (const quizElement of quizElements) {
-                const quizName = quizElement.dataset.quiz;
-                const responses = await this.getQuizResponses(quizName);
-                
-                // Estadísticas para este cuestionario
-                const pending = responses.filter(r => !r.results.gradeConfirmed).length;
-                const avgScore = this.calculateAverageScore(responses);
-                
-                // Actualizar contadores de este cuestionario
-                const pendingElement = document.getElementById(`pending-review-${quizName}`);
-                const scoreElement = document.getElementById(`avg-score-${quizName}`);
-                
-                if (pendingElement) {
-                    pendingElement.textContent = pending;
-                    pendingElement.style.backgroundColor = pending > 0 ? 'var(--warning-100)' : 'var(--gray-100)';
-                    pendingElement.style.color = pending > 0 ? 'var(--warning-700)' : 'var(--gray-600)';
-                }
-                
-                if (scoreElement) {
-                    scoreElement.textContent = avgScore !== null ? `${avgScore}%` : 'N/A';
-                }
-                
-                // Actualizar totales
-                totalResponses += responses.length;
-                totalPending += pending;
-                
-                // Acumular para media global
-                responses.forEach(response => {
-                    if (response.results && response.results.porcentaje) {
-                        scoreSum += response.results.porcentaje;
-                        scoreCount++;
-                    }
-                });
-            }
+            // Cargar los cuestionarios
+            await this.initSystemRoles();
+            await this.loadQuizzes();
+            await this.loadPendingResponses();
             
-            // Actualizar estadísticas globales
-            if (totalElement) totalElement.textContent = totalResponses;
-            if (pendingElement) pendingElement.textContent = totalPending;
+            // Configurar los manejadores de eventos
+            this.setupEventHandlers();
             
-            if (averageElement) {
-                const globalAvg = scoreCount > 0 ? Math.round(scoreSum / scoreCount) : 'N/A';
-                averageElement.textContent = typeof globalAvg === 'number' ? `${globalAvg}%` : globalAvg;
-            }
+            console.log("QuizAdmin inicializado correctamente");
         } catch (error) {
-            console.error('Error cargando estadísticas de cuestionarios:', error);
+            console.error('Error initializing QuizAdmin:', error);
+            
+            // Mostrar mensaje de error en el contenedor correcto
+            const containers = ['quizzesList', 'quizzes-container', 'quizzes-grid'];
+            for (const containerId of containers) {
+                const container = document.getElementById(containerId);
+                if (container) {
+                    container.innerHTML = `<p class="text-center text-danger">Error al cargar los cuestionarios: ${error.message}</p>`;
+                    break;
+                }
+            }
         }
     }
     
-    calculateAverageScore(responses) {
-        if (!responses || responses.length === 0) return null;
-        
-        const validScores = responses.filter(r => r.results && typeof r.results.porcentaje === 'number');
-        if (validScores.length === 0) return null;
-        
-        const sum = validScores.reduce((total, r) => total + r.results.porcentaje, 0);
-        return Math.round(sum / validScores.length);
-    }
-
-	// Función para inicializar roles administrativos (si no está disponible globalmente)
-	async initializeAdminRoles() {
+    async refreshSystemRoles() {
         try {
-            // Implementación básica para este archivo
-            const adminRoles = ['Admin', 'Administrador'];
-            localStorage.setItem('admin_roles', JSON.stringify(adminRoles));
-            return adminRoles;
-        } catch (error) {
-            console.error('Error inicializando roles administrativos:', error);
-            return [];
-        }
-    }
-
-	async loadSurveyRoleAssignments() {
-        try {
-            // Obtener roles administrativos
-            let adminRoles = JSON.parse(localStorage.getItem('admin_roles') || '[]');
-            if (adminRoles.length === 0) {
-                adminRoles = await this.initializeAdminRoles();
+            console.log('🔄 Actualizando roles del sistema...');
+            
+            // Los roles ya están definidos en SYSTEM_ROLES
+            const roles = SYSTEM_ROLES;
+            
+            // Actualizar tabla de asignaciones
+            await this.updateRoleAssignmentTable();
+            
+            console.log('✅ Roles actualizados:', roles);
+            
+            if (window.app && window.app.showAlert) {
+                window.app.showAlert(`Roles actualizados: ${roles.join(', ')}`, 'success');
             }
             
-            // Obtener asignaciones guardadas
-            const assignments = JSON.parse(localStorage.getItem('survey_role_assignments') || '{}');
-            
-            // Actualizar estado de los checkboxes
-            const checkboxes = document.querySelectorAll('.role-checkbox[data-survey]');
-            checkboxes.forEach(checkbox => {
-                const surveyName = checkbox.dataset.survey;
-                const roleName = checkbox.dataset.role;
-                
-                // Si hay asignaciones guardadas para esta encuesta
-                if (assignments[surveyName] && assignments[surveyName].includes(roleName)) {
-                    checkbox.checked = true;
-                } 
-                // Asignaciones por defecto para roles administrativos si no hay asignación explícita
-                else if (!assignments[surveyName] && adminRoles.includes(roleName)) {
-                    checkbox.checked = true;
-                }
-            });
+            return roles;
         } catch (error) {
-            console.error('Error cargando asignaciones de roles para encuestas:', error);
+            console.error('Error actualizando roles:', error);
+            if (window.app && window.app.showAlert) {
+                window.app.showAlert('Error actualizando roles del sistema', 'danger');
+            }
         }
     }
 
-	/**
-	 * Función para guardar asignaciones de roles para cuestionarios
-	 */
-	async saveQuizRoleAssignments() {
-	    try {
-	        // Recopilar todas las asignaciones
-	        const checkboxes = document.querySelectorAll('.role-checkbox[data-quiz]');
-	        const assignments = {};
-	        
-	        checkboxes.forEach(checkbox => {
-	            const quizName = checkbox.dataset.quiz;
-	            const roleName = checkbox.dataset.role;
-	            
-	            if (!assignments[quizName]) {
-	                assignments[quizName] = [];
-	            }
-	            
-	            if (checkbox.checked) {
-	                assignments[quizName].push(roleName);
-	            }
-	        });
-	        
-	        // Guardar en localStorage
-	        localStorage.setItem('quiz_role_assignments', JSON.stringify(assignments));
-	        
-	        if (window.app && window.app.showAlert) {
-	            window.app.showAlert('Asignaciones guardadas correctamente', 'success');
-	        } else {
-	            alert('Asignaciones guardadas correctamente');
-	        }
-	    } catch (error) {
-	        console.error('Error al guardar asignaciones:', error);
-	        if (window.app && window.app.showAlert) {
-	            window.app.showAlert('Error al guardar las asignaciones', 'danger');
-	        } else {
-	            alert('Error al guardar las asignaciones');
-	        }
-	    }
-	}
-
-    async getQuizResponses(quizName) {
+    async checkDatabaseContent() {
         try {
-            // Buscar en IndexedDB
-            const db = window.localDB || await this.initDB();
-            const responses = await db.query('RESPUESTAS_CUESTIONARIO', { quizName });
+            console.log("Verificando contenido de la base de datos...");
             
-            // Si no hay respuestas, crear algunas de ejemplo para demostración
-            if (responses.length === 0) {
-                const sampleResponses = [
-                    {
-                        id: `quiz_${Date.now()}_1`,
-                        quizName: quizName,
-                        userId: 'usuario1@email.com',
-                        timestamp: Date.now() - 86400000, // Ayer
-                        reviewed: false,
-                        results: {
-                            totalPreguntas: 5,
-                            totalCorrectas: 3,
-                            porcentaje: 60,
-                            gradeConfirmed: false,
-                            preguntas: [
-                                {
-                                    texto: "Pregunta 1",
-                                    respuesta: "Opción A",
-                                    esCorrecta: true,
-                                    respuestaCorrecta: "Opción A",
-                                    correctionReviewed: false
-                                },
-                                {
-                                    texto: "Pregunta 2",
-                                    respuesta: "Opción B",
-                                    esCorrecta: false,
-                                    respuestaCorrecta: "Opción C",
-                                    correctionReviewed: false
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        id: `quiz_${Date.now()}_2`,
-                        quizName: quizName,
-                        userId: 'usuario2@email.com',
-                        timestamp: Date.now() - 172800000, // Hace 2 días
-                        reviewed: true,
-                        results: {
-                            totalPreguntas: 5,
-                            totalCorrectas: 4,
-                            porcentaje: 80,
-                            gradeConfirmed: true,
-                            preguntas: [
-                                {
-                                    texto: "Pregunta 1",
-                                    respuesta: "Opción A",
-                                    esCorrecta: true,
-                                    respuestaCorrecta: "Opción A",
-                                    correctionReviewed: true
-                                },
-                                {
-                                    texto: "Pregunta 2",
-                                    respuesta: "Opción C",
-                                    esCorrecta: true,
-                                    respuestaCorrecta: "Opción C",
-                                    correctionReviewed: true
-                                }
-                            ]
-                        }
+            // Listar contenido de los almacenes principales
+            const stores = ['CUESTIONARIOS', 'PREGUNTAS_CUESTIONARIO', 'OPCIONES_CUESTIONARIO', 'RESPUESTAS_CUESTIONARIO'];
+            
+            for (const store of stores) {
+                try {
+                    const items = await window.localDB.getAll(store);
+                    console.log(`${store}: ${items.length} elementos`);
+                    if (items.length > 0) {
+                        console.log(`Muestra de ${store}:`, items[0]);
                     }
-                ];
-
-                // Guardar respuestas de ejemplo
-                for (const response of sampleResponses) {
-                    await db.create('RESPUESTAS_CUESTIONARIO', response);
+                } catch (e) {
+                    console.warn(`No se pudo acceder al almacén ${store}:`, e);
                 }
-
-                return sampleResponses;
             }
-
-            return responses;
         } catch (error) {
-            console.error('Error obteniendo respuestas de cuestionario:', error);
-            return [];
+            console.error("Error al verificar el contenido de la base de datos:", error);
         }
     }
 
-    async loadPendingReviews() {
-	    try {
-	        const pendingTable = document.getElementById('pendingReviewsTable');
-	        if (!pendingTable) return;
-	
-	        const allPending = [];
-	        const processedIds = new Set(); // Track processed IDs
-	        const quizElements = document.querySelectorAll('[data-quiz]');
-	        
-	        for (const quizElement of quizElements) {
-	            const quizName = quizElement.dataset.quiz;
-	            const responses = await this.getQuizResponses(quizName);
-	            const pending = responses.filter(r => !r.results.gradeConfirmed);
-	            
-	            pending.forEach(response => {
-	                if (!processedIds.has(response.id)) { // Only add if not already processed
-	                    processedIds.add(response.id);
-	                    response.quizName = quizName;
-	                    allPending.push(response);
-	                }
-	            });
-	        }
-	
-	        if (allPending.length === 0) {
-	            pendingTable.innerHTML = '<p class="text-center">No hay evaluaciones pendientes de revisión</p>';
-	            return;
-	        }
-	
-	        pendingTable.innerHTML = allPending.map(response => `
-	            <div class="review-row">
-	                <div class="review-info">
-	                    <strong>${response.quizName}</strong> - ${response.userId}
-	                    <div class="review-meta">
-	                        Fecha: ${new Date(response.timestamp).toLocaleDateString('es-ES')}
-	                        <span class="review-score">${response.results.porcentaje}%</span>
-	                    </div>
-	                </div>
-	                <div class="review-actions">
-	                    <button class="btn btn-primary btn-sm" onclick="quizAdmin.reviewQuiz('${response.id}', '${response.quizName}')">
-	                        👁️ Revisar Evaluación
-	                    </button>
-	                </div>
-	            </div>
-	        `).join('');
-	
-	    } catch (error) {
-	        console.error('Error loading evaluations pending:', error);
-	    }
-	}
-    
-    async reviewQuiz(responseId, quizName) {
+    async loadPendingResponses() {
         try {
-            const db = window.localDB || await this.initDB();
-            const responses = await this.getQuizResponses(quizName);
-            const response = responses.find(r => r.id === responseId);
+            console.log("Cargando evaluaciones pendientes...");
+            const pendingTable = document.getElementById('pendingReviewsTable');
+            if (!pendingTable) {
+                console.warn('Pending reviews table not found');
+                return;
+            }
+    
+            // Mostrar loading inicial
+            pendingTable.innerHTML = `
+                <div class="text-center p-3">
+                    <div class="loading-spinner"></div>
+                    <span>Cargando evaluaciones pendientes...</span>
+                </div>
+            `;
+    
+            const allPending = [];
+            const processedIds = new Set();
             
-            if (!response) {
-                alert('Evaluación no encontrada');
+            // Obtener todos los cuestionarios primero
+            const quizzes = await window.localDB.getAll('CUESTIONARIOS');
+            console.log('Cuestionarios encontrados:', quizzes.length);
+            
+            if (quizzes.length === 0) {
+                pendingTable.innerHTML = `
+                    <div class="text-center p-4">
+                        <div class="text-muted mb-2">
+                            <i class="fas fa-clipboard-list fa-2x"></i>
+                        </div>
+                        <p class="text-muted">No hay cuestionarios disponibles para revisar</p>
+                    </div>
+                `;
                 return;
             }
             
-            this.currentQuizReview = response;
-            
-            const modal = document.getElementById('reviewModal');
-            const modalBody = document.getElementById('reviewModalBody');
-            
-            if (!modal || !modalBody) return;
-            
-            modalBody.innerHTML = `
-                <div class="student-info">
-                    <h4>${response.userId}</h4>
-                    <div class="student-meta">
-                        <div>Cuestionario: <strong>${quizName}</strong></div>
-                        <div>Fecha: <strong>${new Date(response.timestamp).toLocaleString('es-ES')}</strong></div>
-                    </div>
-                </div>
-                
-                <div class="quiz-score">
-                    <div class="score-circle">${response.results.porcentaje}%</div>
-                    <p>${response.results.totalCorrectas} de ${response.results.totalPreguntas} respuestas correctas</p>
-                    <p class="note">${response.results.gradeConfirmed ? 
-                        '<span class="badge status-correct">Calificación Confirmada</span>' : 
-                        '<span class="badge status-incorrect">Pendiente de Confirmación</span>'}</p>
-                </div>
-                
-                <div class="questions-review">
-                    <h4>Revisión de Preguntas</h4>
+            // Buscar respuestas pendientes para cada cuestionario
+            for (const quiz of quizzes) {
+                try {
+                    const responses = await this.getQuizResponses(quiz.nombre);
+                    console.log(`Respuestas para ${quiz.nombre}:`, responses.length);
                     
-                     ${response.results.preguntas.map((pregunta, index) => `
-	                    <div class="question-review-item">
-	                        <div class="question-review-header">
-	                            <h5 class="question-review-title">Pregunta ${index + 1}: ${pregunta.texto}</h5>
-	                            <span class="question-status ${pregunta.esCorrecta ? 'status-correct' : 'status-incorrect'}">
-	                                ${pregunta.esCorrecta ? 'Correcta' : 'Incorrecta'}
-	                            </span>
-	                        </div>
-	                        <div class="question-review-body">
-                                <div class="answers-comparison">
-                                    <div class="student-answer">
-                                        <div class="answer-label">Respuesta del estudiante:</div>
-                                        <div class="answer-value">${pregunta.respuesta}</div>
-                                    </div>
-                                    <div class="correct-answer">
-                                        <div class="answer-label">Respuesta correcta:</div>
-                                        <div class="answer-value">${pregunta.respuestaCorrecta}</div>
-                                    </div>
-                                </div>
-                                
-                                <div class="correction-toggle">
-	                                <div class="toggle-label">¿Modificar corrección?</div>
-	                                <div class="role-toggle">
-	                                    <input type="checkbox" id="toggle_correction_${index}" 
-	                                           class="role-checkbox correction-checkbox"
-	                                           data-question-index="${index}" 
-	                                           ${pregunta.esCorrecta ? 'checked' : ''}>
-	                                    <label for="toggle_correction_${index}" class="role-label"></label>
-	                                </div>
-                                    <div class="toggle-status">
-                                        <span class="status-${pregunta.esCorrecta ? 'correct' : 'incorrect'}">
-                                            ${pregunta.esCorrecta ? 'Correcta' : 'Incorrecta'}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-                
-                <div class="score-actions">
-                    <button class="btn btn-success" id="recalculateScoreBtn" onclick="quizAdmin.recalculateScore()">
-                        Recalcular Puntuación
-                    </button>
-                </div>
-            `;
-            
-            // Agregar eventos para los checkboxes de corrección
-            const correctionCheckboxes = modalBody.querySelectorAll('.correction-checkbox');
-            correctionCheckboxes.forEach(checkbox => {
-                checkbox.addEventListener('change', this.handleCorrectionToggle.bind(this));
-            });
-            
-            // Habilitar/deshabilitar botón de confirmar según estado
-            const confirmBtn = document.getElementById('confirmGradeBtn');
-            if (confirmBtn) {
-                confirmBtn.disabled = response.results.gradeConfirmed;
-                if (response.results.gradeConfirmed) {
-                    confirmBtn.textContent = 'Calificación ya confirmada';
+                    const pending = responses.filter(r => r.results && !r.results.gradeConfirmed);
+                    console.log(`Pendientes para ${quiz.nombre}:`, pending.length);
+                    
+                    pending.forEach(response => {
+                        if (!processedIds.has(response.id)) {
+                            processedIds.add(response.id);
+                            response.quizName = quiz.nombre;
+                            response.quizTitle = quiz.titulo;
+                            allPending.push(response);
+                        }
+                    });
+                } catch (error) {
+                    console.warn(`Error cargando respuestas para ${quiz.nombre}:`, error);
                 }
             }
-            
-            modal.style.display = 'flex';
+    
+            console.log('Total de evaluaciones pendientes:', allPending.length);
+    
+            if (allPending.length === 0) {
+                pendingTable.innerHTML = `
+                    <div class="text-center p-4">
+                        <div class="text-success mb-2">
+                            <i class="fas fa-check-circle fa-2x"></i>
+                        </div>
+                        <p class="text-muted">No hay evaluaciones pendientes de revisión</p>
+                        <small class="text-muted">Todas las evaluaciones han sido revisadas</small>
+                    </div>
+                `;
+                return;
+            }
+    
+            pendingTable.innerHTML = allPending.map(response => `
+                <div class="review-row">
+                    <div class="review-info">
+                        <strong>${response.quizTitle || response.quizName}</strong>
+                        <div class="review-meta">
+                            Usuario: ${response.userId || 'Anónimo'} | 
+                            Fecha: ${new Date(response.timestamp).toLocaleDateString('es-ES')} |
+                            Puntuación: ${response.results.porcentaje}%
+                        </div>
+                    </div>
+                    <div class="review-score">
+                        ${response.results.porcentaje}%
+                    </div>
+                    <div class="review-actions">
+                        <button class="btn btn-info btn-sm" onclick="window.quizAdmin.reviewQuiz('${response.id}', '${response.quizName}')">
+                            👁️ Revisar
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+    
+            // Actualizar contador en estadísticas
+            const pendingCounter = document.getElementById('pending-quiz-reviews');
+            if (pendingCounter) {
+                pendingCounter.textContent = allPending.length;
+            }
+    
         } catch (error) {
-            console.error('Error revisando cuestionario:', error);
-            alert('Error al cargar la revisión del cuestionario');
+            console.error('Error loading pending reviews:', error);
+            const pendingTable = document.getElementById('pendingReviewsTable');
+            if (pendingTable) {
+                pendingTable.innerHTML = `
+                    <div class="text-center p-4">
+                        <div class="text-danger mb-2">
+                            <i class="fas fa-exclamation-triangle fa-2x"></i>
+                        </div>
+                        <p class="text-danger">Error al cargar las evaluaciones pendientes</p>
+                        <button class="btn btn-outline-primary btn-sm" onclick="window.location.reload()">
+                            Reintentar
+                        </button>
+                    </div>
+                `;
+            }
         }
     }
 
-	evaluateQuiz() {
-	    // Evaluación de cuestionario
-	    const totalPreguntas = this.totalQuestions;
-	    let totalCorrectas = 0;
-	    
-	    const preguntas = [];
-	    for (let i = 1; i <= totalPreguntas; i++) {
-	        const container = this.form.querySelector(`[data-question="${i}"]`);
-	        const questionText = container?.querySelector('.question-text')?.textContent || `Pregunta ${i}`;
-	        
-	        // Determine if correct randomly (50% chance) to simulate user answers
-	        const isCorrect = Math.random() > 0.5;
-	        if (isCorrect) totalCorrectas++;
-	        
-	        preguntas.push({
-	            texto: questionText,
-	            respuesta: this.answers.get(`question_${i}`) || 'No respondida',
-	            esCorrecta: isCorrect,
-	            respuestaCorrecta: 'Respuesta correcta simulada',
-	            correctionReviewed: false // Indica si un admin ha revisado la corrección
-	        });
-	    }
-	    
-	    const porcentaje = Math.round((totalCorrectas / totalPreguntas) * 100);
-	
-	    return {
-	        totalPreguntas,
-	        totalCorrectas,
-	        porcentaje,
-	        preguntas,
-	        gradeConfirmed: false // El administrador debe confirmar la calificación
-	    };
-	}
-    
-    handleCorrectionToggle(event) {
-        const checkbox = event.target;
-        const questionIndex = parseInt(checkbox.dataset.questionIndex, 10);
-        const isCorrect = checkbox.checked;
-        
-        if (!this.currentQuizReview || !this.currentQuizReview.results.preguntas[questionIndex]) {
-            return;
-        }
-        
-        // Actualizar estado de corrección
-        this.currentQuizReview.results.preguntas[questionIndex].esCorrecta = isCorrect;
-        this.currentQuizReview.results.preguntas[questionIndex].correctionReviewed = true;
-        
-        // Actualizar elemento de estado en la interfaz
-        const toggleStatus = checkbox.closest('.correction-toggle').querySelector('.toggle-status span');
-        if (toggleStatus) {
-            toggleStatus.className = `status-${isCorrect ? 'correct' : 'incorrect'}`;
-            toggleStatus.textContent = isCorrect ? 'Correcta' : 'Incorrecta';
-        }
-        
-        // Actualizar cabecera de pregunta
-        const questionHeader = checkbox.closest('.question-review-item').querySelector('.question-status');
-        if (questionHeader) {
-            questionHeader.className = `question-status ${isCorrect ? 'status-correct' : 'status-incorrect'}`;
-            questionHeader.textContent = isCorrect ? 'Correcta' : 'Incorrecta';
+    closeResultsModal() {
+        const modal = document.getElementById('resultsModal');
+        if (modal) {
+            modal.style.display = 'none';
         }
     }
     
-    recalculateScore() {
-        if (!this.currentQuizReview) return;
-        
-        // Contar preguntas correctas
-        const totalPreguntas = this.currentQuizReview.results.preguntas.length;
-        const totalCorrectas = this.currentQuizReview.results.preguntas.filter(p => p.esCorrecta).length;
-        const porcentaje = Math.round((totalCorrectas / totalPreguntas) * 100);
-        
-        // Actualizar resultados
-        this.currentQuizReview.results.totalCorrectas = totalCorrectas;
-        this.currentQuizReview.results.porcentaje = porcentaje;
-        
-        // Actualizar puntuación en la interfaz
-        const scoreCircle = document.querySelector('.score-circle');
-        if (scoreCircle) {
-            scoreCircle.textContent = `${porcentaje}%`;
+    closeReviewModal() {
+        const modal = document.getElementById('reviewModal');
+        if (modal) {
+            modal.style.display = 'none';
         }
-        
-        const scoreText = document.querySelector('.quiz-score p');
-        if (scoreText) {
-            scoreText.textContent = `${totalCorrectas} de ${totalPreguntas} respuestas correctas`;
-        }
-        
-        // Mostrar mensaje
-        window.app.showAlert('Puntuación recalculada correctamente', 'success');
     }
-    
-    async confirmGrade() {
-        if (!this.currentQuizReview) return;
+
+    setupEventHandlers() {
+        console.log("Configurando manejadores de eventos...");
         
+        // Botones para eliminar cuestionarios
+        document.addEventListener('click', async (e) => {
+            if (e.target.classList.contains('quiz-delete-btn')) {
+                const quizId = e.target.dataset.id;
+                if (quizId) {
+                    this.deleteQuiz(quizId);
+                }
+            }
+        });
+        
+        // Botón para guardar asignaciones de roles para cuestionarios
+        const saveQuizRoleAssignments = document.getElementById('saveQuizRoleAssignments');
+        if (saveQuizRoleAssignments) {
+            saveQuizRoleAssignments.addEventListener('click', () => {
+                this.saveQuizRoleAssignments();
+            });
+        }
+        
+        // Botones para cerrar modales
+        const closeButtons = document.querySelectorAll('.modal-close');
+        closeButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const modal = button.closest('.modal');
+                if (modal) modal.style.display = 'none';
+            });
+        });
+        
+        // Cargar asignaciones de roles al inicializar
+        setTimeout(() => {
+            this.loadQuizRoleAssignments();
+        }, 500);
+    }
+
+    async loadQuizRoleAssignments() {
         try {
-            // Marcar como confirmada
-            this.currentQuizReview.results.gradeConfirmed = true;
-            this.currentQuizReview.reviewedAt = Date.now();
+            console.log("Cargando asignaciones de roles para cuestionarios...");
             
-            // Guardar en la base de datos
-            const db = window.localDB || await this.initDB();
-            await db.update('RESPUESTAS_CUESTIONARIO', this.currentQuizReview);
+            // Obtener asignaciones guardadas
+            const assignments = JSON.parse(localStorage.getItem('quiz_role_assignments') || '{}');
+            console.log('Asignaciones cargadas:', assignments);
             
-            // Actualizar interfaz
-            const confirmBtn = document.getElementById('confirmGradeBtn');
-            if (confirmBtn) {
-                confirmBtn.disabled = true;
-                confirmBtn.textContent = 'Calificación confirmada';
-            }
+            // Actualizar estado de los checkboxes
+            const checkboxes = document.querySelectorAll('.role-checkbox[data-quiz]');
+            console.log('Checkboxes encontrados:', checkboxes.length);
             
-            const noteElement = document.querySelector('.quiz-score .note');
-            if (noteElement) {
-                noteElement.innerHTML = '<span class="badge status-correct">Calificación Confirmada</span>';
-            }
+            checkboxes.forEach(checkbox => {
+                const quizName = checkbox.dataset.quiz;
+                const roleName = checkbox.dataset.role;
+                
+                // Resetear estado
+                checkbox.checked = false;
+                
+                // Si hay asignaciones guardadas para este cuestionario
+                if (assignments[quizName] && assignments[quizName].includes(roleName)) {
+                    checkbox.checked = true;
+                    console.log(`✅ ${quizName} -> ${roleName}: ASIGNADO`);
+                } 
+                // Asignaciones por defecto solo para roles administrativos si no hay asignación explícita
+                else if (!assignments[quizName] && this.isAdminRole(roleName)) {
+                    checkbox.checked = true;
+                    console.log(`🔧 ${quizName} -> ${roleName}: ASIGNADO POR DEFECTO`);
+                } else {
+                    console.log(`❌ ${quizName} -> ${roleName}: NO ASIGNADO`);
+                }
+            });
             
-            // Recargar estadísticas
-            await this.loadQuizStats();
-            await this.loadPendingReviews();
-            
-            window.app.showAlert('Calificación confirmada. El estudiante ya puede ver los resultados.', 'success');
+            console.log('✅ Asignaciones de roles cargadas correctamente');
         } catch (error) {
-            console.error('Error al confirmar calificación:', error);
-            window.app.showAlert('Error al confirmar la calificación', 'danger');
+            console.error('Error cargando asignaciones de roles para cuestionarios:', error);
         }
     }
+
+    isAdminRole(roleName) {
+        // Detectar roles administrativos basándose en el nombre
+        const adminKeywords = ['admin', 'administrador', 'director', 'coordinador'];
+        return adminKeywords.some(keyword => roleName.toLowerCase().includes(keyword));
+    }
     
+    async saveQuizRoleAssignments() {
+        try {
+            console.log("Guardando asignaciones de roles para cuestionarios...");
+            
+            // Recopilar todas las asignaciones
+            const checkboxes = document.querySelectorAll('.role-checkbox[data-quiz]');
+            const assignments = {};
+            
+            checkboxes.forEach(checkbox => {
+                const quizName = checkbox.dataset.quiz;
+                const roleName = checkbox.dataset.role;
+                
+                if (!assignments[quizName]) {
+                    assignments[quizName] = [];
+                }
+                
+                if (checkbox.checked) {
+                    assignments[quizName].push(roleName);
+                }
+            });
+            
+            // Guardar en localStorage
+            localStorage.setItem('quiz_role_assignments', JSON.stringify(assignments));
+            
+            if (window.app && window.app.showAlert) {
+                window.app.showAlert('Asignaciones de cuestionarios guardadas correctamente', 'success');
+            } else {
+                alert('Asignaciones de cuestionarios guardadas correctamente');
+            }
+        } catch (error) {
+            console.error('Error al guardar asignaciones de cuestionarios:', error);
+            if (window.app && window.app.showAlert) {
+                window.app.showAlert('Error al guardar las asignaciones de cuestionarios', 'danger');
+            } else {
+                alert('Error al guardar las asignaciones de cuestionarios');
+            }
+        }
+    }
+
+    async updateRoleAssignmentTable() {
+        try {
+            const quizzes = await window.localDB.getAll('CUESTIONARIOS');
+            const roleAssignmentTable = document.querySelector('.role-assignments tbody');
+            
+            if (!roleAssignmentTable || quizzes.length === 0) {
+                console.log('No role assignment table found or no quizzes');
+                return;
+            }
+            
+            // Usar los roles del sistema generados
+            const availableRoles = SYSTEM_ROLES;
+            
+            console.log('Roles disponibles para cuestionarios:', availableRoles);
+            
+            // Generar cabecera de la tabla primero
+            const tableHeader = document.querySelector('.role-assignments thead tr');
+            if (tableHeader) {
+                tableHeader.innerHTML = `
+                    <th>Cuestionario</th>
+                    ${availableRoles.map(role => `<th>${role}</th>`).join('')}
+                `;
+            }
+            
+            // Generar filas de la tabla
+            const tableHTML = quizzes.map(quiz => {
+                return `
+                    <tr>
+                        <td><strong>${quiz.titulo || quiz.nombre}</strong><br><small class="text-muted">${quiz.nombre}</small></td>
+                        ${availableRoles.map(role => `
+                            <td>
+                                <div class="role-toggle">
+                                    <input type="checkbox" id="role_${quiz.nombre}_${role}" 
+                                           class="role-checkbox"
+                                           data-quiz="${quiz.nombre}" 
+                                           data-role="${role}">
+                                    <label for="role_${quiz.nombre}_${role}" class="role-label"></label>
+                                </div>
+                            </td>
+                        `).join('')}
+                    </tr>
+                `;
+            }).join('');
+            
+            roleAssignmentTable.innerHTML = tableHTML;
+            
+            // Cargar asignaciones existentes
+            await this.loadQuizRoleAssignments();
+            
+            console.log('✅ Tabla de asignaciones de cuestionarios actualizada');
+            
+        } catch (error) {
+            console.error('Error updating role assignment table:', error);
+        }
+    }
+
+    // Función simplificada para obtener roles del sistema
+    getSystemRolesFromTemplate() {
+        return SYSTEM_ROLES;
+    }
+
+    // Función mejorada para sincronizar roles entre módulos
+    async syncSystemRoles() {
+        try {
+            return SYSTEM_ROLES;
+        } catch (error) {
+            console.error('Error sincronizando roles del sistema:', error);
+            return SYSTEM_ROLES.length > 0 ? SYSTEM_ROLES : ['Admin', 'Usuario'];
+        }
+    }
+
+    async getSystemRoles() {
+        return SYSTEM_ROLES;
+    }
+
+    async loadQuizzes() {
+        try {
+            console.log("Cargando cuestionarios desde la base de datos...");
+            
+            // Buscar el contenedor correcto
+            let quizzesContainer = document.getElementById('quizzesList') || 
+                                  document.querySelector('.quizzes-grid') || 
+                                  document.getElementById('quizzes-container');
+            
+            if (!quizzesContainer) {
+                console.warn('No quizzes container found, creating one');
+                const mainContent = document.querySelector('.main-content .container');
+                if (mainContent) {
+                    const section = document.createElement('section');
+                    section.innerHTML = '<div class="card"><div class="card-body"><div id="quizzesList"></div></div></div>';
+                    mainContent.appendChild(section);
+                    quizzesContainer = document.getElementById('quizzesList');
+                } else {
+                    console.error('No main content container found');
+                    return;
+                }
+            }
+            
+            // Mostrar indicador de carga
+            quizzesContainer.innerHTML = '<p class="text-center">Cargando cuestionarios...</p>';
+            
+            // Obtener todos los cuestionarios de la base de datos
+            let quizzes = [];
+            try {
+                quizzes = await window.localDB.getAll('CUESTIONARIOS');
+                console.log('Cuestionarios cargados desde DB:', quizzes.length, quizzes);
+            } catch (error) {
+                console.error('Error al obtener cuestionarios:', error);
+                quizzesContainer.innerHTML = `<p class="text-center text-danger">Error al cargar los cuestionarios: ${error.message}</p>`;
+                return;
+            }
+            
+            // Verificar si hay cuestionarios para mostrar
+            if (quizzes.length === 0) {
+                quizzesContainer.innerHTML = `
+                    <div class="text-center p-4">
+                        <h4>No hay cuestionarios disponibles</h4>
+                        <p>Crea un nuevo cuestionario para comenzar.</p>
+                        <a href="create-quiz.html" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Crear Nuevo Cuestionario
+                        </a>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Mostrar los cuestionarios en el contenedor
+            const quizzesHTML = quizzes.map((quiz, index) => {
+                const quizId = quiz.id_cuestionario;
+                const quizName = quiz.nombre || `Cuestionario ${index + 1}`;
+                const quizTitle = quiz.titulo || quizName;
+                const quizDesc = quiz.descripcion || 'Sin descripción';
+                const quizTimeLimit = quiz.tiempoLimite || 30;
+                
+                return `
+                    <div class="quiz-item card mb-3" data-quiz="${quizName}">
+                        <div class="card-body">
+                            <div class="quiz-details">
+                                <h5 class="card-title">${quizTitle}</h5>
+                                <p class="card-text">${quizDesc}</p>
+                                <div class="quiz-meta">
+                                    <small class="text-muted">
+                                        <span><i class="fas fa-user"></i> ${quizName}</span> |
+                                        <span><i class="fas fa-clock"></i> ${quizTimeLimit} minutos</span> |
+                                        <span><i class="fas fa-question-circle"></i> ID: ${quizId}</span>
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="quiz-actions mt-3">
+                                <a href="edit-quiz.html?id=${quizId}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-edit"></i> Editar
+                                </a>
+                                <button class="btn btn-success btn-sm" onclick="window.quizAdmin.viewQuizResults('${quizName}')">
+                                    <i class="fas fa-chart-line"></i> Estadísticas
+                                </button>
+                                <button class="btn btn-danger btn-sm quiz-delete-btn" data-id="${quizId}">
+                                    <i class="fas fa-trash"></i> Eliminar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            quizzesContainer.innerHTML = quizzesHTML.join('');
+            console.log(`✅ Se han mostrado ${quizzes.length} cuestionarios`);
+            await this.updateRoleAssignmentTable();
+        } catch (error) {
+            console.error('Error loading quizzes:', error);
+            const quizzesContainer = document.getElementById('quizzesList') || 
+                                    document.querySelector('.quizzes-grid');
+            if (quizzesContainer) {
+                quizzesContainer.innerHTML = `<p class="text-center text-danger">Error al cargar los cuestionarios: ${error.message}</p>`;
+            }
+        }
+    }
+
+    async deleteQuiz(quizId) {
+        try {
+            console.log(`Intentando eliminar cuestionario con ID: ${quizId}`);
+            
+            if (!confirm('¿Está seguro de que desea eliminar este cuestionario? Esta acción no se puede deshacer.')) {
+                return;
+            }
+            
+            // 1. Obtener el cuestionario para obtener su nombre
+            const quizzes = await window.localDB.query('CUESTIONARIOS', { id_cuestionario: parseInt(quizId) });
+            
+            if (quizzes.length === 0) {
+                throw new Error('Cuestionario no encontrado.');
+            }
+            
+            const quizName = quizzes[0].nombre;
+            console.log(`Eliminando cuestionario "${quizName}" (ID: ${quizId})`);
+            
+            // 2. Obtener las preguntas asociadas
+            const questions = await window.localDB.query('PREGUNTAS_CUESTIONARIO', { id_cuestionario: parseInt(quizId) });
+            console.log(`Encontradas ${questions.length} preguntas para eliminar`);
+            
+            // 3. Eliminar las opciones de cada pregunta
+            for (const question of questions) {
+                const options = await window.localDB.query('OPCIONES_CUESTIONARIO', { id_pregunta: question.id_pregunta });
+                
+                for (const option of options) {
+                    await window.localDB.delete('OPCIONES_CUESTIONARIO', option.id_opcion);
+                }
+                
+                // Eliminar la pregunta
+                await window.localDB.delete('PREGUNTAS_CUESTIONARIO', question.id_pregunta);
+            }
+            
+            // 4. Eliminar las respuestas asociadas por nombre de cuestionario
+            const responses = await window.localDB.query('RESPUESTAS_CUESTIONARIO', { quizName: quizName });
+            for (const response of responses) {
+                await window.localDB.delete('RESPUESTAS_CUESTIONARIO', response.id);
+            }
+            
+            // 5. Eliminar el cuestionario
+            await window.localDB.delete('CUESTIONARIOS', parseInt(quizId));
+            
+            console.log(`Cuestionario eliminado correctamente: ${quizName}`);
+
+            // Eliminar página generada
+            localStorage.removeItem(`generated_quiz_${quizName}`);
+            const generatedPages = JSON.parse(localStorage.getItem('generated_quiz_pages') || '[]');
+            const updatedPages = generatedPages.filter(page => page !== quizName);
+            localStorage.setItem('generated_quiz_pages', JSON.stringify(updatedPages));
+            
+            if (window.app && window.app.showAlert) {
+                window.app.showAlert('Cuestionario eliminado correctamente.', 'success');
+            } else {
+                alert('Cuestionario eliminado correctamente.');
+            }
+            
+            // Recargar la lista de cuestionarios
+            await this.loadQuizzes();
+        } catch (error) {
+            console.error('Error deleting quiz:', error);
+            if (window.app && window.app.showAlert) {
+                window.app.showAlert('Error al eliminar el cuestionario: ' + error.message, 'danger');
+            }
+        }
+    }
+
     async viewQuizResults(quizName) {
         try {
+            // Utilizamos el método del código original para mantener la coherencia
             const responses = await this.getQuizResponses(quizName);
             
             const modal = document.getElementById('resultsModal');
@@ -556,6 +636,7 @@ class QuizAdmin {
                 return;
             }
             
+            // Reutilizamos el código original para mostrar las estadísticas
             // Calcular estadísticas
             const totalResponses = validResponses.length;
             const confirmedResponses = validResponses.filter(r => r.results.gradeConfirmed).length;
@@ -642,7 +723,7 @@ class QuizAdmin {
                                         </div>
                                     </div>
                                     <div class="student-actions">
-                                        <button class="btn btn-primary btn-sm" onclick="quizAdmin.reviewQuiz('${r.id}', '${quizName}')">
+                                        <button class="btn btn-primary btn-sm" onclick="window.quizAdmin.reviewQuiz('${r.id}', '${quizName}')">
                                             Ver Detalles
                                         </button>
                                     </div>
@@ -653,340 +734,607 @@ class QuizAdmin {
                 </div>
             `;
             
-            // Agregar estilos específicos
-            const style = document.createElement('style');
-            style.textContent = `
-                .distribution-bars {
-                    margin-top: 1rem;
-                }
-                
-                .distribution-item {
-                    margin-bottom: 0.75rem;
-                }
-                
-                .distribution-label {
-                    font-size: 0.875rem;
-                    font-weight: 500;
-                    margin-bottom: 0.25rem;
-                }
-                
-                .distribution-bar-container {
-                    height: 24px;
-                    background: var(--gray-100);
-                    border-radius: var(--radius);
-                    position: relative;
-                    overflow: hidden;
-                }
-                
-                .distribution-bar {
-                    height: 100%;
-                    background: var(--primary-500);
-                    transition: width 0.5s ease;
-                }
-                
-                .distribution-value {
-                    position: absolute;
-                    top: 0;
-                    left: 0.5rem;
-                    height: 100%;
-                    display: flex;
-                    align-items: center;
-                    font-size: 0.75rem;
-                    color: white;
-                    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-                }
-                
-                .student-results-list {
-                    margin-top: 1rem;
-                    max-height: 300px;
-                    overflow-y: auto;
-                }
-                
-                .student-result-item {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    padding: 0.75rem;
-                    border: 1px solid var(--gray-200);
-                    border-radius: var(--radius);
-                    margin-bottom: 0.5rem;
-                }
-                
-                .student-result-item.confirmed {
-                    border-left: 4px solid var(--success-500);
-                }
-                
-                .student-result-item.pending {
-                    border-left: 4px solid var(--warning-500);
-                }
-                
-                .student-name {
-                    font-weight: 500;
-                }
-                
-                .student-meta {
-                    font-size: 0.75rem;
-                    color: var(--gray-600);
-                }
-                
-                .score-badge {
-                    background: var(--blue-100);
-                    color: var(--blue-700);
-                    padding: 0.25rem 0.5rem;
-                    border-radius: var(--radius);
-                    font-weight: 600;
-                }
-                
-                .score-status {
-                    font-size: 0.75rem;
-                    margin-top: 0.25rem;
-                    text-align: center;
-                }
+            modal.style.display = 'flex';
+        } catch (error) {
+            console.error('Error al cargar resultados:', error);
+            window.app && window.app.showAlert('Error al mostrar los resultados del cuestionario', 'danger');
+        }
+    }
+	generateQuestionOptions(question, questionIndex) {
+        if (question.tipo === 'opcion_multiple') {
+            return question.opciones.map((option, optIndex) => `
+                <div class="option-card">
+                    <input type="radio" id="q${questionIndex}_${option.valor}" name="question_${questionIndex}" value="${option.valor}" class="option-input" required>
+                    <label for="q${questionIndex}_${option.valor}" class="option-label">
+                        <div class="option-indicator">
+                            <span class="option-letter">${option.valor}</span>
+                        </div>
+                        <div class="option-content">
+                            <span class="option-text">${option.texto}</span>
+                        </div>
+                    </label>
+                </div>
+            `).join('');
+        } else if (question.tipo === 'verdadero_falso') {
+            return `
+                <div class="option-card">
+                    <input type="radio" id="q${questionIndex}_true" name="question_${questionIndex}" value="true" class="option-input" required>
+                    <label for="q${questionIndex}_true" class="option-label">
+                        <div class="option-indicator">
+                            <span class="option-letter">V</span>
+                        </div>
+                        <div class="option-content">
+                            <span class="option-text">Verdadero</span>
+                        </div>
+                    </label>
+                </div>
+                <div class="option-card">
+                    <input type="radio" id="q${questionIndex}_false" name="question_${questionIndex}" value="false" class="option-input" required>
+                    <label for="q${questionIndex}_false" class="option-label">
+                        <div class="option-indicator">
+                            <span class="option-letter">F</span>
+                        </div>
+                        <div class="option-content">
+                            <span class="option-text">Falso</span>
+                        </div>
+                    </label>
+                </div>
             `;
-            modalBody.appendChild(style);
+        } else if (question.tipo === 'respuesta_corta') {
+            return `
+                <div class="textarea-container">
+                    <textarea id="q${questionIndex}_text" name="question_${questionIndex}" rows="4" class="form-textarea" placeholder="Escribe tu respuesta aquí..." required maxlength="500"></textarea>
+                    <div class="textarea-counter">
+                        <span id="q${questionIndex}_counter">0</span>/500 caracteres
+                    </div>
+                </div>
+            `;
+        }
+        return '';
+    }
+
+    async reviewQuiz(responseId, quizName) {
+        try {
+            const responses = await this.getQuizResponses(quizName);
+            const response = responses.find(r => r.id === responseId);
+            
+            if (!response) {
+                alert('Evaluación no encontrada');
+                return;
+            }
+            
+            this.currentQuizReview = response;
+            
+            const modal = document.getElementById('reviewModal');
+            const modalBody = document.getElementById('reviewModalBody');
+            
+            if (!modal || !modalBody) return;
+            
+            modalBody.innerHTML = `
+                <div class="student-info">
+                    <h4>${response.userId}</h4>
+                    <div class="student-meta">
+                        <div>Cuestionario: <strong>${quizName}</strong></div>
+                        <div>Fecha: <strong>${new Date(response.timestamp).toLocaleString('es-ES')}</strong></div>
+                    </div>
+                </div>
+                
+                <div class="quiz-score">
+                    <div class="score-circle">${response.results.porcentaje}%</div>
+                    <p>${response.results.totalCorrectas} de ${response.results.totalPreguntas} respuestas correctas</p>
+                    <p class="note">${response.results.gradeConfirmed ? 
+                        '<span class="badge status-correct">Calificación Confirmada</span>' : 
+                        '<span class="badge status-incorrect">Pendiente de Confirmación</span>'}</p>
+                </div>
+                
+                <div class="questions-review">
+                    <h4>Revisión de Preguntas</h4>
+                    
+                     ${response.results.preguntas.map((pregunta, index) => `
+                        <div class="question-review-item">
+                            <div class="question-review-header">
+                                <h5 class="question-review-title">Pregunta ${index + 1}: ${pregunta.texto}</h5>
+                                <span class="question-status ${pregunta.esCorrecta ? 'status-correct' : 'status-incorrect'}">
+                                    ${pregunta.esCorrecta ? 'Correcta' : 'Incorrecta'}
+                                </span>
+                            </div>
+                            <div class="question-review-body">
+                                <div class="answers-comparison">
+                                    <div class="student-answer">
+                                        <div class="answer-label">Respuesta del estudiante:</div>
+                                        <div class="answer-value">${pregunta.respuesta}</div>
+                                    </div>
+                                    <div class="correct-answer">
+                                        <div class="answer-label">Respuesta correcta:</div>
+                                        <div class="answer-value">${pregunta.respuestaCorrecta}</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="correction-toggle">
+                                    <div class="toggle-label">¿Modificar corrección?</div>
+                                    <div class="role-toggle">
+                                        <input type="checkbox" id="toggle_correction_${index}" 
+                                               class="role-checkbox correction-checkbox"
+                                               data-question-index="${index}" 
+                                               ${pregunta.esCorrecta ? 'checked' : ''}>
+                                        <label for="toggle_correction_${index}" class="role-label"></label>
+                                    </div>
+                                    <div class="toggle-status">
+                                        <span class="status-${pregunta.esCorrecta ? 'correct' : 'incorrect'}">
+                                            ${pregunta.esCorrecta ? 'Correcta' : 'Incorrecta'}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <div class="score-actions">
+                    <button class="btn btn-success" id="recalculateScoreBtn" onclick="window.quizAdmin.recalculateScore()">
+                        Recalcular Puntuación
+                    </button>
+                    ${!response.results.gradeConfirmed ? `
+                        <button class="btn btn-primary" id="confirmGradeBtn" onclick="window.quizAdmin.confirmGrade()">
+                            Confirmar Calificación
+                        </button>
+                    ` : `
+                        <button class="btn btn-secondary" disabled>
+                            Calificación ya confirmada
+                        </button>
+                    `}
+                </div>
+            `;
+            
+            // Agregar eventos para los checkboxes de corrección
+            const correctionCheckboxes = modalBody.querySelectorAll('.correction-checkbox');
+            correctionCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', this.handleCorrectionToggle.bind(this));
+            });
             
             modal.style.display = 'flex';
         } catch (error) {
-            console.error('Error al mostrar resultados del cuestionario:', error);
-            window.app.showAlert('Error al cargar los resultados', 'danger');
+            console.error('Error revisando cuestionario:', error);
+            alert('Error al cargar la revisión del cuestionario');
         }
     }
-    
-    setupRoleAssignments() {
-        // Manejar guardado de asignaciones
-        const saveButton = document.getElementById('saveQuizRoleAssignments');
-        if (saveButton) {
-            saveButton.addEventListener('click', this.saveRoleAssignments.bind(this));
-        }
-    }
-    
-    async saveRoleAssignments() {
-        try {
-            // Recopilar todas las asignaciones
-            const checkboxes = document.querySelectorAll('.role-checkbox[data-quiz]');
-            const assignments = {};
-            
-            checkboxes.forEach(checkbox => {
-                const quizName = checkbox.dataset.quiz;
-                const roleName = checkbox.dataset.role;
-                
-                if (!assignments[quizName]) {
-                    assignments[quizName] = [];
-                }
-                
-                if (checkbox.checked) {
-                    assignments[quizName].push(roleName);
-                }
-            });
-            
-            // Guardar en localStorage (o podría guardarse en IndexedDB)
-            localStorage.setItem('quiz_role_assignments', JSON.stringify(assignments));
-            
-            window.app.showAlert('Asignaciones guardadas correctamente', 'success');
-        } catch (error) {
-            console.error('Error al guardar asignaciones:', error);
-            window.app.showAlert('Error al guardar las asignaciones', 'danger');
-        }
-    }
-    
-    async deleteQuiz(quizName) {
-        if (!confirm(`¿Está seguro de que desea eliminar el cuestionario "${quizName}"? Esta acción eliminará también todas las respuestas asociadas.`)) {
+
+    handleCorrectionToggle(event) {
+        const checkbox = event.target;
+        const questionIndex = parseInt(checkbox.dataset.questionIndex, 10);
+        const isCorrect = checkbox.checked;
+        
+        if (!this.currentQuizReview || !this.currentQuizReview.results.preguntas[questionIndex]) {
             return;
         }
-
+        
+        // Actualizar estado de corrección
+        this.currentQuizReview.results.preguntas[questionIndex].esCorrecta = isCorrect;
+        this.currentQuizReview.results.preguntas[questionIndex].correctionReviewed = true;
+        
+        // Actualizar elemento de estado en la interfaz
+        const toggleStatus = checkbox.closest('.correction-toggle').querySelector('.toggle-status span');
+        if (toggleStatus) {
+            toggleStatus.className = `status-${isCorrect ? 'correct' : 'incorrect'}`;
+            toggleStatus.textContent = isCorrect ? 'Correcta' : 'Incorrecta';
+        }
+        
+        // Actualizar cabecera de pregunta
+        const questionHeader = checkbox.closest('.question-review-item').querySelector('.question-status');
+        if (questionHeader) {
+            questionHeader.className = `question-status ${isCorrect ? 'status-correct' : 'status-incorrect'}`;
+            questionHeader.textContent = isCorrect ? 'Correcta' : 'Incorrecta';
+        }
+    }
+    
+    recalculateScore() {
+        if (!this.currentQuizReview) return;
+        
+        // Contar preguntas correctas
+        const totalPreguntas = this.currentQuizReview.results.preguntas.length;
+        const totalCorrectas = this.currentQuizReview.results.preguntas.filter(p => p.esCorrecta).length;
+        const porcentaje = Math.round((totalCorrectas / totalPreguntas) * 100);
+        
+        // Actualizar resultados
+        this.currentQuizReview.results.totalCorrectas = totalCorrectas;
+        this.currentQuizReview.results.porcentaje = porcentaje;
+        
+        // Actualizar puntuación en la interfaz
+        const scoreCircle = document.querySelector('.score-circle');
+        if (scoreCircle) {
+            scoreCircle.textContent = `${porcentaje}%`;
+        }
+        
+        const scoreText = document.querySelector('.quiz-score p');
+        if (scoreText) {
+            scoreText.textContent = `${totalCorrectas} de ${totalPreguntas} respuestas correctas`;
+        }
+        
+        // Mostrar mensaje
+        if (window.app && window.app.showAlert) {
+            window.app.showAlert('Puntuación recalculada correctamente', 'success');
+        } else {
+            alert('Puntuación recalculada correctamente');
+        }
+    }
+    
+    async confirmGrade() {
+        if (!this.currentQuizReview) return;
+        
         try {
-            const db = window.localDB || await this.initDB();
+            // Marcar como confirmada
+            this.currentQuizReview.results.gradeConfirmed = true;
+            this.currentQuizReview.reviewedAt = Date.now();
             
-            // Eliminar respuestas asociadas
-            const responses = await this.getQuizResponses(quizName);
-            for (const response of responses) {
-                await db.delete('RESPUESTAS_CUESTIONARIO', response.id);
+            // Guardar en la base de datos
+            await window.localDB.update('RESPUESTAS_CUESTIONARIO', this.currentQuizReview);
+            
+            // Actualizar interfaz
+            const confirmBtn = document.getElementById('confirmGradeBtn');
+            if (confirmBtn) {
+                confirmBtn.disabled = true;
+                confirmBtn.textContent = 'Calificación confirmada';
             }
             
-            window.app.showAlert('Cuestionario eliminado correctamente', 'success');
+            const noteElement = document.querySelector('.quiz-score .note');
+            if (noteElement) {
+                noteElement.innerHTML = '<span class="badge status-correct">Calificación Confirmada</span>';
+            }
             
-            // Recargar estadísticas
-            await this.loadQuizStats();
-            await this.loadPendingReviews();
+            if (window.app && window.app.showAlert) {
+                window.app.showAlert('Calificación confirmada. El estudiante ya puede ver los resultados.', 'success');
+            } else {
+                alert('Calificación confirmada. El estudiante ya puede ver los resultados.');
+            }
         } catch (error) {
-            console.error('Error eliminando cuestionario:', error);
-            window.app.showAlert('Error al eliminar el cuestionario', 'danger');
+            console.error('Error al confirmar calificación:', error);
+            if (window.app && window.app.showAlert) {
+                window.app.showAlert('Error al confirmar la calificación', 'danger');
+            } else {
+                alert('Error al confirmar la calificación');
+            }
         }
     }
 
-    editQuiz(quizName) {
-        // Redirigir a página de edición (en una implementación real)
-        window.app.showAlert(`Función de edición para "${quizName}" - Por implementar`, 'info');
-    }
-
-    closeReviewModal() {
-        const modal = document.getElementById('reviewModal');
-        if (modal) {
-            modal.style.display = 'none';
-        }
-    }
-
-    closeResultsModal() {
-        const modal = document.getElementById('resultsModal');
-        if (modal) {
-            modal.style.display = 'none';
+    // Método del original para obtener respuestas
+    async getQuizResponses(quizName) {
+        try {
+            console.log(`Obteniendo respuestas para cuestionario: ${quizName}`);
+            
+            // Buscar en IndexedDB
+            const responses = await window.localDB.query('RESPUESTAS_CUESTIONARIO', { quizName });
+            console.log(`Respuestas encontradas en BD: ${responses.length}`);
+            
+            // Si no hay respuestas reales, crear algunas de ejemplo SOLO si hay cuestionarios
+            if (responses.length === 0) {
+                console.log(`Creando respuestas de ejemplo para ${quizName}...`);
+                
+                const sampleResponses = [
+                    {
+                        id: `quiz_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                        quizName: quizName,
+                        userId: 'estudiante1@universidad.com',
+                        timestamp: Date.now() - (Math.random() * 7 * 24 * 60 * 60 * 1000), // Última semana
+                        reviewed: false,
+                        results: {
+                            totalPreguntas: Math.floor(Math.random() * 8) + 3, // 3-10 preguntas
+                            totalCorrectas: 0,
+                            porcentaje: 0,
+                            gradeConfirmed: false,
+                            preguntas: []
+                        }
+                    },
+                    {
+                        id: `quiz_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                        quizName: quizName,
+                        userId: 'estudiante2@universidad.com',
+                        timestamp: Date.now() - (Math.random() * 3 * 24 * 60 * 60 * 1000), // Últimos 3 días
+                        reviewed: false,
+                        results: {
+                            totalPreguntas: Math.floor(Math.random() * 8) + 3,
+                            totalCorrectas: 0,
+                            porcentaje: 0,
+                            gradeConfirmed: false,
+                            preguntas: []
+                        }
+                    }
+                ];
+    
+                // Generar preguntas y respuestas para cada ejemplo
+                for (const response of sampleResponses) {
+                    const totalPreguntas = response.results.totalPreguntas;
+                    let totalCorrectas = 0;
+                    
+                    for (let i = 1; i <= totalPreguntas; i++) {
+                        const esCorrecta = Math.random() > 0.4; // 60% probabilidad de correcta
+                        if (esCorrecta) totalCorrectas++;
+                        
+                        response.results.preguntas.push({
+                            texto: `Pregunta ${i} del cuestionario ${quizName}`,
+                            respuesta: `Respuesta del estudiante ${i}`,
+                            esCorrecta: esCorrecta,
+                            respuestaCorrecta: `Respuesta correcta ${i}`,
+                            correctionReviewed: false
+                        });
+                    }
+                    
+                    response.results.totalCorrectas = totalCorrectas;
+                    response.results.porcentaje = Math.round((totalCorrectas / totalPreguntas) * 100);
+                    
+                    // Guardar en la base de datos
+                    try {
+                        await window.localDB.create('RESPUESTAS_CUESTIONARIO', response);
+                        console.log(`Respuesta de ejemplo creada: ${response.id}`);
+                    } catch (error) {
+                        console.warn(`Error creando respuesta de ejemplo: ${error.message}`);
+                    }
+                }
+    
+                return sampleResponses;
+            }
+    
+            return responses;
+        } catch (error) {
+            console.error('Error obteniendo respuestas de cuestionario:', error);
+            return [];
         }
     }
 
     async initDB() {
         try {
-            // Si la base de datos global ya existe, la usamos
-            if (window.localDB && window.localDB.db) {
-                return window.localDB;
+            console.log('Inicializando base de datos...');
+            console.log('Window localDB exists:', !!window.localDB);
+            
+            if (!window.localDB) {
+                console.log('LocalDB no existe, creando una nueva instancia...');
+                
+                // Usar la versión 2 para resolver problemas de versión
+                const request = indexedDB.open('DataWeb_DB', 2);
+                
+                await new Promise((resolve, reject) => {
+                    request.onerror = (event) => {
+                        console.error('Error initializing database:', event.target.error);
+                        reject(event.target.error);
+                    };
+                    
+                    request.onsuccess = (event) => {
+                        const db = event.target.result;
+                        console.log('Database opened successfully, version:', db.version);
+                        window.localDB = this.createDBWrapper(db);
+                        resolve();
+                    };
+                    
+                    request.onupgradeneeded = (event) => {
+                        console.log('Upgrading database to version:', event.newVersion);
+                        const db = event.target.result;
+                        
+                        // Crear almacenes de objetos si no existen
+                        if (!db.objectStoreNames.contains('CUESTIONARIOS')) {
+                            console.log('Creando almacén CUESTIONARIOS');
+                            db.createObjectStore('CUESTIONARIOS', { keyPath: 'id_cuestionario', autoIncrement: true });
+                        }
+                        
+                        if (!db.objectStoreNames.contains('PREGUNTAS_CUESTIONARIO')) {
+                            console.log('Creando almacén PREGUNTAS_CUESTIONARIO');
+                            db.createObjectStore('PREGUNTAS_CUESTIONARIO', { keyPath: 'id_pregunta', autoIncrement: true });
+                        }
+                        
+                        if (!db.objectStoreNames.contains('OPCIONES_CUESTIONARIO')) {
+                            console.log('Creando almacén OPCIONES_CUESTIONARIO');
+                            db.createObjectStore('OPCIONES_CUESTIONARIO', { keyPath: 'id_opcion', autoIncrement: true });
+                        }
+                        
+                        if (!db.objectStoreNames.contains('RESPUESTAS_CUESTIONARIO')) {
+                            console.log('Creando almacén RESPUESTAS_CUESTIONARIO');
+                            db.createObjectStore('RESPUESTAS_CUESTIONARIO', { keyPath: 'id', autoIncrement: true });
+                        }
+                        
+                        if (!db.objectStoreNames.contains('ENCUESTAS')) {
+                            console.log('Creando almacén ENCUESTAS');
+                            db.createObjectStore('ENCUESTAS', { keyPath: 'id_encuesta', autoIncrement: true });
+                        }
+                        
+                        if (!db.objectStoreNames.contains('PREGUNTAS_ENCUESTA')) {
+                            console.log('Creando almacén PREGUNTAS_ENCUESTA');
+                            db.createObjectStore('PREGUNTAS_ENCUESTA', { keyPath: 'id_pregunta', autoIncrement: true });
+                        }
+                        
+                        if (!db.objectStoreNames.contains('OPCIONES_PREGUNTA')) {
+                            console.log('Creando almacén OPCIONES_PREGUNTA');
+                            db.createObjectStore('OPCIONES_PREGUNTA', { keyPath: 'id_opcion', autoIncrement: true });
+                        }
+                        
+                        if (!db.objectStoreNames.contains('RESPUESTAS_ENCUESTA')) {
+                            console.log('Creando almacén RESPUESTAS_ENCUESTA');
+                            db.createObjectStore('RESPUESTAS_ENCUESTA', { keyPath: 'id', autoIncrement: true });
+                        }
+                    };
+                });
+                
+                console.log('Base de datos inicializada correctamente');
+            } else {
+                console.log('Utilizando instancia existente de localDB');
             }
-
-            // Importar o crear LocalDBManager
-            const LocalDBManager = window.LocalDBManager || class LocalDBManager {
-                constructor() {
-                    this.dbName = 'DataWeb_DB';
-                    this.version = 1;
-                    this.db = null;
-                }
-
-                async init() {
-                    return new Promise((resolve, reject) => {
-                        const request = indexedDB.open(this.dbName, this.version);
-                        
-                        request.onerror = () => {
-                            reject(request.error);
-                        };
-                        
-                        request.onsuccess = () => {
-                            this.db = request.result;
-                            resolve(this.db);
-                        };
-                        
-                        request.onupgradeneeded = (event) => {
-                            const db = event.target.result;
-                            
-                            if (!db.objectStoreNames.contains('RESPUESTAS_CUESTIONARIO')) {
-                                const store = db.createObjectStore('RESPUESTAS_CUESTIONARIO', { 
-                                    keyPath: 'id', 
-                                    autoIncrement: false 
-                                });
-                                store.createIndex('quizName', 'quizName', { unique: false });
-                                store.createIndex('userId', 'userId', { unique: false });
-                                store.createIndex('reviewed', 'reviewed', { unique: false });
-                            }
-                        };
-                    });
-                }
-
-                async query(tableName, filters = {}) {
-                    return new Promise((resolve, reject) => {
-                        const transaction = this.db.transaction([tableName], 'readonly');
-                        const store = transaction.objectStore(tableName);
-                        const request = store.getAll();
-                        
-                        request.onsuccess = () => {
-                            let results = request.result;
-                            
-                            if (Object.keys(filters).length > 0) {
-                                results = results.filter(item => {
-                                    return Object.keys(filters).every(key => {
-                                        if (!filters[key]) return true;
-                                        return item[key] === filters[key];
-                                    });
-                                });
-                            }
-                            
-                            resolve(results);
-                        };
-                        request.onerror = () => reject(request.error);
-                    });
-                }
-
-                async create(tableName, data) {
-                    return new Promise((resolve, reject) => {
-                        const transaction = this.db.transaction([tableName], 'readwrite');
-                        const store = transaction.objectStore(tableName);
-                        const request = store.add(data);
-                        
-                        request.onsuccess = () => resolve(request.result);
-                        request.onerror = () => reject(request.error);
-                    });
-                }
-
-                async update(tableName, data) {
-                    return new Promise((resolve, reject) => {
-                        const transaction = this.db.transaction([tableName], 'readwrite');
-                        const store = transaction.objectStore(tableName);
-                        const request = store.put(data);
-                        
-                        request.onsuccess = () => resolve(request.result);
-                        request.onerror = () => reject(request.error);
-                    });
-                }
-
-                async delete(tableName, id) {
-                    return new Promise((resolve, reject) => {
-                        const transaction = this.db.transaction([tableName], 'readwrite');
-                        const store = transaction.objectStore(tableName);
-                        const request = store.delete(id);
-                        
-                        request.onsuccess = () => resolve(request.result);
-                        request.onerror = () => reject(request.error);
-                    });
-                }
-            };
-
-            // Inicializar base de datos
-            const dbManager = new LocalDBManager();
-            await dbManager.init();
             
-            // Guardar globalmente
-            window.localDB = dbManager;
-            
-            return dbManager;
+            return window.localDB;
         } catch (error) {
             console.error('Error initializing database:', error);
             throw error;
         }
     }
+
+    createDBWrapper(db) {
+        return {
+            db: db,
+            
+            async create(storeName, data) {
+                console.log(`Creando registro en ${storeName}:`, data);
+                return new Promise((resolve, reject) => {
+                    try {
+                        const transaction = db.transaction([storeName], 'readwrite');
+                        const store = transaction.objectStore(storeName);
+                        const request = store.add(data);
+                        
+                        request.onsuccess = (event) => {
+                            console.log(`Registro creado con ID: ${request.result}`);
+                            resolve(request.result);
+                        };
+                        
+                        request.onerror = (event) => {
+                            console.error(`Error al crear registro en ${storeName}:`, request.error);
+                            reject(request.error);
+                        };
+                    } catch (error) {
+                        console.error(`Error de transacción en ${storeName}:`, error);
+                        reject(error);
+                    }
+                });
+            },
+            
+            async getAll(storeName) {
+                console.log(`Obteniendo todos los registros de ${storeName}`);
+                return new Promise((resolve, reject) => {
+                    try {
+                        const transaction = db.transaction([storeName], 'readonly');
+                        const store = transaction.objectStore(storeName);
+                        const request = store.getAll();
+                        
+                        request.onsuccess = (event) => {
+                            console.log(`Recuperados ${request.result.length} registros de ${storeName}`);
+                            resolve(request.result);
+                        };
+                        
+                        request.onerror = (event) => {
+                            console.error(`Error al obtener registros de ${storeName}:`, request.error);
+                            reject(request.error);
+                        };
+                    } catch (error) {
+                        console.error(`Error de transacción en ${storeName}:`, error);
+                        reject(error);
+                    }
+                });
+            },
+            
+            async get(storeName, id) {
+                console.log(`Obteniendo registro con ID ${id} de ${storeName}`);
+                return new Promise((resolve, reject) => {
+                    try {
+                        const transaction = db.transaction([storeName], 'readonly');
+                        const store = transaction.objectStore(storeName);
+                        const request = store.get(id);
+                        
+                        request.onsuccess = (event) => {
+                            console.log(`Registro recuperado de ${storeName}:`, request.result);
+                            resolve(request.result);
+                        };
+                        
+                        request.onerror = (event) => {
+                            console.error(`Error al obtener registro de ${storeName}:`, request.error);
+                            reject(request.error);
+                        };
+                    } catch (error) {
+                        console.error(`Error de transacción en ${storeName}:`, error);
+                        reject(error);
+                    }
+                });
+            },
+            
+            async query(storeName, condition) {
+                console.log(`Consultando ${storeName} con condición:`, condition);
+                try {
+                    const all = await this.getAll(storeName);
+                    
+                    if (!condition || Object.keys(condition).length === 0) {
+                        return all;
+                    }
+                    
+                    const filtered = all.filter(item => {
+                        return Object.keys(condition).every(key => {
+                            return item[key] == condition[key]; // Loose equality for number vs string
+                        });
+                    });
+                    
+                    console.log(`Filtro aplicado en ${storeName}, resultados:`, filtered.length);
+                    return filtered;
+                } catch (error) {
+                    console.error(`Error en consulta a ${storeName}:`, error);
+                    throw error;
+                }
+            },
+            
+            async update(storeName, data) {
+                console.log(`Actualizando registro en ${storeName}:`, data);
+                return new Promise((resolve, reject) => {
+                    try {
+                        const transaction = db.transaction([storeName], 'readwrite');
+                        const store = transaction.objectStore(storeName);
+                        const request = store.put(data);
+                        
+                        request.onsuccess = (event) => {
+                            console.log(`Registro actualizado en ${storeName}`);
+                            resolve(request.result);
+                        };
+                        
+                        request.onerror = (event) => {
+                            console.error(`Error al actualizar registro en ${storeName}:`, request.error);
+                            reject(request.error);
+                        };
+                    } catch (error) {
+                        console.error(`Error de transacción en ${storeName}:`, error);
+                        reject(error);
+                    }
+                });
+            },
+            
+            async delete(storeName, id) {
+                console.log(`Eliminando registro con ID ${id} de ${storeName}`);
+                return new Promise((resolve, reject) => {
+                    try {
+                        const transaction = db.transaction([storeName], 'readwrite');
+                        const store = transaction.objectStore(storeName);
+                        const request = store.delete(id);
+                        
+                        request.onsuccess = (event) => {
+                            console.log(`Registro eliminado de ${storeName}`);
+                            resolve(request.result);
+                        };
+                        
+                        request.onerror = (event) => {
+                            console.error(`Error al eliminar registro de ${storeName}:`, request.error);
+                            reject(request.error);
+                        };
+                    } catch (error) {
+                        console.error(`Error de transacción en ${storeName}:`, error);
+                        reject(error);
+                    }
+                });
+            }
+        };
+    }
 }
 
-// Crear instancia global para usar en onclick
-window.quizAdmin = new QuizAdmin();
+// Inicializar la administración de cuestionarios
+console.log("Creando instancia de QuizAdmin...");
+const quizAdmin = new QuizAdmin();
 
-// Funciones globales para los onclick
-window.viewQuizResults = function(quizName) {
-    window.quizAdmin.viewQuizResults(quizName);
-};
+// Hacer accesible globalmente
+window.quizAdmin = quizAdmin;
 
-window.editQuiz = function(quizName) {
-    window.quizAdmin.editQuiz(quizName);
-};
-
-window.deleteQuiz = function(quizName) {
-    window.quizAdmin.deleteQuiz(quizName);
+window.closeResultsModal = function() {
+    if (window.quizAdmin) {
+        window.quizAdmin.closeResultsModal();
+    }
 };
 
 window.closeReviewModal = function() {
-    window.quizAdmin.closeReviewModal();
-};
-
-window.closeResultsModal = function() {
-    window.quizAdmin.closeResultsModal();
-};
-
-window.confirmGrade = function() {
-    window.quizAdmin.confirmGrade();
-};
-
-window.initializeAdminRoles = function() {
-	window.quizAdmin.initializeAdminRoles();
-};
-
-document.addEventListener('DOMContentLoaded', function() {
-    const saveButton = document.getElementById('saveQuizRoleAssignments');
-    if (saveButton) {
-        saveButton.addEventListener('click', function() {
-            quizAdmin.saveQuizRoleAssignments();
-        });
+    if (window.quizAdmin) {
+        window.quizAdmin.closeReviewModal();
     }
-});
+};
+window.refreshSystemRoles = function() {
+    if (window.adminSurvey) {
+        return window.adminSurvey.refreshSystemRoles();
+    } else if (window.quizAdmin) {
+        return window.quizAdmin.refreshSystemRoles();
+    }
+};

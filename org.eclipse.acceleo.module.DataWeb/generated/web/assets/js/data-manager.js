@@ -12,20 +12,24 @@ class DataManager {
     getTableName(entityName) {
         // Mapear nombres de entidades a nombres de tablas
         const tableMap = {
-            'libro': 'LIBROS'
-,            'categoria': 'CATEGORIAS'
-,            'usuario': 'USUARIOS'
+            'cliente': 'CLIENTES'
+,            'cuenta': 'CUENTAS'
+,            'transaccion': 'TRANSACCIONES'
+,            'empleado': 'EMPLEADOS'
 ,            'prestamo': 'PRESTAMOS'
+,            'tarjetacredito': 'TARJETAS_CREDITO'
         };
         return tableMap[entityName] || entityName.toUpperCase();
     }
 
     getPrimaryKey() {
         const pkMap = {
-            'LIBROS': 'id_libro'
-,            'CATEGORIAS': 'id_categoria'
-,            'USUARIOS': 'id_usuario'
+            'CLIENTES': 'id_cliente'
+,            'CUENTAS': 'numero_cuenta'
+,            'TRANSACCIONES': 'id_transaccion'
+,            'EMPLEADOS': 'id_empleado'
 ,            'PRESTAMOS': 'id_prestamo'
+,            'TARJETAS_CREDITO': 'numero_tarjeta'
         };
         return pkMap[this.tableName] || 'id';
     }
@@ -46,7 +50,7 @@ class DataManager {
             // Importar o crear LocalDBManager
             const LocalDBManager = window.LocalDBManager || class LocalDBManager {
                 constructor() {
-                    this.dbName = 'Biblioteca_Universitaria_DB';
+                    this.dbName = 'Sistema_Bancario Digital_DB';
                     this.version = 1;
                     this.db = null;
                 }
@@ -72,39 +76,61 @@ class DataManager {
                             const db = event.target.result;
                             
                             // Crear tablas para entidades
-                            if (!db.objectStoreNames.contains('LIBROS')) {
-                                console.log('Creating object store: LIBROS');
-                                const store = db.createObjectStore('LIBROS', {
-                                    keyPath: 'id_libro',
+                            if (!db.objectStoreNames.contains('CLIENTES')) {
+                                console.log('Creating object store: CLIENTES');
+                                const store = db.createObjectStore('CLIENTES', {
+                                    keyPath: 'id_cliente',
                                     autoIncrement: true
                                 });
                                 
                                 // Crear índices para búsquedas
-                                store.createIndex('titulo', 'titulo', { unique: false });
-                                store.createIndex('autor', 'autor', { unique: false });
-                                store.createIndex('añoPublicacion', 'añoPublicacion', { unique: false });
-                                store.createIndex('disponible', 'disponible', { unique: false });
+                                store.createIndex('dni', 'dni', { unique: false });
+                                store.createIndex('nombre', 'nombre', { unique: false });
+                                store.createIndex('apellidos', 'apellidos', { unique: false });
+                                store.createIndex('email', 'email', { unique: false });
+                                store.createIndex('telefono', 'telefono', { unique: false });
+                                store.createIndex('fecha_registro', 'fecha_registro', { unique: false });
+                                store.createIndex('activo', 'activo', { unique: false });
                             }
-                            if (!db.objectStoreNames.contains('CATEGORIAS')) {
-                                console.log('Creating object store: CATEGORIAS');
-                                const store = db.createObjectStore('CATEGORIAS', {
-                                    keyPath: 'id_categoria',
+                            if (!db.objectStoreNames.contains('CUENTAS')) {
+                                console.log('Creating object store: CUENTAS');
+                                const store = db.createObjectStore('CUENTAS', {
+                                    keyPath: 'numero_cuenta',
                                     autoIncrement: true
                                 });
                                 
                                 // Crear índices para búsquedas
-                                store.createIndex('nombre_categoria', 'nombre_categoria', { unique: false });
+                                store.createIndex('tipo_cuenta', 'tipo_cuenta', { unique: false });
+                                store.createIndex('saldo', 'saldo', { unique: false });
+                                store.createIndex('fecha_apertura', 'fecha_apertura', { unique: false });
+                                store.createIndex('activa', 'activa', { unique: false });
+                            }
+                            if (!db.objectStoreNames.contains('TRANSACCIONES')) {
+                                console.log('Creating object store: TRANSACCIONES');
+                                const store = db.createObjectStore('TRANSACCIONES', {
+                                    keyPath: 'id_transaccion',
+                                    autoIncrement: true
+                                });
+                                
+                                // Crear índices para búsquedas
+                                store.createIndex('fecha_transaccion', 'fecha_transaccion', { unique: false });
+                                store.createIndex('tipo_transaccion', 'tipo_transaccion', { unique: false });
+                                store.createIndex('monto', 'monto', { unique: false });
                                 store.createIndex('descripcion', 'descripcion', { unique: false });
+                                store.createIndex('estado', 'estado', { unique: false });
                             }
-                            if (!db.objectStoreNames.contains('USUARIOS')) {
-                                console.log('Creating object store: USUARIOS');
-                                const store = db.createObjectStore('USUARIOS', {
-                                    keyPath: 'id_usuario',
+                            if (!db.objectStoreNames.contains('EMPLEADOS')) {
+                                console.log('Creating object store: EMPLEADOS');
+                                const store = db.createObjectStore('EMPLEADOS', {
+                                    keyPath: 'id_empleado',
                                     autoIncrement: true
                                 });
                                 
                                 // Crear índices para búsquedas
-                                store.createIndex('nombre_usuario', 'nombre_usuario', { unique: false });
+                                store.createIndex('codigo_empleado', 'codigo_empleado', { unique: false });
+                                store.createIndex('nombre', 'nombre', { unique: false });
+                                store.createIndex('puesto', 'puesto', { unique: false });
+                                store.createIndex('departamento', 'departamento', { unique: false });
                                 store.createIndex('email', 'email', { unique: false });
                                 store.createIndex('activo', 'activo', { unique: false });
                             }
@@ -116,8 +142,25 @@ class DataManager {
                                 });
                                 
                                 // Crear índices para búsquedas
-                                store.createIndex('fechaPrestamo', 'fechaPrestamo', { unique: false });
-                                store.createIndex('fechaDevolucion', 'fechaDevolucion', { unique: false });
+                                store.createIndex('monto_solicitado', 'monto_solicitado', { unique: false });
+                                store.createIndex('tasa_interes', 'tasa_interes', { unique: false });
+                                store.createIndex('plazo_meses', 'plazo_meses', { unique: false });
+                                store.createIndex('estado_prestamo', 'estado_prestamo', { unique: false });
+                                store.createIndex('fecha_solicitud', 'fecha_solicitud', { unique: false });
+                                store.createIndex('fecha_aprobacion', 'fecha_aprobacion', { unique: false });
+                            }
+                            if (!db.objectStoreNames.contains('TARJETAS_CREDITO')) {
+                                console.log('Creating object store: TARJETAS_CREDITO');
+                                const store = db.createObjectStore('TARJETAS_CREDITO', {
+                                    keyPath: 'numero_tarjeta',
+                                    autoIncrement: true
+                                });
+                                
+                                // Crear índices para búsquedas
+                                store.createIndex('limite_credito', 'limite_credito', { unique: false });
+                                store.createIndex('saldo_actual', 'saldo_actual', { unique: false });
+                                store.createIndex('fecha_vencimiento', 'fecha_vencimiento', { unique: false });
+                                store.createIndex('activa', 'activa', { unique: false });
                             }
                             
                             // Crear tablas para encuestas y cuestionarios
@@ -354,50 +397,75 @@ class DataManager {
                     try {
                         console.log('Initializing sample data...');
                         
-                        // Verificar si Libro ya tiene datos
-                        const libroCount = await this.count('LIBROS');
-                        if (libroCount === 0) {
-                            console.log('Inserting sample data for Libro...');
-                            // Crear 5 registros de ejemplo para Libro
+                        // Verificar si Cliente ya tiene datos
+                        const clienteCount = await this.count('CLIENTES');
+                        if (clienteCount === 0) {
+                            console.log('Inserting sample data for Cliente...');
+                            // Crear 5 registros de ejemplo para Cliente
                             for (let i = 1; i <= 5; i++) {
                                 const data = {
-                                    titulo: 'Libro Ejemplo ' + i
-,                                    autor: 'Libro Ejemplo ' + i
-,                                    añoPublicacion: (i * 10)
-,                                    disponible: (i % 2 === 0)
-                                };
-                                await this.create('LIBROS', data);
-                            }
-                            console.log('✅ Sample data for Libro inserted');
-                        }
-                        // Verificar si Categoria ya tiene datos
-                        const categoriaCount = await this.count('CATEGORIAS');
-                        if (categoriaCount === 0) {
-                            console.log('Inserting sample data for Categoria...');
-                            // Crear 5 registros de ejemplo para Categoria
-                            for (let i = 1; i <= 5; i++) {
-                                const data = {
-                                    nombre_categoria: 'Categoria Ejemplo ' + i
-,                                    descripcion: 'Categoria Ejemplo ' + i
-                                };
-                                await this.create('CATEGORIAS', data);
-                            }
-                            console.log('✅ Sample data for Categoria inserted');
-                        }
-                        // Verificar si Usuario ya tiene datos
-                        const usuarioCount = await this.count('USUARIOS');
-                        if (usuarioCount === 0) {
-                            console.log('Inserting sample data for Usuario...');
-                            // Crear 5 registros de ejemplo para Usuario
-                            for (let i = 1; i <= 5; i++) {
-                                const data = {
-                                    nombre_usuario: 'Usuario Ejemplo ' + i
-,                                    email: 'Usuario Ejemplo ' + i
+                                    dni: 'Cliente Ejemplo ' + i
+,                                    nombre: 'Cliente Ejemplo ' + i
+,                                    apellidos: 'Cliente Ejemplo ' + i
+,                                    email: 'Cliente Ejemplo ' + i
+,                                    telefono: 'Cliente Ejemplo ' + i
+,                                    fecha_registro: 'Cliente Ejemplo ' + i
 ,                                    activo: (i % 2 === 0)
                                 };
-                                await this.create('USUARIOS', data);
+                                await this.create('CLIENTES', data);
                             }
-                            console.log('✅ Sample data for Usuario inserted');
+                            console.log('✅ Sample data for Cliente inserted');
+                        }
+                        // Verificar si Cuenta ya tiene datos
+                        const cuentaCount = await this.count('CUENTAS');
+                        if (cuentaCount === 0) {
+                            console.log('Inserting sample data for Cuenta...');
+                            // Crear 5 registros de ejemplo para Cuenta
+                            for (let i = 1; i <= 5; i++) {
+                                const data = {
+                                    tipo_cuenta: 'Cuenta Ejemplo ' + i
+,                                    saldo: (i * 10.5)
+,                                    fecha_apertura: 'Cuenta Ejemplo ' + i
+,                                    activa: (i % 2 === 0)
+                                };
+                                await this.create('CUENTAS', data);
+                            }
+                            console.log('✅ Sample data for Cuenta inserted');
+                        }
+                        // Verificar si Transaccion ya tiene datos
+                        const transaccionCount = await this.count('TRANSACCIONES');
+                        if (transaccionCount === 0) {
+                            console.log('Inserting sample data for Transaccion...');
+                            // Crear 5 registros de ejemplo para Transaccion
+                            for (let i = 1; i <= 5; i++) {
+                                const data = {
+                                    fecha_transaccion: 'Transaccion Ejemplo ' + i
+,                                    tipo_transaccion: 'Transaccion Ejemplo ' + i
+,                                    monto: (i * 10.5)
+,                                    descripcion: 'Transaccion Ejemplo ' + i
+,                                    estado: 'Transaccion Ejemplo ' + i
+                                };
+                                await this.create('TRANSACCIONES', data);
+                            }
+                            console.log('✅ Sample data for Transaccion inserted');
+                        }
+                        // Verificar si Empleado ya tiene datos
+                        const empleadoCount = await this.count('EMPLEADOS');
+                        if (empleadoCount === 0) {
+                            console.log('Inserting sample data for Empleado...');
+                            // Crear 5 registros de ejemplo para Empleado
+                            for (let i = 1; i <= 5; i++) {
+                                const data = {
+                                    codigo_empleado: 'Empleado Ejemplo ' + i
+,                                    nombre: 'Empleado Ejemplo ' + i
+,                                    puesto: 'Empleado Ejemplo ' + i
+,                                    departamento: 'Empleado Ejemplo ' + i
+,                                    email: 'Empleado Ejemplo ' + i
+,                                    activo: (i % 2 === 0)
+                                };
+                                await this.create('EMPLEADOS', data);
+                            }
+                            console.log('✅ Sample data for Empleado inserted');
                         }
                         // Verificar si Prestamo ya tiene datos
                         const prestamoCount = await this.count('PRESTAMOS');
@@ -406,12 +474,32 @@ class DataManager {
                             // Crear 5 registros de ejemplo para Prestamo
                             for (let i = 1; i <= 5; i++) {
                                 const data = {
-                                    fechaPrestamo: 'Prestamo Ejemplo ' + i
-,                                    fechaDevolucion: 'Prestamo Ejemplo ' + i
+                                    monto_solicitado: (i * 10.5)
+,                                    tasa_interes: (i * 10.5)
+,                                    plazo_meses: (i * 10)
+,                                    estado_prestamo: 'Prestamo Ejemplo ' + i
+,                                    fecha_solicitud: 'Prestamo Ejemplo ' + i
+,                                    fecha_aprobacion: 'Prestamo Ejemplo ' + i
                                 };
                                 await this.create('PRESTAMOS', data);
                             }
                             console.log('✅ Sample data for Prestamo inserted');
+                        }
+                        // Verificar si TarjetaCredito ya tiene datos
+                        const tarjetacreditoCount = await this.count('TARJETAS_CREDITO');
+                        if (tarjetacreditoCount === 0) {
+                            console.log('Inserting sample data for TarjetaCredito...');
+                            // Crear 5 registros de ejemplo para TarjetaCredito
+                            for (let i = 1; i <= 5; i++) {
+                                const data = {
+                                    limite_credito: (i * 10.5)
+,                                    saldo_actual: (i * 10.5)
+,                                    fecha_vencimiento: 'TarjetaCredito Ejemplo ' + i
+,                                    activa: (i % 2 === 0)
+                                };
+                                await this.create('TARJETAS_CREDITO', data);
+                            }
+                            console.log('✅ Sample data for TarjetaCredito inserted');
                         }
                         
                         // Insertar datos de ejemplo para encuestas
@@ -419,10 +507,10 @@ class DataManager {
                         if (encuestasCount === 0) {
                             console.log('Inserting sample surveys...');
                             await this.create('ENCUESTAS', {
-                                nombre: 'preferenciasBiblioteca',
-                                titulo: 'Encuesta de Preferencias',
-                                descripcion: 'Ayúdanos a conocer tus preferencias de lectura',
-                                tipo_representacion: 'BARRAS'
+                                nombre: 'preferenciasBancarias',
+                                titulo: 'Encuesta de Servicios Preferidos',
+                                descripcion: 'Ayúdanos a conocer tus preferencias bancarias',
+                                tipo_representacion: 'CIRCULAR'
                             });
                             console.log('✅ Sample surveys inserted');
                         }
@@ -432,9 +520,9 @@ class DataManager {
                         if (cuestionariosCount === 0) {
                             console.log('Inserting sample quizzes...');
                             await this.create('CUESTIONARIOS', {
-                                nombre: 'satisfaccionBiblioteca',
-                                titulo: 'Cuestionario de Satisfacción',
-                                descripcion: 'Evalúa tu experiencia con la biblioteca'
+                                nombre: 'satisfaccionCliente',
+                                titulo: 'Encuesta de Satisfacción Bancaria',
+                                descripcion: 'Evalúa tu experiencia con nuestros servicios'
                             });
                             console.log('✅ Sample quizzes inserted');
                         }

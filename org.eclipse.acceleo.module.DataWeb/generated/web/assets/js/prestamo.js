@@ -22,8 +22,44 @@ class PrestamoManager extends CRUDManager {
                 showInTable: true
             }
 ,            {
-                name: 'fechaPrestamo',
-                label: 'FechaPrestamo',
+                name: 'monto_solicitado',
+                label: 'Monto_solicitado',
+                type: 'decimal',
+                isPrimary: false,
+                required: true,
+                sortable: true,
+                showInTable: true
+            }
+,            {
+                name: 'tasa_interes',
+                label: 'Tasa_interes',
+                type: 'decimal',
+                isPrimary: false,
+                required: true,
+                sortable: true,
+                showInTable: true
+            }
+,            {
+                name: 'plazo_meses',
+                label: 'Plazo_meses',
+                type: 'number',
+                isPrimary: false,
+                required: true,
+                sortable: true,
+                showInTable: true
+            }
+,            {
+                name: 'estado_prestamo',
+                label: 'Estado_prestamo',
+                type: 'text',
+                isPrimary: false,
+                required: true,
+                sortable: true,
+                showInTable: true
+            }
+,            {
+                name: 'fecha_solicitud',
+                label: 'Fecha_solicitud',
                 type: 'date',
                 isPrimary: false,
                 required: true,
@@ -31,8 +67,8 @@ class PrestamoManager extends CRUDManager {
                 showInTable: true
             }
 ,            {
-                name: 'fechaDevolucion',
-                label: 'FechaDevolucion',
+                name: 'fecha_aprobacion',
+                label: 'Fecha_aprobacion',
                 type: 'date',
                 isPrimary: false,
                 required: true,
@@ -41,24 +77,24 @@ class PrestamoManager extends CRUDManager {
             }
 ,
             {
-                name: 'prestamo_usuario_ID',
-                label: 'Prestamo_usuario',
+                name: 'cliente_solicitante_ID',
+                label: 'Cliente_solicitante',
                 type: 'reference',
                 isPrimary: false,
                 required: true,
                 sortable: true,
                 showInTable: true,
-                referenceEntity: 'usuario'
+                referenceEntity: 'cliente'
             }
 ,            {
-                name: 'prestamo_libro_ID',
-                label: 'Prestamo_libro',
+                name: 'empleado_aprobador_ID',
+                label: 'Empleado_aprobador',
                 type: 'reference',
                 isPrimary: false,
                 required: true,
                 sortable: true,
                 showInTable: true,
-                referenceEntity: 'libro'
+                referenceEntity: 'empleado'
             }
         ];
     }
@@ -91,6 +127,33 @@ class PrestamoManager extends CRUDManager {
                 };
             }
         }
+        if (fieldName === 'monto_solicitado') {
+            const numValue = parseFloat(value);
+            if (isNaN(numValue) || numValue < 0) {
+                return {
+                    isValid: false,
+                    message: 'Debe ser un número positivo'
+                };
+            }
+        }
+        if (fieldName === 'tasa_interes') {
+            const numValue = parseFloat(value);
+            if (isNaN(numValue) || numValue < 0) {
+                return {
+                    isValid: false,
+                    message: 'Debe ser un número positivo'
+                };
+            }
+        }
+        if (fieldName === 'plazo_meses') {
+            const numValue = parseInt(value);
+            if (isNaN(numValue) || numValue < 0) {
+                return {
+                    isValid: false,
+                    message: 'Debe ser un número entero positivo'
+                };
+            }
+        }
         
         return { isValid: true };
     }
@@ -110,6 +173,15 @@ class PrestamoManager extends CRUDManager {
         // Transformaciones específicas para Prestamo antes de guardar
         if (data.hasOwnProperty('id_prestamo')) {
             data['id_prestamo'] = parseInt(data['id_prestamo']) || 0;
+        }
+        if (data.hasOwnProperty('monto_solicitado')) {
+            data['monto_solicitado'] = parseFloat(data['monto_solicitado']) || 0;
+        }
+        if (data.hasOwnProperty('tasa_interes')) {
+            data['tasa_interes'] = parseFloat(data['tasa_interes']) || 0;
+        }
+        if (data.hasOwnProperty('plazo_meses')) {
+            data['plazo_meses'] = parseInt(data['plazo_meses']) || 0;
         }
         
         return data;

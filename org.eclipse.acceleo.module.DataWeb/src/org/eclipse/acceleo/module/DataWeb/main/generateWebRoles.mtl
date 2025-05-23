@@ -485,122 +485,237 @@
 	    updateCurrentTime();
 	    setInterval(updateCurrentTime, 60000);
 	    
+	    // Función para esperar a que la base de datos esté disponible
+	    async function waitForDatabase() {
+	        let attempts = 0;
+	        const maxAttempts = 100;
+	        
+	        while (attempts < maxAttempts) {
+	            if (window.localDB && window.localDB.db) {
+	                return window.localDB;
+	            }
+	            
+	            // Intentar inicializar la base de datos
+	            try {
+	                const request = indexedDB.open('DataWeb_DB', 2);
+	                const db = await new Promise((resolve, reject) => {
+	                    request.onsuccess = () => {
+	                        const database = request.result;
+	                        const dbWrapper = {
+	                            db: database,
+	                            async getAll(storeName) {
+	                                return new Promise((resolve, reject) => {
+	                                    if (!database.objectStoreNames.contains(storeName)) {
+	                                        resolve(['['/]]);
+	                                        return;
+	                                    }
+	                                    const transaction = database.transaction(['['/]storeName], 'readonly');
+	                                    const store = transaction.objectStore(storeName);
+	                                    const request = store.getAll();
+	                                    request.onsuccess = () => resolve(request.result || ['['/]]);
+	                                    request.onerror = () => resolve(['['/]]);
+	                                });
+	                            }
+	                        };
+	                        window.localDB = dbWrapper;
+	                        resolve(dbWrapper);
+	                    };
+	                    request.onerror = () => resolve(null);
+	                });
+	                
+	                if (db) return db;
+	            } catch (error) {
+	                console.warn('Database initialization attempt failed:', error);
+	            }
+	            
+	            await new Promise(resolve => setTimeout(resolve, 100));
+	            attempts++;
+	        }
+	        
+	        return null;
+	    }
+	    
 	    // Cargar encuestas y cuestionarios disponibles para este rol
 	    document.addEventListener('DOMContentLoaded', async () => {
 	        try {
 	            // Guardar el rol actual
-	            localStorage.setItem('current_role', '[rol.nombre/]');
+	            const currentRole = '[rol.nombre/]';
+	            localStorage.setItem('current_role', currentRole);
 	            
-	            // Verificar si este rol es administrativo
-	            let adminRoles = JSON.parse(localStorage.getItem('admin_roles') || '['['/]]');
-	            if (adminRoles.length === 0) {
-	                adminRoles = await initializeAdminRoles();
+	            console.log('Cargando evaluaciones para rol:', currentRole);
+	            
+	            // Esperar a que la base de datos esté disponible
+	            const db = await waitForDatabase();
+	            if (!db) {
+	                console.error('Base de datos no disponible');
+	                return;
 	            }
 	            
-	            const isAdmin = adminRoles.includes('[rol.nombre/]');
-	            console.log('¿Es rol administrativo?', isAdmin);
+	            // Cargar encuestas y cuestionarios desde la base de datos
+	            const ['['/]surveys, quizzes] = await Promise.all(['['/]
+	                db.getAll('ENCUESTAS').catch(() => ['['/]]),
+	                db.getAll('CUESTIONARIOS').catch(() => ['['/]])
+	            ]);
 	            
-	            // Obtener asignaciones de rol desde localStorage
-	            const currentRole = '[rol.nombre/]';
+	            console.log('Datos cargados desde BD - Encuestas:', surveys.length, 'Cuestionarios:', quizzes.length);
+	            
+	            // Obtener asignaciones de roles
+	            const surveyRoleAssignments = JSON.parse(localStorage.getItem('survey_role_assignments') || '{}');
+	            const quizRoleAssignments = JSON.parse(localStorage.getItem('quiz_role_assignments') || '{}');
+	            
+	            // Filtrar encuestas disponibles para el rol actual
+	            const availableSurveys = surveys.filter(survey => {
+	                if (surveyRoleAssignments['['/]survey.nombre]) {
+	                    return surveyRoleAssignments['['/]survey.nombre].includes(currentRole);
+	                }
+	                // Si no hay asignación específica, mostrar para todos por defecto
+	                return true;
+	            });
+	            
+	            // Filtrar cuestionarios disponibles para el rol actual
+	            const availableQuizzes = quizzes.filter(quiz => {
+	                if (quizRoleAssignments['['/]quiz.nombre]) {
+	                    return quizRoleAssignments['['/]quiz.nombre].includes(currentRole);
+	                }
+	                // Si no hay asignación específica, mostrar para todos por defecto
+	                return true;
+	            });
+	            
+	            console.log('Disponibles para rol', currentRole, '- Encuestas:', availableSurveys.length, 'Cuestionarios:', availableQuizzes.length);
+	            
+	            // Contenedores
 	            const surveysContainer = document.getElementById('roleSurveys');
 	            const quizzesContainer = document.getElementById('roleQuizzes');
 	            
-	            const surveyAssignments = JSON.parse(localStorage.getItem('survey_role_assignments') || '{}');
-	            const quizAssignments = JSON.parse(localStorage.getItem('quiz_role_assignments') || '{}');
-	            
-	            // Determinar encuestas asignadas a este rol
-	            let assignedSurveys = ['['/]];
-	            Object.entries(surveyAssignments).forEach((['['/]surveyName, roles]) => {
-	                if (roles.includes(currentRole)) {
-	                    assignedSurveys.push(surveyName);
-	                }
-	            });
-	            
-	            // Determinar cuestionarios asignados a este rol
-	            let assignedQuizzes = ['['/]];
-	            Object.entries(quizAssignments).forEach((['['/]quizName, roles]) => {
-	                if (roles.includes(currentRole)) {
-	                    assignedQuizzes.push(quizName);
-	                }
-	            });
-	            
-	            // Por defecto, si no hay asignaciones, mostrar todos para roles administrativos
-	            // y solo algunos específicos para otros roles
-	            if (assignedSurveys.length === 0) {
-	                assignedSurveys = isAdmin ? 
-	                    ['['/]
-	                        [for (encuesta : Encuesta | app.encuestas) separator(',')]
-	                        '[encuesta.nombre/]'
-	                        [/for]
-	                    ] : 
-	                    ['['/]
-	                        [if (app.encuestas->size() > 0)]
-	                        '[app.encuestas->first().nombre/]'
-	                        [/if]
-	                    ];
-	            }
-	            
-	            if (assignedQuizzes.length === 0) {
-	                assignedQuizzes = isAdmin ? 
-	                    ['['/]
-	                        [for (cuestionario : Cuestionario | app.cuestionarios) separator(',')]
-	                        '[cuestionario.nombre/]'
-	                        [/for]
-	                    ] : 
-	                    ['['/]
-	                        [if (app.cuestionarios->size() > 0)]
-	                        '[app.cuestionarios->first().nombre/]'
-	                        [/if]
-	                    ];
-	            }
-	            
 	            // Mostrar encuestas
 	            if (surveysContainer) {
-	                if (assignedSurveys.length === 0) {
+	                if (availableSurveys.length === 0) {
 	                    surveysContainer.innerHTML = '<p class="empty-message">No hay encuestas asignadas a tu rol.</p>';
 	                } else {
-	                    surveysContainer.innerHTML = `
-	                        ${assignedSurveys.map(surveyName => `
-	                            <div class="assessment-item">
-	                                <div class="assessment-info">
-	                                    <h5>${surveyName.replace(/_/g, ' ')}</h5>
-	                                    <p>Encuesta disponible para tu rol</p>
-	                                </div>
-	                                <a href="../surveys/${surveyName}.html" class="btn btn-primary btn-sm">
-	                                    Participar
-	                                </a>
+	                    surveysContainer.innerHTML = availableSurveys.map(survey => `
+	                        <div class="assessment-item">
+	                            <div class="assessment-info">
+	                                <h5>${survey.titulo || survey.nombre}</h5>
+	                                <p>${survey.descripcion || 'Encuesta disponible para tu rol'}</p>
+	                                <span class="assessment-badge">${survey.tipo_representacion || 'Encuesta'}</span>
 	                            </div>
-	                        `).join('')}
-	                    `;
+	                            <button class="btn btn-primary btn-sm" onclick="openSurveyPage('${survey.nombre}')">
+	                                Participar
+	                            </button>
+	                        </div>
+	                    `).join('');
 	                }
 	            }
 	            
 	            // Mostrar cuestionarios
 	            if (quizzesContainer) {
-	                if (assignedQuizzes.length === 0) {
+	                if (availableQuizzes.length === 0) {
 	                    quizzesContainer.innerHTML = '<p class="empty-message">No hay cuestionarios asignados a tu rol.</p>';
 	                } else {
-	                    quizzesContainer.innerHTML = `
-	                        ${assignedQuizzes.map(quizName => `
-	                            <div class="assessment-item">
-	                                <div class="assessment-info">
-	                                    <h5>${quizName.replace(/_/g, ' ')}</h5>
-	                                    <p>Cuestionario disponible para evaluación</p>
-	                                    ${!isAdmin ? '<span class="assessment-badge">Evaluable</span>' : ''}
-	                                </div>
-	                                <a href="../quizzes/${quizName}.html" class="btn btn-primary btn-sm">
-	                                    Realizar
-	                                </a>
+	                    quizzesContainer.innerHTML = availableQuizzes.map(quiz => `
+	                        <div class="assessment-item">
+	                            <div class="assessment-info">
+	                                <h5>${quiz.titulo || quiz.nombre}</h5>
+	                                <p>${quiz.descripcion || 'Cuestionario disponible para evaluación'}</p>
+	                                <span class="assessment-badge">Evaluativo (${quiz.tiempoLimite || 30} min)</span>
 	                            </div>
-	                        `).join('')}
-	                    `;
+	                            <button class="btn btn-primary btn-sm" onclick="openQuizPage('${quiz.nombre}')">
+	                                Realizar
+	                            </button>
+	                        </div>
+	                    `).join('');
 	                }
 	            }
 	            
 	        } catch (error) {
 	            console.error('Error cargando evaluaciones:', error);
+	            
+	            // Mostrar mensaje de error en los contenedores
+	            const surveysContainer = document.getElementById('roleSurveys');
+	            const quizzesContainer = document.getElementById('roleQuizzes');
+	            
+	            if (surveysContainer) {
+	                surveysContainer.innerHTML = `
+	                    <div class="error-message">
+	                        <p>Error al cargar encuestas</p>
+	                        <button onclick="location.reload()" class="btn btn-sm btn-outline-primary">Reintentar</button>
+	                    </div>
+	                `;
+	            }
+	            
+	            if (quizzesContainer) {
+	                quizzesContainer.innerHTML = `
+	                    <div class="error-message">
+	                        <p>Error al cargar cuestionarios</p>
+	                        <button onclick="location.reload()" class="btn btn-sm btn-outline-primary">Reintentar</button>
+	                    </div>
+	                `;
+	            }
 	        }
 	    });
+	    
+	    // Funciones para abrir evaluaciones
+	    function openSurveyPage(surveyName) {
+	        // Intentar abrir página generada dinámicamente primero
+	        if (window.pageGenerator) {
+	            const surveyHTML = window.pageGenerator.getSurveyPage(surveyName);
+	            if (surveyHTML) {
+	                const newWindow = window.open('', '_blank');
+	                newWindow.document.write(surveyHTML);
+	                newWindow.document.close();
+	                return;
+	            }
+	        }
+	        
+	        // Fallar a URL estática
+	        const surveyURL = `../surveys/${surveyName}.html`;
+	        
+	        // Verificar si el archivo existe
+	        fetch(surveyURL, { method: 'HEAD' })
+	            .then(response => {
+	                if (response.ok) {
+	                    window.location.href = surveyURL;
+	                } else {
+	                    alert('Encuesta no disponible. La página se está generando, por favor intenta de nuevo en unos momentos.');
+	                }
+	            })
+	            .catch(() => {
+	                window.open(surveyURL, '_blank');
+	            });
+	    }
+	    
+	    function openQuizPage(quizName) {
+	        // Intentar abrir página generada dinámicamente primero
+	        if (window.pageGenerator) {
+	            const quizHTML = window.pageGenerator.getQuizPage(quizName);
+	            if (quizHTML) {
+	                const newWindow = window.open('', '_blank');
+	                newWindow.document.write(quizHTML);
+	                newWindow.document.close();
+	                return;
+	            }
+	        }
+	        
+	        // Fallar a URL estática
+	        const quizURL = `../quizzes/${quizName}.html`;
+	        
+	        // Verificar si el archivo existe
+	        fetch(quizURL, { method: 'HEAD' })
+	            .then(response => {
+	                if (response.ok) {
+	                    window.location.href = quizURL;
+	                } else {
+	                    alert('Cuestionario no disponible. La página se está generando, por favor intenta de nuevo en unos momentos.');
+	                }
+	            })
+	            .catch(() => {
+	                window.open(quizURL, '_blank');
+	            });
+	    }
+	    
+	    // Hacer funciones disponibles globalmente
+	    window.openSurveyPage = openSurveyPage;
+	    window.openQuizPage = openQuizPage;
 	    
 	    // Manejar dropdown del menú
 	    document.addEventListener('DOMContentLoaded', () => {
@@ -615,49 +730,35 @@
 	            });
 	        }
 	    });
-	    
-	    // Función auxiliar para inicializar roles administrativos (por si no está disponible globalmente)
-	    async function initializeAdminRoles() {
-	        try {
-	            // Obtener todos los roles del sistema
-	            const rolesInfo = ['['/]
-	                [for (rol : Rol | app.roles) separator(',')]
-	                {
-	                    name: '[rol.nombre/]',
-	                    entidadesAccesibles: [rol.numeroEntidadesAccesibles/]
-	                }
-	                [/for]
-	            ];
-	            
-	            // Si no hay datos, usar un valor por defecto
-	            if (!rolesInfo || rolesInfo.length === 0) {
-	                console.warn('No se encontraron datos de roles. Usando valores por defecto.');
-	                return ['['/]'Admin', 'Administrador'];
-	            }
-	            
-	            // Determinar el número máximo de entidades accesibles
-	            const maxEntidades = Math.max(...rolesInfo.map(r => r.entidadesAccesibles));
-	            
-	            // Identificar roles administrativos (con acceso al máximo de entidades)
-	            const adminRoles = rolesInfo
-	                .filter(r => r.entidadesAccesibles === maxEntidades)
-	                .map(r => r.name);
-	                
-	            console.log('Roles administrativos detectados:', adminRoles);
-	                
-	            // Guardar roles administrativos en localStorage para referencia
-	            localStorage.setItem('admin_roles', JSON.stringify(adminRoles));
-	            
-	            return adminRoles;
-	        } catch (error) {
-	            console.error('Error inicializando roles administrativos:', error);
-	            return ['['/]];
-	        }
-	    }
 	</script>
     
     <!-- CSS específico del dashboard -->
     <style>
+		.error-message {
+		    text-align: center;
+		    padding: 2rem;
+		    color: var(--danger-600);
+		    background: var(--danger-50);
+		    border: 1px solid var(--danger-200);
+		    border-radius: var(--radius);
+		}
+		
+		.error-message p {
+		    margin: 0 0 1rem 0;
+		    font-weight: 500;
+		}
+		
+		.assessment-badge {
+		    display: inline-block;
+		    margin-top: 0.5rem;
+		    padding: 0.25rem 0.5rem;
+		    background: var(--info-100);
+		    color: var(--info-700);
+		    border-radius: var(--radius);
+		    font-size: 0.75rem;
+		    font-weight: 500;
+		}
+		
         .dashboard-stats {
             margin-top: 1.5rem;
         }
@@ -998,6 +1099,7 @@
             }
         }
     </style>
+	<script src="../assets/js/dynamic-page-generator.js"></script>
 </body>
 </html>
 [/file]

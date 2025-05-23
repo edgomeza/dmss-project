@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Biblioteca Universitaria - Cuestionarios</title>
+    <title>Sistema Bancario Digital - Cuestionarios</title>
     <meta name="description" content="Lista de cuestionarios disponibles">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,7 +22,7 @@
     <nav class="main-nav">
         <div class="container nav-container">
             <div class="nav-brand">
-                <a href="../index.html" class="nav-logo">Biblioteca Universitaria</a>
+                <a href="../index.html" class="nav-logo">Sistema Bancario Digital</a>
             </div>
             <ul class="nav-menu">
                 <li class="nav-item">
@@ -77,7 +77,7 @@
     <footer class="app-footer">
         <div class="container">
             <div class="footer-bottom">
-                <p>&copy; 2025 Biblioteca Universitaria. Todos los derechos reservados.</p>
+                <p>&copy; 2025 Sistema Bancario Digital. Todos los derechos reservados.</p>
             </div>
         </div>
     </footer>
@@ -85,118 +85,45 @@
     <script src="../assets/js/app.js"></script>
     
     <script>
-        // Cargar cuestionarios según el rol
-        document.addEventListener('DOMContentLoaded', async () => {
-            try {
-                const container = document.getElementById('quizzes-container');
-                if (!container) return;
-                
-                // Determinar rol actual (en una implementación real se obtendría de la sesión)
-                const currentRole = localStorage.getItem('current_role') || 'Usuario';
-                
-                // Obtener asignaciones de roles
-                const roleAssignments = JSON.parse(localStorage.getItem('quiz_role_assignments') || '{}');
-                
-                // Lista completa de cuestionarios
-                const allQuizzes = [
-                    {
-                        name: 'satisfaccionBiblioteca',
-                        title: 'Cuestionario de Satisfacción',
-                        description: 'Evalúa tu experiencia con la biblioteca',
-                        questions: 3
-                    }
-                ];
-                
-                // Filtrar cuestionarios asignados al rol actual
-                let availableQuizzes = [];
-                
-                // Verificar cada cuestionario
-                allQuizzes.forEach(quiz => {
-                    // Si hay asignación para este cuestionario, verificar si incluye el rol actual
-                    if (roleAssignments[quiz.name] && roleAssignments[quiz.name].includes(currentRole)) {
-                        availableQuizzes.push(quiz);
-                    } 
-                    // Si no hay asignación, mostrar todos los cuestionarios por defecto
-                    else if (!roleAssignments[quiz.name]) {
-                        availableQuizzes.push(quiz);
-                    }
-                });
-                
-                // Mostrar cuestionarios
-                if (availableQuizzes.length === 0) {
-                    container.innerHTML = `
-                        <div class="empty-state">
-                            <div class="empty-icon">
-                                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <circle cx="12" cy="12" r="10"></circle>
-                                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-                                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                                </svg>
-                            </div>
-                            <h3>No hay cuestionarios disponibles para tu rol</h3>
-                            <p>No se han asignado cuestionarios al rol "${currentRole}" o no hay cuestionarios activos en este momento.</p>
-                            <a href="../index.html" class="btn btn-primary">Volver al inicio</a>
-                        </div>
-                    `;
-                } else {
-                    container.innerHTML = `
-                        <div class="quizzes-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            ${availableQuizzes.map(quiz => `
-                                <div class="quiz-card card animate-target">
-                                    <div class="card-header">
-                                        <h3>${quiz.title}</h3>
-                                    </div>
-                                    <div class="card-body">
-                                        <p>${quiz.description}</p>
-                                        <div class="quiz-info">
-                                            <span class="badge badge-primary">${quiz.questions} preguntas</span>
-                                            <span class="badge badge-warning">Evaluativo</span>
-                                        </div>
-                                    </div>
-                                    <div class="card-footer">
-                                        <a href="${quiz.name}.html" class="btn btn-primary btn-block">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <circle cx="12" cy="12" r="10"></circle>
-                                                <path d="m9 12 2 2 4-4"></path>
-                                            </svg>
-                                            Realizar Cuestionario
-                                        </a>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>`;
-                }
-                
-                // Cargar resultados de cuestionarios
-                await loadQuizResults();
-                
-            } catch (error) {
-                console.error('Error cargando cuestionarios:', error);
-                const container = document.getElementById('quizzes-container');
-                if (container) {
-                    container.innerHTML = `
-                        <div class="error-message">
-                            <p>Error al cargar los cuestionarios. Por favor, intenta de nuevo más tarde.</p>
-                        </div>
-                    `;
-                }
-            }
-        });
-        
-        // Función para cargar los resultados de cuestionarios
 		async function loadQuizResults() {
 		    try {
 		        const resultsSection = document.getElementById('quiz-results-section');
-		        if (!resultsSection) return;
+		        if (!resultsSection) {
+		            console.log('Quiz results section not found');
+		            return;
+		        }
 		        
 		        const currentUserId = 'usuario@example.com'; // En una implementación real, se obtendría de la sesión
 		        
-		        // Inicializar la base de datos
-		        const db = await initDatabase();
+		        // Usar la base de datos ya conectada o intentar conectar
+		        let db = window.localDB;
+		        if (!db) {
+		            console.log('Database not available, trying to connect...');
+		            try {
+		                db = await initDatabase();
+		            } catch (error) {
+		                console.warn('Could not connect to database for results:', error);
+		                resultsSection.style.display = 'none';
+		                return;
+		            }
+		        }
 		        
 		        // Buscar resultados confirmados
-		        const allResults = await db.query('RESPUESTAS_CUESTIONARIO', { userId: currentUserId });
-		        const confirmedResults = allResults.filter(r => r.results && r.results.gradeConfirmed);
+		        let allResults = [];
+		        try {
+		            allResults = await db.getAll('RESPUESTAS_CUESTIONARIO');
+		            console.log('All quiz results found:', allResults.length);
+		        } catch (error) {
+		            console.warn('Error getting quiz results:', error);
+		            resultsSection.style.display = 'none';
+		            return;
+		        }
+		        
+		        // Filtrar resultados del usuario actual
+		        const userResults = allResults.filter(r => r.userId === currentUserId);
+		        const confirmedResults = userResults.filter(r => r.results && r.results.gradeConfirmed);
+		        
+		        console.log(`User results: ${userResults.length}, Confirmed: ${confirmedResults.length}`);
 		        
 		        if (confirmedResults.length === 0) {
 		            resultsSection.innerHTML = `
@@ -205,8 +132,15 @@
 		                        <h2>Tus Resultados de Evaluaciones</h2>
 		                    </div>
 		                    <div class="card-body">
-		                        <div class="empty-state">
-		                            <p>Aún no tienes evaluaciones calificadas por un administrador.</p>
+		                        <div class="empty-state text-center">
+		                            <div class="empty-icon mb-3">
+		                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+		                                    <path d="M9 11l3 3L22 4"></path>
+		                                    <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"></path>
+		                                </svg>
+		                            </div>
+		                            <p class="text-muted">Aún no tienes evaluaciones calificadas por un administrador.</p>
+		                            <small class="text-muted">Una vez que completes cuestionarios y sean revisados, aparecerán aquí.</small>
 		                        </div>
 		                        <div class="text-center mt-4">
 		                            <a href="results.html" class="btn btn-primary">Ver página de resultados</a>
@@ -221,8 +155,14 @@
 		                        <h2>Tus Resultados de Evaluaciones</h2>
 		                    </div>
 		                    <div class="card-body">
-		                        <p>Tienes ${confirmedResults.length} evaluaciones calificadas por un administrador.</p>
-		                        <div class="text-center mt-4">
+		                        <div class="text-center">
+		                            <div class="results-summary mb-3">
+		                                <div class="summary-item">
+		                                    <span class="summary-number">${confirmedResults.length}</span>
+		                                    <span class="summary-label">Evaluaciones Calificadas</span>
+		                                </div>
+		                            </div>
+		                            <p class="text-muted mb-4">Tienes ${confirmedResults.length} evaluaciones calificadas por un administrador.</p>
 		                            <a href="results.html" class="btn btn-primary">Ver todos mis resultados</a>
 		                        </div>
 		                    </div>
@@ -233,92 +173,369 @@
 		        resultsSection.style.display = 'block';
 		    } catch (error) {
 		        console.error('Error loading quiz results:', error);
+		        const resultsSection = document.getElementById('quiz-results-section');
+		        if (resultsSection) {
+		            resultsSection.style.display = 'none';
+		        }
 		    }
 		}
-        
-        // Función para inicializar la base de datos
-        async function initDB() {
-            try {
-                // Si la base de datos global ya existe, la usamos
-                if (window.localDB && window.localDB.db) {
-                    return window.localDB;
-                }
+		
+		// Función auxiliar mejorada para inicializar la base de datos
+		async function initDatabase() {
+		    if (window.localDB && window.localDB.db) {
+		        return window.localDB;
+		    }
+		    
+		    return new Promise((resolve, reject) => {
+		        const request = indexedDB.open('DataWeb_DB', 2);
+		        
+		        request.onsuccess = () => {
+		            const database = request.result;
+		            const dbWrapper = {
+		                db: database,
+		                async getAll(storeName) {
+		                    return new Promise((resolve, reject) => {
+		                        if (!database.objectStoreNames.contains(storeName)) {
+		                            console.warn(`Store "${storeName}" does not exist`);
+		                            resolve([]);
+		                            return;
+		                        }
+		                        const transaction = database.transaction([storeName], 'readonly');
+		                        const store = transaction.objectStore(storeName);
+		                        const request = store.getAll();
+		                        request.onsuccess = () => resolve(request.result || []);
+		                        request.onerror = () => {
+		                            console.error('Error reading from store:', request.error);
+		                            resolve([]);
+		                        };
+		                    });
+		                }
+		            };
+		            window.localDB = dbWrapper;
+		            resolve(dbWrapper);
+		        };
+		        
+		        request.onerror = () => {
+		            console.error('Database connection failed:', request.error);
+		            resolve(null);
+		        };
+		    });
+		}
+        // Cargar cuestionarios según el rol
+        document.addEventListener('DOMContentLoaded', async () => {
+		    try {
+				async function initDatabase() {
+				    if (window.localDB && window.localDB.db) {
+				        return window.localDB;
+				    }
+				    
+				    return new Promise((resolve, reject) => {
+				        const request = indexedDB.open('DataWeb_DB', 2);
+				        
+				        request.onsuccess = () => {
+				            const database = request.result;
+				            const dbWrapper = {
+				                db: database,
+				                async getAll(storeName) {
+				                    return new Promise((resolve, reject) => {
+				                        if (!database.objectStoreNames.contains(storeName)) {
+				                            resolve([]);
+				                            return;
+				                        }
+				                        const transaction = database.transaction([storeName], 'readonly');
+				                        const store = transaction.objectStore(storeName);
+				                        const request = store.getAll();
+				                        request.onsuccess = () => resolve(request.result);
+				                        request.onerror = () => resolve([]);
+				                    });
+				                }
+				            };
+				            window.localDB = dbWrapper;
+				            resolve(dbWrapper);
+				        };
+				        
+				        request.onerror = () => resolve(null);
+				    });
+				}
+				
+		        const container = document.getElementById('quizzes-container');
+		        if (!container) {
+		            console.error('Quizzes container not found');
+		            return;
+		        }
+		        
+		        // Mostrar loading
+		        container.innerHTML = `
+		            <div class="loading text-center">
+		                <div class="loading-spinner"></div>
+		                <span>Cargando cuestionarios para tu rol...</span>
+		            </div>
+		        `;
+		        
+		        // Esperar a que la base de datos esté disponible
+		        let db = null;
+		        let attempts = 0;
+		        const maxAttempts = 100; // 10 segundos máximo
+		        
+		        while (!db && attempts < maxAttempts) {
+		            if (window.localDB && window.localDB.db) {
+		                db = window.localDB;
+		                break;
+		            }
+		            
+		            // Intentar inicializar la base de datos
+		            try {
+		                const request = indexedDB.open('DataWeb_DB', 2);
+		                db = await new Promise((resolve, reject) => {
+		                    request.onsuccess = () => {
+		                        const database = request.result;
+		                        const dbWrapper = {
+		                            db: database,
+		                            async getAll(storeName) {
+		                                return new Promise((resolve, reject) => {
+		                                    if (!database.objectStoreNames.contains(storeName)) {
+		                                        resolve([]);
+		                                        return;
+		                                    }
+		                                    const transaction = database.transaction([storeName], 'readonly');
+		                                    const store = transaction.objectStore(storeName);
+		                                    const request = store.getAll();
+		                                    request.onsuccess = () => resolve(request.result);
+		                                    request.onerror = () => resolve([]);
+		                                });
+		                            }
+		                        };
+		                        window.localDB = dbWrapper;
+		                        resolve(dbWrapper);
+		                    };
+		                    request.onerror = () => resolve(null);
+		                });
+		                break;
+		            } catch (error) {
+		                console.warn('Database initialization attempt failed:', error);
+		            }
+		            
+		            await new Promise(resolve => setTimeout(resolve, 100));
+		            attempts++;
+		        }
+		        
+		        if (!db) {
+		            throw new Error('No se pudo conectar con la base de datos después de varios intentos');
+		        }
+		        
+		        console.log('Base de datos conectada correctamente');
+		        
+		        // Cargar cuestionarios desde la base de datos
+		        const allQuizzes = await db.getAll('CUESTIONARIOS');
+		        console.log('Cuestionarios cargados desde BD:', allQuizzes);
+		        
+		        // Determinar rol actual
+		        const currentRole = localStorage.getItem('current_role') || 'Usuario';
+		        console.log('Rol actual:', currentRole);
+		        
+		        // Obtener asignaciones de roles
+		        const roleAssignments = JSON.parse(localStorage.getItem('quiz_role_assignments') || '{}');
+		        console.log('Asignaciones de roles:', roleAssignments);
+		        
+		        // Convertir formato de base de datos a formato esperado
+		        let availableQuizzes = allQuizzes.map(quiz => ({
+		            name: quiz.nombre,
+		            title: quiz.titulo,
+		            description: quiz.descripcion || `Cuestionario: ${quiz.titulo}`,
+		            questions: 0, // Se puede calcular posteriormente si es necesario
+		            timeLimit: quiz.tiempoLimite || 30
+		        }));
 
-                // Importar o crear LocalDBManager
-                const LocalDBManager = window.LocalDBManager || class LocalDBManager {
-                    constructor() {
-                        this.dbName = 'DataWeb_DB';
-                        this.version = 1;
-                        this.db = null;
-                    }
+				function openQuizPage(quizName) {
+				    // Primero, intentar abrir la página generada dinámicamente
+				    if (window.pageGenerator) {
+				        const quizHTML = window.pageGenerator.getQuizPage(quizName);
+				        if (quizHTML) {
+				            const newWindow = window.open('', '_blank');
+				            newWindow.document.write(quizHTML);
+				            newWindow.document.close();
+				            return;
+				        }
+				    }
+				    
+				    // Si no hay página generada, intentar redirigir al archivo HTML
+				    const quizURL = `${quizName}.html`;
+				    
+				    // Verificar si el archivo existe
+				    fetch(quizURL, { method: 'HEAD' })
+				        .then(response => {
+				            if (response.ok) {
+				                // El archivo existe, redirigir
+				                window.location.href = quizURL;
+				            } else {
+				                // El archivo no existe, mostrar mensaje
+				                alert('Cuestionario no disponible. La página se está generando, por favor intenta de nuevo en unos momentos.');
+				            }
+				        })
+				        .catch(() => {
+				            // Error en la verificación, intentar abrir de todos modos
+				            window.open(quizURL, '_blank');
+				        });
+				}
 
-                    async init() {
-                        return new Promise((resolve, reject) => {
-                            const request = indexedDB.open(this.dbName, this.version);
-                            
-                            request.onerror = () => {
-                                reject(request.error);
-                            };
-                            
-                            request.onsuccess = () => {
-                                this.db = request.result;
-                                resolve(this.db);
-                            };
-                            
-                            request.onupgradeneeded = (event) => {
-                                const db = event.target.result;
-                                
-                                if (!db.objectStoreNames.contains('RESPUESTAS_CUESTIONARIO')) {
-                                    const store = db.createObjectStore('RESPUESTAS_CUESTIONARIO', { 
-                                        keyPath: 'id', 
-                                        autoIncrement: false 
-                                    });
-                                    store.createIndex('quizName', 'quizName', { unique: false });
-                                    store.createIndex('userId', 'userId', { unique: false });
-                                    store.createIndex('reviewed', 'reviewed', { unique: false });
-                                }
-                            };
-                        });
-                    }
+				async function loadQuizResults() {
+				    try {
+				        const resultsSection = document.getElementById('quiz-results-section');
+				        if (!resultsSection) return;
+				        
+				        const currentUserId = 'usuario@example.com'; // En una implementación real, se obtendría de la sesión
+				        
+				        // Usar la base de datos ya conectada
+				        const db = window.localDB;
+				        if (!db) {
+				            console.warn('Base de datos no disponible para cargar resultados');
+				            resultsSection.style.display = 'none';
+				            return;
+				        }
+				        
+				        // Buscar resultados confirmados
+				        let allResults = [];
+				        try {
+				            allResults = await db.getAll('RESPUESTAS_CUESTIONARIO');
+				        } catch (error) {
+				            console.warn('Error al obtener resultados de cuestionarios:', error);
+				            resultsSection.style.display = 'none';
+				            return;
+				        }
+				        
+				        const userResults = allResults.filter(r => r.userId === currentUserId);
+				        const confirmedResults = userResults.filter(r => r.results && r.results.gradeConfirmed);
+				        
+				        if (confirmedResults.length === 0) {
+				            resultsSection.innerHTML = `
+				                <div class="card">
+				                    <div class="card-header">
+				                        <h2>Tus Resultados de Evaluaciones</h2>
+				                    </div>
+				                    <div class="card-body">
+				                        <div class="empty-state">
+				                            <p>Aún no tienes evaluaciones calificadas por un administrador.</p>
+				                        </div>
+				                        <div class="text-center mt-4">
+				                            <a href="results.html" class="btn btn-primary">Ver página de resultados</a>
+				                        </div>
+				                    </div>
+				                </div>
+				            `;
+				        } else {
+				            resultsSection.innerHTML = `
+				                <div class="card">
+				                    <div class="card-header">
+				                        <h2>Tus Resultados de Evaluaciones</h2>
+				                    </div>
+				                    <div class="card-body">
+				                        <p>Tienes ${confirmedResults.length} evaluaciones calificadas por un administrador.</p>
+				                        <div class="text-center mt-4">
+				                            <a href="results.html" class="btn btn-primary">Ver todos mis resultados</a>
+				                        </div>
+				                    </div>
+				                </div>
+				            `;
+				        }
+				        
+				        resultsSection.style.display = 'block';
+				    } catch (error) {
+				        console.error('Error loading quiz results:', error);
+				        const resultsSection = document.getElementById('quiz-results-section');
+				        if (resultsSection) {
+				            resultsSection.style.display = 'none';
+				        }
+				    }
+				}
+		        
+		        // Filtrar por rol si hay asignaciones
+		        if (Object.keys(roleAssignments).length > 0) {
+		            availableQuizzes = availableQuizzes.filter(quiz => {
+		                if (roleAssignments[quiz.name] && roleAssignments[quiz.name].includes(currentRole)) {
+		                    return true;
+		                }
+		                return !roleAssignments[quiz.name]; // Si no hay asignación, mostrar
+		            });
+		        }
+		        
+		        console.log('Cuestionarios disponibles para el rol:', availableQuizzes);
+		        
+		        // Mostrar cuestionarios
+		        if (availableQuizzes.length === 0) {
+		            container.innerHTML = `
+		                <div class="empty-state">
+		                    <div class="empty-icon">
+		                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+		                            <circle cx="12" cy="12" r="10"></circle>
+		                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+		                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+		                        </svg>
+		                    </div>
+		                    <h3>No hay cuestionarios disponibles para tu rol</h3>
+		                    <p>No se han asignado cuestionarios al rol "${currentRole}" o no hay cuestionarios activos en este momento.</p>
+		                    <a href="../index.html" class="btn btn-primary">Volver al inicio</a>
+		                </div>
+		            `;
+		        } else {
+		            container.innerHTML = `
+		                <div class="quizzes-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+		                    ${availableQuizzes.map(quiz => `
+		                        <div class="quiz-card card animate-target">
+		                            <div class="card-header">
+		                                <h3>${quiz.title}</h3>
+		                            </div>
+		                            <div class="card-body">
+		                                <p>${quiz.description}</p>
+		                                <div class="quiz-info">
+		                                    <span class="badge badge-primary">Evaluativo</span>
+		                                    <span class="badge badge-warning">${quiz.timeLimit} minutos</span>
+		                                </div>
+		                            </div>
+		                            <div class="card-footer">
+		                                <button class="btn btn-primary btn-block" onclick="openQuizPage('${quiz.name}')">
+		                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+		                                        <circle cx="12" cy="12" r="10"></circle>
+		                                        <path d="m9 12 2 2 4-4"></path>
+		                                    </svg>
+		                                    Realizar Cuestionario
+		                                </button>
+		                            </div>
+		                        </div>
+		                    `).join('')}
+		                </div>
+		            `;
+		        }
+		        
+		        // Cargar resultados de cuestionarios
+		        await loadQuizResults();
+		        
+		    } catch (error) {
+		        console.error('Error cargando cuestionarios:', error);
+		        const container = document.getElementById('quizzes-container');
+		        if (container) {
+		            container.innerHTML = `
+		                <div class="error-message">
+		                    <p>Error al cargar los cuestionarios: ${error.message}</p>
+		                    <button onclick="location.reload()" class="btn btn-primary">Reintentar</button>
+		                </div>
+		            `;
+		        }
+		    }
+		});
 
-                    async query(tableName, filters = {}) {
-                        return new Promise((resolve, reject) => {
-                            const transaction = this.db.transaction([tableName], 'readonly');
-                            const store = transaction.objectStore(tableName);
-                            const request = store.getAll();
-                            
-                            request.onsuccess = () => {
-                                let results = request.result;
-                                
-                                if (Object.keys(filters).length > 0) {
-                                    results = results.filter(item => {
-                                        return Object.keys(filters).every(key => {
-                                            if (!filters[key]) return true;
-                                            return item[key] === filters[key];
-                                        });
-                                    });
-                                }
-                                
-                                resolve(results);
-                            };
-                            request.onerror = () => reject(request.error);
-                        });
-                    }
-                };
-
-                // Inicializar base de datos
-                const dbManager = new LocalDBManager();
-                await dbManager.init();
-                
-                // Guardar globalmente
-                window.localDB = dbManager;
-                
-                return dbManager;
-            } catch (error) {
-                console.error('Error initializing database:', error);
-                throw error;
-            }
-        }
+		window.openQuizPage = function(quizName) {
+		    const quizHTML = localStorage.getItem(`quiz_page_${quizName}`);
+		    if (quizHTML) {
+		        const newWindow = window.open('', '_blank');
+		        newWindow.document.write(quizHTML);
+		        newWindow.document.close();
+		    } else {
+		        alert('Cuestionario no disponible. Por favor, contacte al administrador.');
+		    }
+		};
+		
+		window.loadQuizResults = loadQuizResults;
+		window.initDatabase = initDatabase;
     </script>
     
     <style>

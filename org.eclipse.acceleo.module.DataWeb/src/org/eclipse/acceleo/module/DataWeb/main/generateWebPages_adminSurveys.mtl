@@ -138,9 +138,7 @@
                                     <button class="btn btn-info btn-sm" onclick="viewSurveyResults('[encuesta.nombre/]')">
                                         Ver Resultados
                                     </button>
-                                    <button class="btn btn-warning btn-sm" onclick="editSurvey('[encuesta.nombre/]')">
-                                        Editar
-                                    </button>
+                                    <a href="edit-survey.html?id=${survey.id_encuesta}" class="btn btn-warning btn-sm">Editar</a>
                                     <button class="btn btn-danger btn-sm" onclick="deleteSurvey('[encuesta.nombre/]')">
                                         Eliminar
                                     </button>
@@ -240,6 +238,7 @@
     
     <script src="../assets/js/app.js"></script>
     <script src="../assets/js/admin-surveys.js"></script>
+	<script src="../assets/js/dynamic-page-generator.js"></script>
     
     <style>
         .stats-grid {

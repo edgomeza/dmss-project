@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Bancario Digital - Editar Cuestionario</title>
+    <meta name="description" content="Editar un cuestionario existente en el sistema">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="icon" type="image/x-icon" href="../assets/icons/favicon.ico">
+</head>
+<body>
+    <header class="app-header">
+        <div class="container">
+            <h1>Editar Cuestionario</h1>
+            <p>Modifique los campos del cuestionario existente</p>
+        </div>
+    </header>
+    
+    <nav class="main-nav">
+        <div class="container nav-container">
+            <div class="nav-brand">
+                <a href="../index.html" class="nav-logo">Administración</a>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="../index.html" class="nav-link">Inicio</a>
+                </li>
+                <li class="nav-item">
+                    <a href="surveys-admin.html" class="nav-link">Encuestas</a>
+                </li>
+                <li class="nav-item">
+                    <a href="quizzes-admin.html" class="nav-link">Cuestionarios</a>
+                </li>
+                <li class="nav-item">
+                    <a href="edit-quiz.html" class="nav-link active">Editar Cuestionario</a>
+                </li>
+            </ul>
+            <button class="nav-toggle" aria-label="Abrir menú">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+    
+    <main class="main-content">
+        <div class="container">
+            <!-- Loading indicator -->
+            <div id="loadingIndicator" class="loading-indicator">
+                <div class="loading-spinner"></div>
+                <span>Cargando datos del cuestionario...</span>
+            </div>
+
+            <div class="card mb-6" id="editCard" style="display: none;">
+                <div class="card-header">
+                    <h2>Editar Cuestionario</h2>
+                    <p>Modifique la información y preguntas del cuestionario</p>
+                </div>
+                <div class="card-body">
+                    <form id="editQuizForm" class="quiz-form">
+                        <input type="hidden" id="cuestionarioId" name="cuestionarioId">
+                        <div class="form-group">
+                            <label for="nombre" class="form-label">Nombre Interno <span class="required">*</span></label>
+                            <input type="text" id="nombre" name="nombre" class="form-control" required>
+                            <div class="field-help">Identificador interno del cuestionario (sin espacios)</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="titulo" class="form-label">Título <span class="required">*</span></label>
+                            <input type="text" id="titulo" name="titulo" class="form-control" required>
+                            <div class="field-help">Título visible del cuestionario</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="descripcion" class="form-label">Descripción</label>
+                            <textarea id="descripcion" name="descripcion" class="form-control" rows="4"></textarea>
+                            <div class="field-help">Breve descripción del propósito del cuestionario</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="timeLimit" class="form-label">Tiempo Límite (minutos) <span class="required">*</span></label>
+                            <input type="number" id="timeLimit" name="timeLimit" class="form-control" min="5" max="180" value="30" required>
+                            <div class="field-help">Tiempo máximo para completar el cuestionario</div>
+                        </div>
+                        
+                        <h3 class="mt-6 mb-4">Preguntas del Cuestionario</h3>
+                        
+                        <div id="preguntasContainer">
+                            <!-- Las preguntas se cargarán dinámicamente aquí -->
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-outline-primary" id="addQuestionBtn">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="12" y1="8" x2="12" y2="16"></line>
+                                    <line x1="8" y1="12" x2="16" y2="12"></line>
+                                </svg>
+                                Agregar Pregunta
+                            </button>
+                        </div>
+                        
+                        <div class="form-actions mt-6 border-top pt-4">
+                            <button type="submit" class="btn btn-success" id="submitBtn">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M9 11l3 3L22 4"></path>
+                                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                                </svg>
+                                Actualizar Cuestionario
+                            </button>
+                            <a href="quizzes-admin.html" class="btn btn-secondary">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M19 12H5"></path>
+                                    <path d="M12 19l-7-7 7-7"></path>
+                                </svg>
+                                Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <footer class="app-footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2025 Sistema Bancario Digital. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script src="../assets/js/app.js"></script>
+    <script src="../assets/js/quiz-editor.js"></script>
+    
+    <style>
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-label {
+            font-weight: 500;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        
+        .required {
+            color: var(--danger-600);
+        }
+        
+        .field-help {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            margin-top: 0.25rem;
+        }
+        
+        .question-item {
+            border: 1px solid var(--gray-200);
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+        
+        .question-delete {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--danger-100);
+            border: none;
+            color: var(--danger-700);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .question-delete:hover {
+            background: var(--danger-200);
+            transform: scale(1.1);
+        }
+        
+        .option-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .option-value {
+            flex: 0 0 80px;
+        }
+        
+        .option-text {
+            flex: 1;
+        }
+        
+        .option-delete {
+            flex: 0 0 30px;
+            background: var(--gray-100);
+            border: none;
+            color: var(--gray-700);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .option-delete:hover {
+            background: var(--danger-100);
+            color: var(--danger-700);
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .loading-indicator {
+            text-align: center;
+            padding: 3rem;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--gray-200);
+            border-radius: 50%;
+            border-top-color: var(--primary-600);
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 1rem;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            .form-actions {
+                flex-direction: column;
+            }
+            
+            .form-actions button,
+            .form-actions a {
+                width: 100%;
+            }
+        }
+    </style>
+</body>
+</html>

@@ -110,32 +110,30 @@
                     </div>
                     <div class="card-body">
                         <div class="surveys-grid grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <div class="survey-card" data-survey="preferenciasBiblioteca">
+                            <div class="survey-card" data-survey="preferenciasBancarias">
                                 <div class="survey-header">
-                                    <h3>Encuesta de Preferencias</h3>
+                                    <h3>Encuesta de Servicios Preferidos</h3>
                                     <span class="survey-badge">Activa</span>
                                 </div>
                                 <div class="survey-details">
-                                    <p>Ayúdanos a conocer tus preferencias de lectura</p>
+                                    <p>Ayúdanos a conocer tus preferencias bancarias</p>
                                     <div class="survey-stats">
                                         <div class="stat-item">
                                             <span class="stat-label">Respuestas:</span>
-                                            <span class="stat-value" id="responses-preferenciasBiblioteca">--</span>
+                                            <span class="stat-value" id="responses-preferenciasBancarias">--</span>
                                         </div>
                                         <div class="stat-item">
                                             <span class="stat-label">Pendientes:</span>
-                                            <span class="stat-value pending" id="pending-preferenciasBiblioteca">--</span>
+                                            <span class="stat-value pending" id="pending-preferenciasBancarias">--</span>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="survey-actions">
-                                    <button class="btn btn-info btn-sm" onclick="viewSurveyResults('preferenciasBiblioteca')">
+                                    <button class="btn btn-info btn-sm" onclick="viewSurveyResults('preferenciasBancarias')">
                                         Ver Resultados
                                     </button>
-                                    <button class="btn btn-warning btn-sm" onclick="editSurvey('preferenciasBiblioteca')">
-                                        Editar
-                                    </button>
-                                    <button class="btn btn-danger btn-sm" onclick="deleteSurvey('preferenciasBiblioteca')">
+                                    <a href="edit-survey.html?id=${survey.id_encuesta}" class="btn btn-warning btn-sm">Editar</a>
+                                    <button class="btn btn-danger btn-sm" onclick="deleteSurvey('preferenciasBancarias')">
                                         Eliminar
                                     </button>
                                 </div>
@@ -173,42 +171,53 @@
                             <thead>
                                 <tr>
                                     <th>Encuesta</th>
-                                    <th>Administrador</th>
-                                    <th>Bibliotecario</th>
-                                    <th>Estudiante</th>
+                                    <th>AdministradorBanco</th>
+                                    <th>GerenteOperaciones</th>
+                                    <th>EmpleadoBanco</th>
+                                    <th>Cliente</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td>Encuesta de Preferencias</td>
+                                    <td>Encuesta de Servicios Preferidos</td>
                                     <td>
                                         <div class="role-toggle">
-                                            <input type="checkbox" id="role_preferenciasBiblioteca_Administrador" 
+                                            <input type="checkbox" id="role_preferenciasBancarias_AdministradorBanco" 
                                                    class="role-checkbox"
-                                                   data-survey="preferenciasBiblioteca" 
-                                                   data-role="Administrador"
-                                                   checked>
-                                            <label for="role_preferenciasBiblioteca_Administrador" class="role-label"></label>
+                                                   data-survey="preferenciasBancarias" 
+                                                   data-role="AdministradorBanco"
+                                                   >
+                                            <label for="role_preferenciasBancarias_AdministradorBanco" class="role-label"></label>
                                         </div>
                                     </td>
                                     <td>
                                         <div class="role-toggle">
-                                            <input type="checkbox" id="role_preferenciasBiblioteca_Bibliotecario" 
+                                            <input type="checkbox" id="role_preferenciasBancarias_GerenteOperaciones" 
                                                    class="role-checkbox"
-                                                   data-survey="preferenciasBiblioteca" 
-                                                   data-role="Bibliotecario"
+                                                   data-survey="preferenciasBancarias" 
+                                                   data-role="GerenteOperaciones"
                                                    >
-                                            <label for="role_preferenciasBiblioteca_Bibliotecario" class="role-label"></label>
+                                            <label for="role_preferenciasBancarias_GerenteOperaciones" class="role-label"></label>
                                         </div>
                                     </td>
                                     <td>
                                         <div class="role-toggle">
-                                            <input type="checkbox" id="role_preferenciasBiblioteca_Estudiante" 
+                                            <input type="checkbox" id="role_preferenciasBancarias_EmpleadoBanco" 
                                                    class="role-checkbox"
-                                                   data-survey="preferenciasBiblioteca" 
-                                                   data-role="Estudiante"
+                                                   data-survey="preferenciasBancarias" 
+                                                   data-role="EmpleadoBanco"
                                                    >
-                                            <label for="role_preferenciasBiblioteca_Estudiante" class="role-label"></label>
+                                            <label for="role_preferenciasBancarias_EmpleadoBanco" class="role-label"></label>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="role-toggle">
+                                            <input type="checkbox" id="role_preferenciasBancarias_Cliente" 
+                                                   class="role-checkbox"
+                                                   data-survey="preferenciasBancarias" 
+                                                   data-role="Cliente"
+                                                   >
+                                            <label for="role_preferenciasBancarias_Cliente" class="role-label"></label>
                                         </div>
                                     </td>
                                 </tr>
@@ -249,6 +258,7 @@
     
     <script src="../assets/js/app.js"></script>
     <script src="../assets/js/admin-surveys.js"></script>
+	<script src="../assets/js/dynamic-page-generator.js"></script>
     
     <style>
         .stats-grid {

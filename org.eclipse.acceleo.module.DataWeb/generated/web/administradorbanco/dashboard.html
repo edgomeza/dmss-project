@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Bancario Digital - Panel de AdministradorBanco</title>
+    <meta name="description" content="Panel de control para AdministradorBanco en Sistema Bancario Digital">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="icon" type="image/x-icon" href="../assets/icons/favicon.ico">
+</head>
+<body>
+    <!-- Header del Panel -->
+    <header class="app-header">
+        <div class="container">
+            <h1>Sistema Bancario Digital - AdministradorBanco</h1>
+            <p>Acceso completo al sistema bancario</p>
+        </div>
+    </header>
+    
+    <!-- Navegación -->
+    <nav class="main-nav">
+        <div class="container nav-container">
+            <div class="nav-brand">
+                <a href="../index.html" class="nav-logo">Sistema Bancario Digital</a>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="dashboard.html" class="nav-link active">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a href="pages/informacion.html" class="nav-link">Información del Banco</a>
+                </li>
+                <li class="nav-item">
+                    <a href="pages/cliente/index.html" class="nav-link">Listado de Clientes</a>
+                </li>
+                <li class="nav-item">
+                    <a href="pages/cliente/index.html" class="nav-link">Detalle de Cliente</a>
+                </li>
+                <li class="nav-item">
+                    <a href="pages/cliente/index.html" class="nav-link">Registro de Nuevo Cliente</a>
+                </li>
+                <li class="nav-item">
+                    <a href="pages/cliente/index.html" class="nav-link">Actualizar Datos Cliente</a>
+                </li>
+                <li class="nav-item">
+                    <a href="pages/transaccion/index.html" class="nav-link">Historial de Transacciones</a>
+                </li>
+                <li class="nav-item">
+                    <a href="../index.html" class="nav-link">Cambiar Rol</a>
+                </li>
+                
+				<li class="nav-item dropdown">
+				    <a href="#" class="nav-link dropdown-toggle">
+				        Administración
+				        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+				            <polyline points="6 9 12 15 18 9"></polyline>
+				        </svg>
+				    </a>
+				    <div class="dropdown-menu">
+				        <a href="../admin/surveys-admin.html" class="dropdown-item">Gestionar Encuestas</a>
+				        <a href="../admin/quizzes-admin.html" class="dropdown-item">Gestionar Cuestionarios</a>
+				    </div>
+				</li>
+            </ul>
+            <button class="nav-toggle" aria-label="Abrir menú">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+    
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+        <div class="container">
+            <ul class="breadcrumb-list">
+                <li class="breadcrumb-item">
+                    <a href="../index.html" class="breadcrumb-link">Inicio</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <span>AdministradorBanco</span>
+                </li>
+                <li class="breadcrumb-item">
+                    <span>Dashboard</span>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    
+    <!-- Contenido Principal -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Alert de Bienvenida -->
+            <div class="alert alert-success" data-auto-dismiss="true">
+                <strong>¡Bienvenido!</strong> Has iniciado sesión correctamente como <strong>AdministradorBanco</strong>.
+            </div>
+
+			<section class="admin-section mb-8">
+			    <div class="card">
+			        <div class="card-header">
+			            <h3>Panel de Administración</h3>
+			            <p>Herramientas exclusivas para roles con permisos administrativos</p>
+			        </div>
+			        <div class="card-body">
+			            <div class="admin-tools grid grid-cols-1 md:grid-cols-2 gap-4">
+			                <div class="admin-card">
+			                    <div class="admin-icon">
+			                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+			                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+			                            <polyline points="14,2 14,8 20,8"></polyline>
+			                            <line x1="16" y1="13" x2="8" y2="13"></line>
+			                            <line x1="16" y1="17" x2="8" y2="17"></line>
+			                        </svg>
+			                    </div>
+			                    <div class="admin-content">
+			                        <h4>Gestión de Encuestas</h4>
+			                        <p>Administra las encuestas, revisa y aprueba respuestas</p>
+			                        <a href="../admin/surveys-admin.html" class="btn btn-primary btn-sm">
+			                            Administrar Encuestas
+			                        </a>
+			                    </div>
+			                </div>
+			                <div class="admin-card">
+			                    <div class="admin-icon">
+			                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+			                            <circle cx="12" cy="12" r="10"></circle>
+			                            <path d="m9 12 2 2 4-4"></path>
+			                        </svg>
+			                    </div>
+			                    <div class="admin-content">
+			                        <h4>Gestión de Cuestionarios</h4>
+			                        <p>Administra los cuestionarios y revisa los resultados</p>
+			                        <a href="../admin/quizzes-admin.html" class="btn btn-primary btn-sm">
+			                            Administrar Cuestionarios
+			                        </a>
+			                    </div>
+			                </div>
+			            </div>
+			        </div>
+			    </div>
+			</section>
+            
+            <!-- Dashboard Overview -->
+            <section class="dashboard-overview mb-8">
+                <div class="card hero-card">
+                    <div class="card-header">
+                        <h2>Panel de Control - AdministradorBanco</h2>
+                        <p>Resumen de tu acceso y estadísticas</p>
+                    </div>
+                    <div class="card-body">
+                        <div class="dashboard-stats grid grid-cols-1 md:grid-cols-4 gap-6">
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2H5a2 2 0 0 0-2-2z"></path>
+                                        <path d="M8 21v-5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v5"></path>
+                                    </svg>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="stat-number">10</div>
+                                    <div class="stat-label">Páginas Accesibles</div>
+                                </div>
+                            </div>
+                            
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                        <rect x="7" y="7" width="3" height="9"></rect>
+                                        <rect x="14" y="7" width="3" height="5"></rect>
+                                    </svg>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="stat-number">3</div>
+                                    <div class="stat-label">Entidades Gestionadas</div>
+                                </div>
+                            </div>
+                            
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="8.5" cy="7" r="4"></circle>
+                                        <path d="m22 2-5 10-5-5 10-5z"></path>
+                                    </svg>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="stat-number">AdministradorBanco</div>
+                                    <div class="stat-label">Rol Actual</div>
+                                </div>
+                            </div>
+                            
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <polyline points="12,6 12,12 16,14"></polyline>
+                                    </svg>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="stat-number" id="current-time">--:--</div>
+                                    <div class="stat-label">Hora Actual</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Acciones Rápidas -->
+            <section class="quick-actions mb-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Acciones Rápidas</h3>
+                        <p>Accede rápidamente a las funciones más utilizadas</p>
+                    </div>
+                    <div class="card-body">
+                        <div class="actions-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div class="action-card animate-target">
+                                <div class="action-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2H5a2 2 0 0 0-2-2z"></path>
+                                    </svg>
+                                </div>
+                                <div class="action-content">
+                                    <h4>Información del Banco</h4>
+                                    <p>Información institucional del banco</p>
+                                </div>
+                                <div class="action-footer">
+                                    <a href="pages/informacion.html" class="btn btn-primary btn-sm">
+                                        Acceder
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <line x1="7" y1="17" x2="17" y2="7"></line>
+                                            <polyline points="7,7 17,7 17,17"></polyline>
+                                        </svg>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="action-card animate-target">
+                                <div class="action-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                        <rect x="7" y="7" width="3" height="9"></rect>
+                                        <rect x="14" y="7" width="3" height="5"></rect>
+                                    </svg>
+                                </div>
+                                <div class="action-content">
+                                    <h4>Listado de Clientes</h4>
+                                    <p>Lista paginada de todos los clientes</p>
+                                </div>
+                                <div class="action-footer">
+                                    <a href="pages/cliente/index.html" class="btn btn-primary btn-sm">
+                                        Acceder
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <line x1="7" y1="17" x2="17" y2="7"></line>
+                                            <polyline points="7,7 17,7 17,17"></polyline>
+                                        </svg>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="action-card animate-target">
+                                <div class="action-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                        <rect x="7" y="7" width="3" height="9"></rect>
+                                        <rect x="14" y="7" width="3" height="5"></rect>
+                                    </svg>
+                                </div>
+                                <div class="action-content">
+                                    <h4>Detalle de Cliente</h4>
+                                    <p>Ver información completa del cliente</p>
+                                </div>
+                                <div class="action-footer">
+                                    <a href="pages/cliente/index.html" class="btn btn-primary btn-sm">
+                                        Acceder
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <line x1="7" y1="17" x2="17" y2="7"></line>
+                                            <polyline points="7,7 17,7 17,17"></polyline>
+                                        </svg>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="action-card animate-target">
+                                <div class="action-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                        <rect x="7" y="7" width="3" height="9"></rect>
+                                        <rect x="14" y="7" width="3" height="5"></rect>
+                                    </svg>
+                                </div>
+                                <div class="action-content">
+                                    <h4>Registro de Nuevo Cliente</h4>
+                                    <p>Formulario para registrar un nuevo cliente</p>
+                                </div>
+                                <div class="action-footer">
+                                    <a href="pages/cliente/index.html" class="btn btn-primary btn-sm">
+                                        Acceder
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <line x1="7" y1="17" x2="17" y2="7"></line>
+                                            <polyline points="7,7 17,7 17,17"></polyline>
+                                        </svg>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="action-card animate-target">
+                                <div class="action-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                        <rect x="7" y="7" width="3" height="9"></rect>
+                                        <rect x="14" y="7" width="3" height="5"></rect>
+                                    </svg>
+                                </div>
+                                <div class="action-content">
+                                    <h4>Actualizar Datos Cliente</h4>
+                                    <p>Formulario para actualizar información del cliente</p>
+                                </div>
+                                <div class="action-footer">
+                                    <a href="pages/cliente/index.html" class="btn btn-primary btn-sm">
+                                        Acceder
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <line x1="7" y1="17" x2="17" y2="7"></line>
+                                            <polyline points="7,7 17,7 17,17"></polyline>
+                                        </svg>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="action-card animate-target">
+                                <div class="action-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                        <rect x="7" y="7" width="3" height="9"></rect>
+                                        <rect x="14" y="7" width="3" height="5"></rect>
+                                    </svg>
+                                </div>
+                                <div class="action-content">
+                                    <h4>Historial de Transacciones</h4>
+                                    <p>Consulta de movimientos bancarios</p>
+                                </div>
+                                <div class="action-footer">
+                                    <a href="pages/transaccion/index.html" class="btn btn-primary btn-sm">
+                                        Acceder
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <line x1="7" y1="17" x2="17" y2="7"></line>
+                                            <polyline points="7,7 17,7 17,17"></polyline>
+                                        </svg>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="action-card animate-target">
+                                <div class="action-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                        <rect x="7" y="7" width="3" height="9"></rect>
+                                        <rect x="14" y="7" width="3" height="5"></rect>
+                                    </svg>
+                                </div>
+                                <div class="action-content">
+                                    <h4>Detalle de Transacción</h4>
+                                    <p>Ver información completa de la transacción</p>
+                                </div>
+                                <div class="action-footer">
+                                    <a href="pages/transaccion/index.html" class="btn btn-primary btn-sm">
+                                        Acceder
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <line x1="7" y1="17" x2="17" y2="7"></line>
+                                            <polyline points="7,7 17,7 17,17"></polyline>
+                                        </svg>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="action-card animate-target">
+                                <div class="action-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                        <rect x="7" y="7" width="3" height="9"></rect>
+                                        <rect x="14" y="7" width="3" height="5"></rect>
+                                    </svg>
+                                </div>
+                                <div class="action-content">
+                                    <h4>Nueva Transferencia</h4>
+                                    <p>Realizar transferencia entre cuentas</p>
+                                </div>
+                                <div class="action-footer">
+                                    <a href="pages/transaccion/index.html" class="btn btn-primary btn-sm">
+                                        Acceder
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <line x1="7" y1="17" x2="17" y2="7"></line>
+                                            <polyline points="7,7 17,7 17,17"></polyline>
+                                        </svg>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="action-card animate-target">
+                                <div class="action-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                        <rect x="7" y="7" width="3" height="9"></rect>
+                                        <rect x="14" y="7" width="3" height="5"></rect>
+                                    </svg>
+                                </div>
+                                <div class="action-content">
+                                    <h4>Gestión de Préstamos</h4>
+                                    <p>Administración de solicitudes de préstamos</p>
+                                </div>
+                                <div class="action-footer">
+                                    <a href="pages/prestamo/index.html" class="btn btn-primary btn-sm">
+                                        Acceder
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <line x1="7" y1="17" x2="17" y2="7"></line>
+                                            <polyline points="7,7 17,7 17,17"></polyline>
+                                        </svg>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Encuestas y Cuestionarios accesibles -->
+            <section class="surveys-quizzes mb-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Evaluaciones Disponibles</h3>
+                        <p>Encuestas y cuestionarios asignados a tu rol</p>
+                    </div>
+                    <div class="card-body">
+                        <div class="assessments-grid grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="surveys-list">
+                                <h4 class="section-title">Encuestas</h4>
+                                <div class="assessment-list" id="roleSurveys">
+                                    <div class="loading">
+                                        <div class="loading-spinner"></div>
+                                        <span>Cargando encuestas disponibles...</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="quizzes-list">
+                                <h4 class="section-title">Cuestionarios</h4>
+                                <div class="assessment-list" id="roleQuizzes">
+                                    <div class="loading">
+                                        <div class="loading-spinner"></div>
+                                        <span>Cargando cuestionarios disponibles...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Contenido por Entidades -->
+            <section class="entities-section mb-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Entidades Disponibles</h3>
+                        <p>Gestiona la información organizada por entidades</p>
+                    </div>
+                    <div class="card-body">
+                        <div class="entities-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div class="entity-card card animate-target">
+                                <div class="card-header">
+                                    <div class="entity-icon">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                            <rect x="7" y="7" width="3" height="9"></rect>
+                                            <rect x="14" y="7" width="3" height="5"></rect>
+                                        </svg>
+                                    </div>
+                                    <h4>Cliente</h4>
+                                </div>
+                                <div class="card-body">
+                                    <div class="entity-info">
+                                        <div class="entity-stat">
+                                            <span class="entity-stat-label">Atributos:</span>
+                                            <span class="entity-stat-value">8</span>
+                                        </div>
+                                    </div>
+                                    <div class="entity-operations">
+                                        <a href="pages/cliente/index.html" class="btn btn-outline btn-outline-primary btn-sm">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M3 6h18"></path>
+                                                <path d="M3 12h18"></path>
+                                                <path d="M3 18h18"></path>
+                                            </svg>
+                                            Gestionar
+                                        </a>
+                                        <a href="pages/cliente/list.html" class="btn btn-outline btn-outline-info btn-sm">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M3 6h18"></path>
+                                                <path d="M3 12h18"></path>
+                                                <path d="M3 18h18"></path>
+                                            </svg>
+                                            Listar
+                                        </a>
+                                        <a href="pages/cliente/create.html" class="btn btn-outline btn-outline-success btn-sm">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <circle cx="12" cy="12" r="10"></circle>
+                                                <line x1="12" y1="8" x2="12" y2="16"></line>
+                                                <line x1="8" y1="12" x2="16" y2="12"></line>
+                                            </svg>
+                                            Crear
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="entity-card card animate-target">
+                                <div class="card-header">
+                                    <div class="entity-icon">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                            <rect x="7" y="7" width="3" height="9"></rect>
+                                            <rect x="14" y="7" width="3" height="5"></rect>
+                                        </svg>
+                                    </div>
+                                    <h4>Transaccion</h4>
+                                </div>
+                                <div class="card-body">
+                                    <div class="entity-info">
+                                        <div class="entity-stat">
+                                            <span class="entity-stat-label">Atributos:</span>
+                                            <span class="entity-stat-value">6</span>
+                                        </div>
+                                        <div class="entity-stat">
+                                            <span class="entity-stat-label">Referencias:</span>
+                                            <span class="entity-stat-value">2</span>
+                                        </div>
+                                    </div>
+                                    <div class="entity-operations">
+                                        <a href="pages/transaccion/index.html" class="btn btn-outline btn-outline-primary btn-sm">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M3 6h18"></path>
+                                                <path d="M3 12h18"></path>
+                                                <path d="M3 18h18"></path>
+                                            </svg>
+                                            Gestionar
+                                        </a>
+                                        <a href="pages/transaccion/list.html" class="btn btn-outline btn-outline-info btn-sm">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M3 6h18"></path>
+                                                <path d="M3 12h18"></path>
+                                                <path d="M3 18h18"></path>
+                                            </svg>
+                                            Listar
+                                        </a>
+                                        <a href="pages/transaccion/create.html" class="btn btn-outline btn-outline-success btn-sm">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <circle cx="12" cy="12" r="10"></circle>
+                                                <line x1="12" y1="8" x2="12" y2="16"></line>
+                                                <line x1="8" y1="12" x2="16" y2="12"></line>
+                                            </svg>
+                                            Crear
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="entity-card card animate-target">
+                                <div class="card-header">
+                                    <div class="entity-icon">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                            <rect x="7" y="7" width="3" height="9"></rect>
+                                            <rect x="14" y="7" width="3" height="5"></rect>
+                                        </svg>
+                                    </div>
+                                    <h4>Prestamo</h4>
+                                </div>
+                                <div class="card-body">
+                                    <div class="entity-info">
+                                        <div class="entity-stat">
+                                            <span class="entity-stat-label">Atributos:</span>
+                                            <span class="entity-stat-value">7</span>
+                                        </div>
+                                        <div class="entity-stat">
+                                            <span class="entity-stat-label">Referencias:</span>
+                                            <span class="entity-stat-value">2</span>
+                                        </div>
+                                    </div>
+                                    <div class="entity-operations">
+                                        <a href="pages/prestamo/index.html" class="btn btn-outline btn-outline-primary btn-sm">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M3 6h18"></path>
+                                                <path d="M3 12h18"></path>
+                                                <path d="M3 18h18"></path>
+                                            </svg>
+                                            Gestionar
+                                        </a>
+                                        <a href="pages/prestamo/list.html" class="btn btn-outline btn-outline-info btn-sm">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M3 6h18"></path>
+                                                <path d="M3 12h18"></path>
+                                                <path d="M3 18h18"></path>
+                                            </svg>
+                                            Listar
+                                        </a>
+                                        <a href="pages/prestamo/create.html" class="btn btn-outline btn-outline-success btn-sm">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <circle cx="12" cy="12" r="10"></circle>
+                                                <line x1="12" y1="8" x2="12" y2="16"></line>
+                                                <line x1="8" y1="12" x2="16" y2="12"></line>
+                                            </svg>
+                                            Crear
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Información del Sistema -->
+            <div class="system-info grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <!-- Enlaces Útiles -->
+                <div class="useful-links card">
+                    <div class="card-header">
+                        <h3>Enlaces Útiles</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="links-list">
+                            <a href="../index.html" class="link-item">
+                                <div class="link-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                        <polyline points="9,22 9,12 15,12 15,22"></polyline>
+                                    </svg>
+                                </div>
+                                <div class="link-content">
+                                    <h4>Página Principal</h4>
+                                    <p>Volver al inicio del sistema</p>
+                                </div>
+                            </a>
+                            
+                            <a href="../surveys/index.html" class="link-item">
+                                <div class="link-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                        <polyline points="14,2 14,8 20,8"></polyline>
+                                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                                    </svg>
+                                </div>
+                                <div class="link-content">
+                                    <h4>Encuestas</h4>
+                                    <p>Participar en las encuestas disponibles</p>
+                                </div>
+                            </a>
+                            
+                            <a href="../quizzes/index.html" class="link-item">
+                                <div class="link-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <path d="m9 12 2 2 4-4"></path>
+                                    </svg>
+                                </div>
+                                <div class="link-content">
+                                    <h4>Cuestionarios</h4>
+                                    <p>Realiza los cuestionarios de evaluación</p>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Redes Sociales -->
+                <div class="social-section">
+                    <div class="social-header">
+                        <div class="social-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path>
+                            </svg>
+                        </div>
+                        <h3>Síguenos en Redes Sociales</h3>
+                    </div>
+                    <div class="social-feeds">
+                        <div class="social-feed">
+                            <h4>TWITTER: @BancoDigital</h4>
+                            <div class="social-content">
+                                <a class=\"twitter-timeline\" data-width=\"220\" data-height=\"600\" href=\"https://twitter.com/BancoDigital\">Tweets by BancoDigital</a>"
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="app-footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2025 Sistema Bancario Digital. Panel de AdministradorBanco.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Scripts -->
+    <script src="../assets/js/app.js"></script>
+    
+    <!-- Script para el dashboard -->
+	<script>
+	    // Actualizar hora actual
+	    function updateCurrentTime() {
+	        const now = new Date();
+	        const timeString = now.toLocaleTimeString('es-ES', { 
+	            hour: '2-digit', 
+	            minute: '2-digit' 
+	        });
+	        const timeElement = document.getElementById('current-time');
+	        if (timeElement) {
+	            timeElement.textContent = timeString;
+	        }
+	    }
+	    
+	    // Actualizar cada minuto
+	    updateCurrentTime();
+	    setInterval(updateCurrentTime, 60000);
+	    
+	    // Función para esperar a que la base de datos esté disponible
+	    async function waitForDatabase() {
+	        let attempts = 0;
+	        const maxAttempts = 100;
+	        
+	        while (attempts < maxAttempts) {
+	            if (window.localDB && window.localDB.db) {
+	                return window.localDB;
+	            }
+	            
+	            // Intentar inicializar la base de datos
+	            try {
+	                const request = indexedDB.open('DataWeb_DB', 2);
+	                const db = await new Promise((resolve, reject) => {
+	                    request.onsuccess = () => {
+	                        const database = request.result;
+	                        const dbWrapper = {
+	                            db: database,
+	                            async getAll(storeName) {
+	                                return new Promise((resolve, reject) => {
+	                                    if (!database.objectStoreNames.contains(storeName)) {
+	                                        resolve([]);
+	                                        return;
+	                                    }
+	                                    const transaction = database.transaction([storeName], 'readonly');
+	                                    const store = transaction.objectStore(storeName);
+	                                    const request = store.getAll();
+	                                    request.onsuccess = () => resolve(request.result || []);
+	                                    request.onerror = () => resolve([]);
+	                                });
+	                            }
+	                        };
+	                        window.localDB = dbWrapper;
+	                        resolve(dbWrapper);
+	                    };
+	                    request.onerror = () => resolve(null);
+	                });
+	                
+	                if (db) return db;
+	            } catch (error) {
+	                console.warn('Database initialization attempt failed:', error);
+	            }
+	            
+	            await new Promise(resolve => setTimeout(resolve, 100));
+	            attempts++;
+	        }
+	        
+	        return null;
+	    }
+	    
+	    // Cargar encuestas y cuestionarios disponibles para este rol
+	    document.addEventListener('DOMContentLoaded', async () => {
+	        try {
+	            // Guardar el rol actual
+	            const currentRole = 'AdministradorBanco';
+	            localStorage.setItem('current_role', currentRole);
+	            
+	            console.log('Cargando evaluaciones para rol:', currentRole);
+	            
+	            // Esperar a que la base de datos esté disponible
+	            const db = await waitForDatabase();
+	            if (!db) {
+	                console.error('Base de datos no disponible');
+	                return;
+	            }
+	            
+	            // Cargar encuestas y cuestionarios desde la base de datos
+	            const [surveys, quizzes] = await Promise.all([
+	                db.getAll('ENCUESTAS').catch(() => []),
+	                db.getAll('CUESTIONARIOS').catch(() => [])
+	            ]);
+	            
+	            console.log('Datos cargados desde BD - Encuestas:', surveys.length, 'Cuestionarios:', quizzes.length);
+	            
+	            // Obtener asignaciones de roles
+	            const surveyRoleAssignments = JSON.parse(localStorage.getItem('survey_role_assignments') || '{}');
+	            const quizRoleAssignments = JSON.parse(localStorage.getItem('quiz_role_assignments') || '{}');
+	            
+	            // Filtrar encuestas disponibles para el rol actual
+	            const availableSurveys = surveys.filter(survey => {
+	                if (surveyRoleAssignments[survey.nombre]) {
+	                    return surveyRoleAssignments[survey.nombre].includes(currentRole);
+	                }
+	                // Si no hay asignación específica, mostrar para todos por defecto
+	                return true;
+	            });
+	            
+	            // Filtrar cuestionarios disponibles para el rol actual
+	            const availableQuizzes = quizzes.filter(quiz => {
+	                if (quizRoleAssignments[quiz.nombre]) {
+	                    return quizRoleAssignments[quiz.nombre].includes(currentRole);
+	                }
+	                // Si no hay asignación específica, mostrar para todos por defecto
+	                return true;
+	            });
+	            
+	            console.log('Disponibles para rol', currentRole, '- Encuestas:', availableSurveys.length, 'Cuestionarios:', availableQuizzes.length);
+	            
+	            // Contenedores
+	            const surveysContainer = document.getElementById('roleSurveys');
+	            const quizzesContainer = document.getElementById('roleQuizzes');
+	            
+	            // Mostrar encuestas
+	            if (surveysContainer) {
+	                if (availableSurveys.length === 0) {
+	                    surveysContainer.innerHTML = '<p class="empty-message">No hay encuestas asignadas a tu rol.</p>';
+	                } else {
+	                    surveysContainer.innerHTML = availableSurveys.map(survey => `
+	                        <div class="assessment-item">
+	                            <div class="assessment-info">
+	                                <h5>${survey.titulo || survey.nombre}</h5>
+	                                <p>${survey.descripcion || 'Encuesta disponible para tu rol'}</p>
+	                                <span class="assessment-badge">${survey.tipo_representacion || 'Encuesta'}</span>
+	                            </div>
+	                            <button class="btn btn-primary btn-sm" onclick="openSurveyPage('${survey.nombre}')">
+	                                Participar
+	                            </button>
+	                        </div>
+	                    `).join('');
+	                }
+	            }
+	            
+	            // Mostrar cuestionarios
+	            if (quizzesContainer) {
+	                if (availableQuizzes.length === 0) {
+	                    quizzesContainer.innerHTML = '<p class="empty-message">No hay cuestionarios asignados a tu rol.</p>';
+	                } else {
+	                    quizzesContainer.innerHTML = availableQuizzes.map(quiz => `
+	                        <div class="assessment-item">
+	                            <div class="assessment-info">
+	                                <h5>${quiz.titulo || quiz.nombre}</h5>
+	                                <p>${quiz.descripcion || 'Cuestionario disponible para evaluación'}</p>
+	                                <span class="assessment-badge">Evaluativo (${quiz.tiempoLimite || 30} min)</span>
+	                            </div>
+	                            <button class="btn btn-primary btn-sm" onclick="openQuizPage('${quiz.nombre}')">
+	                                Realizar
+	                            </button>
+	                        </div>
+	                    `).join('');
+	                }
+	            }
+	            
+	        } catch (error) {
+	            console.error('Error cargando evaluaciones:', error);
+	            
+	            // Mostrar mensaje de error en los contenedores
+	            const surveysContainer = document.getElementById('roleSurveys');
+	            const quizzesContainer = document.getElementById('roleQuizzes');
+	            
+	            if (surveysContainer) {
+	                surveysContainer.innerHTML = `
+	                    <div class="error-message">
+	                        <p>Error al cargar encuestas</p>
+	                        <button onclick="location.reload()" class="btn btn-sm btn-outline-primary">Reintentar</button>
+	                    </div>
+	                `;
+	            }
+	            
+	            if (quizzesContainer) {
+	                quizzesContainer.innerHTML = `
+	                    <div class="error-message">
+	                        <p>Error al cargar cuestionarios</p>
+	                        <button onclick="location.reload()" class="btn btn-sm btn-outline-primary">Reintentar</button>
+	                    </div>
+	                `;
+	            }
+	        }
+	    });
+	    
+	    // Funciones para abrir evaluaciones
+	    function openSurveyPage(surveyName) {
+	        // Intentar abrir página generada dinámicamente primero
+	        if (window.pageGenerator) {
+	            const surveyHTML = window.pageGenerator.getSurveyPage(surveyName);
+	            if (surveyHTML) {
+	                const newWindow = window.open('', '_blank');
+	                newWindow.document.write(surveyHTML);
+	                newWindow.document.close();
+	                return;
+	            }
+	        }
+	        
+	        // Fallar a URL estática
+	        const surveyURL = `../surveys/${surveyName}.html`;
+	        
+	        // Verificar si el archivo existe
+	        fetch(surveyURL, { method: 'HEAD' })
+	            .then(response => {
+	                if (response.ok) {
+	                    window.location.href = surveyURL;
+	                } else {
+	                    alert('Encuesta no disponible. La página se está generando, por favor intenta de nuevo en unos momentos.');
+	                }
+	            })
+	            .catch(() => {
+	                window.open(surveyURL, '_blank');
+	            });
+	    }
+	    
+	    function openQuizPage(quizName) {
+	        // Intentar abrir página generada dinámicamente primero
+	        if (window.pageGenerator) {
+	            const quizHTML = window.pageGenerator.getQuizPage(quizName);
+	            if (quizHTML) {
+	                const newWindow = window.open('', '_blank');
+	                newWindow.document.write(quizHTML);
+	                newWindow.document.close();
+	                return;
+	            }
+	        }
+	        
+	        // Fallar a URL estática
+	        const quizURL = `../quizzes/${quizName}.html`;
+	        
+	        // Verificar si el archivo existe
+	        fetch(quizURL, { method: 'HEAD' })
+	            .then(response => {
+	                if (response.ok) {
+	                    window.location.href = quizURL;
+	                } else {
+	                    alert('Cuestionario no disponible. La página se está generando, por favor intenta de nuevo en unos momentos.');
+	                }
+	            })
+	            .catch(() => {
+	                window.open(quizURL, '_blank');
+	            });
+	    }
+	    
+	    // Hacer funciones disponibles globalmente
+	    window.openSurveyPage = openSurveyPage;
+	    window.openQuizPage = openQuizPage;
+	    
+	    // Manejar dropdown del menú
+	    document.addEventListener('DOMContentLoaded', () => {
+	        const dropdownToggle = document.querySelector('.dropdown-toggle');
+	        if (dropdownToggle) {
+	            dropdownToggle.addEventListener('click', (e) => {
+	                e.preventDefault();
+	                const dropdownMenu = dropdownToggle.nextElementSibling;
+	                if (dropdownMenu) {
+	                    dropdownMenu.classList.toggle('show');
+	                }
+	            });
+	        }
+	    });
+	</script>
+    
+    <!-- CSS específico del dashboard -->
+    <style>
+		.error-message {
+		    text-align: center;
+		    padding: 2rem;
+		    color: var(--danger-600);
+		    background: var(--danger-50);
+		    border: 1px solid var(--danger-200);
+		    border-radius: var(--radius);
+		}
+		
+		.error-message p {
+		    margin: 0 0 1rem 0;
+		    font-weight: 500;
+		}
+		
+		.assessment-badge {
+		    display: inline-block;
+		    margin-top: 0.5rem;
+		    padding: 0.25rem 0.5rem;
+		    background: var(--info-100);
+		    color: var(--info-700);
+		    border-radius: var(--radius);
+		    font-size: 0.75rem;
+		    font-weight: 500;
+		}
+		
+        .dashboard-stats {
+            margin-top: 1.5rem;
+        }
+        
+        .stat-card {
+            display: flex;
+            align-items: center;
+            padding: 1.5rem;
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--gray-200);
+            transition: var(--transition);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .stat-icon {
+            width: 3rem;
+            height: 3rem;
+            background: var(--primary-100);
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-600);
+            margin-right: 1rem;
+        }
+        
+        .stat-content {
+            flex: 1;
+        }
+        
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            line-height: 1;
+        }
+        
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            margin-top: 0.25rem;
+        }
+        
+        .action-card {
+            background: white;
+            border-radius: var(--radius);
+            border: 1px solid var(--gray-200);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+        }
+        
+        .action-card:hover {
+            border-color: var(--primary-300);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .action-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            background: var(--primary-100);
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-600);
+            margin-bottom: 1rem;
+        }
+        
+        .action-content {
+            flex: 1;
+            margin-bottom: 1rem;
+        }
+        
+        .action-content h4 {
+            margin: 0 0 0.5rem;
+            color: var(--gray-900);
+            font-size: 1rem;
+        }
+        
+        .action-content p {
+            margin: 0;
+            color: var(--gray-600);
+            font-size: 0.875rem;
+            line-height: 1.4;
+        }
+        
+        .action-footer {
+            margin-top: auto;
+        }
+        
+        .entity-card {
+            border: 1px solid var(--gray-200);
+        }
+        
+        .entity-icon {
+            width: 2rem;
+            height: 2rem;
+            color: var(--primary-600);
+            margin-right: 0.75rem;
+        }
+        
+        .entity-info {
+            margin-bottom: 1rem;
+        }
+        
+        .entity-stat {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+        
+        .entity-stat-label {
+            color: var(--gray-600);
+        }
+        
+        .entity-stat-value {
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+        
+        .entity-operations {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .links-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .link-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            text-decoration: none;
+            color: inherit;
+            border-radius: var(--radius);
+            border: 1px solid var(--gray-200);
+            transition: var(--transition);
+        }
+        
+        .link-item:hover {
+            background: var(--gray-50);
+            border-color: var(--primary-300);
+            text-decoration: none;
+        }
+        
+        .link-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            background: var(--gray-100);
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray-600);
+            margin-right: 1rem;
+        }
+        
+        .link-content h4 {
+            margin: 0 0 0.25rem;
+            color: var(--gray-900);
+            font-size: 0.875rem;
+        }
+        
+        .link-content p {
+            margin: 0;
+            color: var(--gray-600);
+            font-size: 0.75rem;
+        }
+        
+        .dropdown {
+            position: relative;
+        }
+        
+        .dropdown-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--gray-200);
+            min-width: 180px;
+            z-index: var(--z-dropdown);
+            margin-top: 0.5rem;
+        }
+        
+        .dropdown-menu.show {
+            display: block;
+            animation: fadeIn 0.2s ease;
+        }
+        
+        .dropdown-item {
+            display: block;
+            padding: 0.75rem 1rem;
+            color: var(--gray-700);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+        
+        .dropdown-item:hover {
+            background: var(--primary-50);
+            color: var(--primary-700);
+            text-decoration: none;
+        }
+        
+        .section-title {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--gray-200);
+            color: var(--gray-800);
+        }
+        
+        .assessment-item {
+            background: white;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius);
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition);
+        }
+        
+        .assessment-item:hover {
+            border-color: var(--primary-300);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .assessment-info {
+            flex: 1;
+        }
+        
+        .assessment-info h5 {
+            margin: 0 0 0.25rem;
+            font-size: 1rem;
+            color: var(--gray-900);
+        }
+        
+        .assessment-info p {
+            margin: 0;
+            font-size: 0.75rem;
+            color: var(--gray-600);
+        }
+        
+        .assessment-badge {
+            display: inline-block;
+            margin-top: 0.5rem;
+            padding: 0.25rem 0.5rem;
+            background: var(--blue-100);
+            color: var(--blue-700);
+            border-radius: var(--radius);
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .empty-message {
+            text-align: center;
+            padding: 2rem;
+            color: var(--gray-500);
+            font-style: italic;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--gray-600);
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 3px solid var(--gray-200);
+            border-radius: 50%;
+            border-top-color: var(--primary-500);
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard-stats {
+                grid-template-columns: repeat(1, minmax(0, 1fr));
+            }
+            
+            .actions-grid {
+                grid-template-columns: repeat(1, minmax(0, 1fr));
+            }
+            
+            .entities-grid {
+                grid-template-columns: repeat(1, minmax(0, 1fr));
+            }
+            
+            .assessment-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .assessment-item .btn {
+                margin-top: 1rem;
+                width: 100%;
+            }
+            
+            .dropdown-menu {
+                position: static;
+                width: 100%;
+                margin-top: 0.5rem;
+                box-shadow: none;
+                border: 1px solid var(--gray-200);
+            }
+        }
+    </style>
+	<script src="../assets/js/dynamic-page-generator.js"></script>
+</body>
+</html>

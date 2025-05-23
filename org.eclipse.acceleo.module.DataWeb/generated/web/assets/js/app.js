@@ -1,5 +1,5 @@
 /**
- * Biblioteca Universitaria - Aplicación JavaScript Principal
+ * Sistema Bancario Digital - Aplicación JavaScript Principal
  * Sistema de gestión de datos moderno y responsivo
  */
 
@@ -12,16 +12,20 @@ async function initializeAdminRoles() {
         // Obtener todos los roles del sistema
         const rolesInfo = [
             {
-                name: 'Administrador',
-                entidadesAccesibles: 4
-            }
-,            {
-                name: 'Bibliotecario',
+                name: 'AdministradorBanco',
                 entidadesAccesibles: 3
             }
 ,            {
-                name: 'Estudiante',
+                name: 'GerenteOperaciones',
+                entidadesAccesibles: 3
+            }
+,            {
+                name: 'EmpleadoBanco',
                 entidadesAccesibles: 2
+            }
+,            {
+                name: 'Cliente',
+                entidadesAccesibles: 1
             }
         ];
         
@@ -88,7 +92,7 @@ async function loadQuizRoleAssignments() {
 
 // Configuración global de la aplicación
 const AppConfig = {
-    name: 'Biblioteca Universitaria',
+    name: 'Sistema Bancario Digital',
     version: '1.0.0',
     debug: false,
     apiBaseUrl: '/api',
@@ -125,7 +129,7 @@ class DataWebApp {
         
         // Mostrar mensaje de bienvenida en desarrollo
         if (AppConfig.debug) {
-            console.log(`✅ Biblioteca Universitaria Application initialized successfully`);
+            console.log(`✅ Sistema Bancario Digital Application initialized successfully`);
         }
     }
 
@@ -814,7 +818,7 @@ class DataWebApp {
                     const perfData = performance.getEntriesByType('navigation')[0];
                     
                     if (AppConfig.debug) {
-                        console.group(`📊 Biblioteca Universitaria Performance Metrics`);
+                        console.group(`📊 Sistema Bancario Digital Performance Metrics`);
                         console.log(`DOM Content Loaded: ${Math.round(perfData.domContentLoadedEventEnd - perfData.navigationStart)}ms`);
                         console.log(`Load Complete: ${Math.round(perfData.loadEventEnd - perfData.navigationStart)}ms`);
                         console.log(`First Paint: ${Math.round(perfData.fetchStart - perfData.navigationStart)}ms`);
@@ -831,7 +835,7 @@ class DataWebApp {
 // =================================================
 class LocalDBManager {
     constructor() {
-        this.dbName = 'Biblioteca_Universitaria_DB';
+        this.dbName = 'Sistema_Bancario Digital_DB';
         this.version = 1;
         this.db = null;
     }
@@ -851,36 +855,57 @@ class LocalDBManager {
                 const db = event.target.result;
                 
                 // Crear tablas para entidades
-                if (!db.objectStoreNames.contains('LIBROS')) {
-                    const store = db.createObjectStore('LIBROS', {
-                        keyPath: 'id_libro',
+                if (!db.objectStoreNames.contains('CLIENTES')) {
+                    const store = db.createObjectStore('CLIENTES', {
+                        keyPath: 'id_cliente',
                         autoIncrement: true
                     });
                     
                     // Crear índices para búsquedas
-                    store.createIndex('titulo', 'titulo', { unique: false });
-                    store.createIndex('autor', 'autor', { unique: false });
-                    store.createIndex('añoPublicacion', 'añoPublicacion', { unique: false });
-                    store.createIndex('disponible', 'disponible', { unique: false });
+                    store.createIndex('dni', 'dni', { unique: false });
+                    store.createIndex('nombre', 'nombre', { unique: false });
+                    store.createIndex('apellidos', 'apellidos', { unique: false });
+                    store.createIndex('email', 'email', { unique: false });
+                    store.createIndex('telefono', 'telefono', { unique: false });
+                    store.createIndex('fecha_registro', 'fecha_registro', { unique: false });
+                    store.createIndex('activo', 'activo', { unique: false });
                 }
-                if (!db.objectStoreNames.contains('CATEGORIAS')) {
-                    const store = db.createObjectStore('CATEGORIAS', {
-                        keyPath: 'id_categoria',
+                if (!db.objectStoreNames.contains('CUENTAS')) {
+                    const store = db.createObjectStore('CUENTAS', {
+                        keyPath: 'numero_cuenta',
                         autoIncrement: true
                     });
                     
                     // Crear índices para búsquedas
-                    store.createIndex('nombre_categoria', 'nombre_categoria', { unique: false });
+                    store.createIndex('tipo_cuenta', 'tipo_cuenta', { unique: false });
+                    store.createIndex('saldo', 'saldo', { unique: false });
+                    store.createIndex('fecha_apertura', 'fecha_apertura', { unique: false });
+                    store.createIndex('activa', 'activa', { unique: false });
+                }
+                if (!db.objectStoreNames.contains('TRANSACCIONES')) {
+                    const store = db.createObjectStore('TRANSACCIONES', {
+                        keyPath: 'id_transaccion',
+                        autoIncrement: true
+                    });
+                    
+                    // Crear índices para búsquedas
+                    store.createIndex('fecha_transaccion', 'fecha_transaccion', { unique: false });
+                    store.createIndex('tipo_transaccion', 'tipo_transaccion', { unique: false });
+                    store.createIndex('monto', 'monto', { unique: false });
                     store.createIndex('descripcion', 'descripcion', { unique: false });
+                    store.createIndex('estado', 'estado', { unique: false });
                 }
-                if (!db.objectStoreNames.contains('USUARIOS')) {
-                    const store = db.createObjectStore('USUARIOS', {
-                        keyPath: 'id_usuario',
+                if (!db.objectStoreNames.contains('EMPLEADOS')) {
+                    const store = db.createObjectStore('EMPLEADOS', {
+                        keyPath: 'id_empleado',
                         autoIncrement: true
                     });
                     
                     // Crear índices para búsquedas
-                    store.createIndex('nombre_usuario', 'nombre_usuario', { unique: false });
+                    store.createIndex('codigo_empleado', 'codigo_empleado', { unique: false });
+                    store.createIndex('nombre', 'nombre', { unique: false });
+                    store.createIndex('puesto', 'puesto', { unique: false });
+                    store.createIndex('departamento', 'departamento', { unique: false });
                     store.createIndex('email', 'email', { unique: false });
                     store.createIndex('activo', 'activo', { unique: false });
                 }
@@ -891,8 +916,24 @@ class LocalDBManager {
                     });
                     
                     // Crear índices para búsquedas
-                    store.createIndex('fechaPrestamo', 'fechaPrestamo', { unique: false });
-                    store.createIndex('fechaDevolucion', 'fechaDevolucion', { unique: false });
+                    store.createIndex('monto_solicitado', 'monto_solicitado', { unique: false });
+                    store.createIndex('tasa_interes', 'tasa_interes', { unique: false });
+                    store.createIndex('plazo_meses', 'plazo_meses', { unique: false });
+                    store.createIndex('estado_prestamo', 'estado_prestamo', { unique: false });
+                    store.createIndex('fecha_solicitud', 'fecha_solicitud', { unique: false });
+                    store.createIndex('fecha_aprobacion', 'fecha_aprobacion', { unique: false });
+                }
+                if (!db.objectStoreNames.contains('TARJETAS_CREDITO')) {
+                    const store = db.createObjectStore('TARJETAS_CREDITO', {
+                        keyPath: 'numero_tarjeta',
+                        autoIncrement: true
+                    });
+                    
+                    // Crear índices para búsquedas
+                    store.createIndex('limite_credito', 'limite_credito', { unique: false });
+                    store.createIndex('saldo_actual', 'saldo_actual', { unique: false });
+                    store.createIndex('fecha_vencimiento', 'fecha_vencimiento', { unique: false });
+                    store.createIndex('activa', 'activa', { unique: false });
                 }
                 
                 // Crear tablas para encuestas y cuestionarios
@@ -949,50 +990,75 @@ class LocalDBManager {
     // Insertar datos de ejemplo automáticamente
     async initSampleData() {
         try {
-            // Verificar si Libro ya tiene datos
-            const libroCount = await this.count('LIBROS');
-            if (libroCount === 0) {
-                console.log('Insertando datos de ejemplo para Libro...');
-                // Crear 5 registros de ejemplo para Libro
+            // Verificar si Cliente ya tiene datos
+            const clienteCount = await this.count('CLIENTES');
+            if (clienteCount === 0) {
+                console.log('Insertando datos de ejemplo para Cliente...');
+                // Crear 5 registros de ejemplo para Cliente
                 for (let i = 1; i <= 5; i++) {
                     const data = {
-                        titulo: 'Libro Ejemplo ' + i
-,                        autor: 'Libro Ejemplo ' + i
-,                        añoPublicacion: (i * 10)
-,                        disponible: (i % 2 === 0)
-                    };
-                    await this.create('LIBROS', data);
-                }
-                console.log('✅ Datos de Libro insertados');
-            }
-            // Verificar si Categoria ya tiene datos
-            const categoriaCount = await this.count('CATEGORIAS');
-            if (categoriaCount === 0) {
-                console.log('Insertando datos de ejemplo para Categoria...');
-                // Crear 5 registros de ejemplo para Categoria
-                for (let i = 1; i <= 5; i++) {
-                    const data = {
-                        nombre_categoria: 'Categoria Ejemplo ' + i
-,                        descripcion: 'Categoria Ejemplo ' + i
-                    };
-                    await this.create('CATEGORIAS', data);
-                }
-                console.log('✅ Datos de Categoria insertados');
-            }
-            // Verificar si Usuario ya tiene datos
-            const usuarioCount = await this.count('USUARIOS');
-            if (usuarioCount === 0) {
-                console.log('Insertando datos de ejemplo para Usuario...');
-                // Crear 5 registros de ejemplo para Usuario
-                for (let i = 1; i <= 5; i++) {
-                    const data = {
-                        nombre_usuario: 'Usuario Ejemplo ' + i
-,                        email: 'Usuario Ejemplo ' + i
+                        dni: 'Cliente Ejemplo ' + i
+,                        nombre: 'Cliente Ejemplo ' + i
+,                        apellidos: 'Cliente Ejemplo ' + i
+,                        email: 'Cliente Ejemplo ' + i
+,                        telefono: 'Cliente Ejemplo ' + i
+,                        fecha_registro: 'Cliente Ejemplo ' + i
 ,                        activo: (i % 2 === 0)
                     };
-                    await this.create('USUARIOS', data);
+                    await this.create('CLIENTES', data);
                 }
-                console.log('✅ Datos de Usuario insertados');
+                console.log('✅ Datos de Cliente insertados');
+            }
+            // Verificar si Cuenta ya tiene datos
+            const cuentaCount = await this.count('CUENTAS');
+            if (cuentaCount === 0) {
+                console.log('Insertando datos de ejemplo para Cuenta...');
+                // Crear 5 registros de ejemplo para Cuenta
+                for (let i = 1; i <= 5; i++) {
+                    const data = {
+                        tipo_cuenta: 'Cuenta Ejemplo ' + i
+,                        saldo: (i * 10.5)
+,                        fecha_apertura: 'Cuenta Ejemplo ' + i
+,                        activa: (i % 2 === 0)
+                    };
+                    await this.create('CUENTAS', data);
+                }
+                console.log('✅ Datos de Cuenta insertados');
+            }
+            // Verificar si Transaccion ya tiene datos
+            const transaccionCount = await this.count('TRANSACCIONES');
+            if (transaccionCount === 0) {
+                console.log('Insertando datos de ejemplo para Transaccion...');
+                // Crear 5 registros de ejemplo para Transaccion
+                for (let i = 1; i <= 5; i++) {
+                    const data = {
+                        fecha_transaccion: 'Transaccion Ejemplo ' + i
+,                        tipo_transaccion: 'Transaccion Ejemplo ' + i
+,                        monto: (i * 10.5)
+,                        descripcion: 'Transaccion Ejemplo ' + i
+,                        estado: 'Transaccion Ejemplo ' + i
+                    };
+                    await this.create('TRANSACCIONES', data);
+                }
+                console.log('✅ Datos de Transaccion insertados');
+            }
+            // Verificar si Empleado ya tiene datos
+            const empleadoCount = await this.count('EMPLEADOS');
+            if (empleadoCount === 0) {
+                console.log('Insertando datos de ejemplo para Empleado...');
+                // Crear 5 registros de ejemplo para Empleado
+                for (let i = 1; i <= 5; i++) {
+                    const data = {
+                        codigo_empleado: 'Empleado Ejemplo ' + i
+,                        nombre: 'Empleado Ejemplo ' + i
+,                        puesto: 'Empleado Ejemplo ' + i
+,                        departamento: 'Empleado Ejemplo ' + i
+,                        email: 'Empleado Ejemplo ' + i
+,                        activo: (i % 2 === 0)
+                    };
+                    await this.create('EMPLEADOS', data);
+                }
+                console.log('✅ Datos de Empleado insertados');
             }
             // Verificar si Prestamo ya tiene datos
             const prestamoCount = await this.count('PRESTAMOS');
@@ -1001,22 +1067,42 @@ class LocalDBManager {
                 // Crear 5 registros de ejemplo para Prestamo
                 for (let i = 1; i <= 5; i++) {
                     const data = {
-                        fechaPrestamo: 'Prestamo Ejemplo ' + i
-,                        fechaDevolucion: 'Prestamo Ejemplo ' + i
+                        monto_solicitado: (i * 10.5)
+,                        tasa_interes: (i * 10.5)
+,                        plazo_meses: (i * 10)
+,                        estado_prestamo: 'Prestamo Ejemplo ' + i
+,                        fecha_solicitud: 'Prestamo Ejemplo ' + i
+,                        fecha_aprobacion: 'Prestamo Ejemplo ' + i
                     };
                     await this.create('PRESTAMOS', data);
                 }
                 console.log('✅ Datos de Prestamo insertados');
+            }
+            // Verificar si TarjetaCredito ya tiene datos
+            const tarjetacreditoCount = await this.count('TARJETAS_CREDITO');
+            if (tarjetacreditoCount === 0) {
+                console.log('Insertando datos de ejemplo para TarjetaCredito...');
+                // Crear 5 registros de ejemplo para TarjetaCredito
+                for (let i = 1; i <= 5; i++) {
+                    const data = {
+                        limite_credito: (i * 10.5)
+,                        saldo_actual: (i * 10.5)
+,                        fecha_vencimiento: 'TarjetaCredito Ejemplo ' + i
+,                        activa: (i % 2 === 0)
+                    };
+                    await this.create('TARJETAS_CREDITO', data);
+                }
+                console.log('✅ Datos de TarjetaCredito insertados');
             }
             
             // Insertar datos de ejemplo para encuestas
             const encuestasCount = await this.count('ENCUESTAS');
             if (encuestasCount === 0) {
                 await this.create('ENCUESTAS', {
-                    nombre: 'preferenciasBiblioteca',
-                    titulo: 'Encuesta de Preferencias',
-                    descripcion: 'Ayúdanos a conocer tus preferencias de lectura',
-                    tipo_representacion: 'BARRAS'
+                    nombre: 'preferenciasBancarias',
+                    titulo: 'Encuesta de Servicios Preferidos',
+                    descripcion: 'Ayúdanos a conocer tus preferencias bancarias',
+                    tipo_representacion: 'CIRCULAR'
                 });
 			console.log('✅ Encuestas de ejemplo insertadas');
             }
@@ -1025,9 +1111,9 @@ class LocalDBManager {
             const cuestionariosCount = await this.count('CUESTIONARIOS');
             if (cuestionariosCount === 0) {
                 await this.create('CUESTIONARIOS', {
-                    nombre: 'satisfaccionBiblioteca',
-                    titulo: 'Cuestionario de Satisfacción',
-                    descripcion: 'Evalúa tu experiencia con la biblioteca'
+                    nombre: 'satisfaccionCliente',
+                    titulo: 'Encuesta de Satisfacción Bancaria',
+                    descripcion: 'Evalúa tu experiencia con nuestros servicios'
                 });
                 console.log('✅ Cuestionarios de ejemplo insertados');
             }

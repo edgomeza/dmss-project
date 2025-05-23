@@ -142,9 +142,7 @@
                                     <button class="btn btn-info btn-sm" onclick="viewQuizResults('[cuestionario.nombre/]')">
                                         Ver Resultados
                                     </button>
-                                    <button class="btn btn-warning btn-sm" onclick="editQuiz('[cuestionario.nombre/]')">
-                                        Editar
-                                    </button>
+                                    <a href="edit-quiz.html?id=${quiz.id_cuestionario}" class="btn btn-warning btn-sm">Editar</a>
                                     <button class="btn btn-danger btn-sm" onclick="deleteQuiz('[cuestionario.nombre/]')">
                                         Eliminar
                                     </button>
@@ -261,6 +259,7 @@
     
     <script src="../assets/js/app.js"></script>
     <script src="../assets/js/admin-quizzes.js"></script>
+	<script src="../assets/js/dynamic-page-generator.js"></script>
     
     <style>
         .stats-grid {

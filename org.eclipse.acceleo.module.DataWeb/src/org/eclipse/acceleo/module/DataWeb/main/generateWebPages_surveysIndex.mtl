@@ -80,102 +80,236 @@
     <script>
         // Cargar encuestas según el rol
         document.addEventListener('DOMContentLoaded', async () => {
-            try {
-                const container = document.getElementById('surveys-container');
-                if (!container) return;
-                
-                // Determinar rol actual (en una implementación real se obtendría de la sesión)
-                // Por ahora simulamos obtenerlo del localStorage o por defecto "Usuario"
-                const currentRole = localStorage.getItem('current_role') || 'Usuario';
-                
-                // Obtener asignaciones de roles
-                const roleAssignments = JSON.parse(localStorage.getItem('survey_role_assignments') || '{}');
-                
-                // Lista completa de encuestas
-                const allSurveys = ['['/]
-                    [for (encuesta : Encuesta | app.encuestas) separator(',')]
-                    {
-                        name: '[encuesta.nombre/]',
-                        title: '[encuesta.titulo/]',
-                        description: '[if (encuesta.descripcion.oclIsUndefined() = false)][encuesta.descripcion/][else]Encuesta: [encuesta.titulo/][/if]',
-                        type: '[encuesta.tipoRepresentacion/]'
-                    }
-                    [/for]
-                ];
-                
-                // Filtrar encuestas asignadas al rol actual
-                let availableSurveys = ['['/]];
-                
-                // Verificar cada encuesta
-                allSurveys.forEach(survey => {
-                    // Si hay asignación para esta encuesta, verificar si incluye el rol actual
-                    if (roleAssignments['['/]survey.name] && roleAssignments['['/]survey.name].includes(currentRole)) {
-                        availableSurveys.push(survey);
-                    } 
-                    // Si no hay asignación, mostrar todas las encuestas por defecto
-                    else if (!roleAssignments['['/]survey.name]) {
-                        availableSurveys.push(survey);
-                    }
-                });
-                
-                // Mostrar encuestas
-                if (availableSurveys.length === 0) {
-                    container.innerHTML = `
-                        <div class="empty-state">
-                            <div class="empty-icon">
-                                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                    <polyline points="14,2 14,8 20,8"></polyline>
-                                    <line x1="16" y1="13" x2="8" y2="13"></line>
-                                    <line x1="16" y1="17" x2="8" y2="17"></line>
-                                </svg>
-                            </div>
-                            <h3>No hay encuestas disponibles para tu rol</h3>
-                            <p>No se han asignado encuestas al rol "${currentRole}" o no hay encuestas activas en este momento.</p>
-                            <a href="../index.html" class="btn btn-primary">Volver al inicio</a>
-                        </div>
-                    `;
-                } else {
-                    container.innerHTML = `
-                        <div class="surveys-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            ${availableSurveys.map(survey => `
-                                <div class="survey-card card animate-target">
-                                    <div class="card-header">
-                                        <h3>${survey.title}</h3>
-                                    </div>
-                                    <div class="card-body">
-                                        <p>${survey.description}</p>
-                                        <div class="survey-info">
-                                            <span class="badge badge-info">${survey.type}</span>
-                                        </div>
-                                    </div>
-                                    <div class="card-footer">
-                                        <a href="${survey.name}.html" class="btn btn-primary btn-block">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <polyline points="9,11 12,14 22,4"></polyline>
-                                                <path d="m21 12 v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-                                            </svg>
-                                            Participar en Encuesta
-                                        </a>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    `;
-                }
-                
-            } catch (error) {
-                console.error('Error cargando encuestas:', error);
-                const container = document.getElementById('surveys-container');
-                if (container) {
-                    container.innerHTML = `
-                        <div class="error-message">
-                            <p>Error al cargar las encuestas. Por favor, intenta de nuevo más tarde.</p>
-                        </div>
-                    `;
-                }
-            }
-        });
+		    try {
+				async function initDatabase() {
+				    if (window.localDB && window.localDB.db) {
+				        return window.localDB;
+				    }
+				    
+				    return new Promise((resolve, reject) => {
+				        const request = indexedDB.open('DataWeb_DB', 2);
+				        
+				        request.onsuccess = () => {
+				            const database = request.result;
+				            const dbWrapper = {
+				                db: database,
+				                async getAll(storeName) {
+				                    return new Promise((resolve, reject) => {
+				                        if (!database.objectStoreNames.contains(storeName)) {
+				                            resolve(['['/]]);
+				                            return;
+				                        }
+				                        const transaction = database.transaction(['['/]storeName], 'readonly');
+				                        const store = transaction.objectStore(storeName);
+				                        const request = store.getAll();
+				                        request.onsuccess = () => resolve(request.result);
+				                        request.onerror = () => resolve(['['/]]);
+				                    });
+				                }
+				            };
+				            window.localDB = dbWrapper;
+				            resolve(dbWrapper);
+				        };
+				        
+				        request.onerror = () => resolve(null);
+				    });
+				}
+					
+		        const container = document.getElementById('surveys-container');
+		        if (!container) {
+		            console.error('Surveys container not found');
+		            return;
+		        }
+		        
+		        // Mostrar loading
+		        container.innerHTML = `
+		            <div class="loading text-center">
+		                <div class="loading-spinner"></div>
+		                <span>Cargando encuestas para tu rol...</span>
+		            </div>
+		        `;
+		        
+		        // Esperar a que la base de datos esté disponible
+		        let db = null;
+		        let attempts = 0;
+		        const maxAttempts = 100;
+		        
+		        while (!db && attempts < maxAttempts) {
+		            if (window.localDB && window.localDB.db) {
+		                db = window.localDB;
+		                break;
+		            }
+		            
+		            try {
+		                const request = indexedDB.open('DataWeb_DB', 2);
+		                db = await new Promise((resolve, reject) => {
+		                    request.onsuccess = () => {
+		                        const database = request.result;
+		                        const dbWrapper = {
+		                            db: database,
+		                            async getAll(storeName) {
+		                                return new Promise((resolve, reject) => {
+		                                    if (!database.objectStoreNames.contains(storeName)) {
+		                                        resolve(['['/]]);
+		                                        return;
+		                                    }
+		                                    const transaction = database.transaction(['['/]storeName], 'readonly');
+		                                    const store = transaction.objectStore(storeName);
+		                                    const request = store.getAll();
+		                                    request.onsuccess = () => resolve(request.result);
+		                                    request.onerror = () => resolve(['['/]]);
+		                                });
+		                            }
+		                        };
+		                        window.localDB = dbWrapper;
+		                        resolve(dbWrapper);
+		                    };
+		                    request.onerror = () => resolve(null);
+		                });
+		                break;
+		            } catch (error) {
+		                console.warn('Database initialization attempt failed:', error);
+		            }
+		            
+		            await new Promise(resolve => setTimeout(resolve, 100));
+		            attempts++;
+		        }
+		        
+		        if (!db) {
+		            throw new Error('No se pudo conectar con la base de datos');
+		        }
+		        
+		        // Cargar encuestas desde la base de datos
+		        const allSurveys = await db.getAll('ENCUESTAS');
+		        console.log('Encuestas cargadas desde BD:', allSurveys);
+		        
+		        // Determinar rol actual
+		        const currentRole = localStorage.getItem('current_role') || 'Usuario';
+		        
+		        // Obtener asignaciones de roles
+		        const roleAssignments = JSON.parse(localStorage.getItem('survey_role_assignments') || '{}');
+		        
+		        // Convertir formato
+		        let availableSurveys = allSurveys.map(survey => ({
+		            name: survey.nombre,
+		            title: survey.titulo,
+		            description: survey.descripcion || `Encuesta: ${survey.titulo}`,
+		            type: survey.tipo_representacion || 'Tabla'
+		        }));
+		        
+		        // Filtrar por rol
+		        if (Object.keys(roleAssignments).length > 0) {
+		            availableSurveys = availableSurveys.filter(survey => {
+		                if (roleAssignments['['/]survey.name] && roleAssignments['['/]survey.name].includes(currentRole)) {
+		                    return true;
+		                }
+		                return !roleAssignments['['/]survey.name];
+		            });
+		        }
+
+				function openSurveyPage(surveyName) {
+				   // Primero, intentar abrir la página generada dinámicamente
+				   if (window.pageGenerator) {
+				       const surveyHTML = window.pageGenerator.getSurveyPage(surveyName);
+				       if (surveyHTML) {
+				           const newWindow = window.open('', '_blank');
+				           newWindow.document.write(surveyHTML);
+				           newWindow.document.close();
+				           return;
+				       }
+				   }
+				   
+				   // Si no hay página generada, intentar redirigir al archivo HTML
+				   const surveyURL = `${surveyName}.html`;
+				   
+				   // Verificar si el archivo existe
+				   fetch(surveyURL, { method: 'HEAD' })
+				       .then(response => {
+				           if (response.ok) {
+				               // El archivo existe, redirigir
+				               window.location.href = surveyURL;
+				           } else {
+				               // El archivo no existe, mostrar mensaje
+				               alert('Encuesta no disponible. La página se está generando, por favor intenta de nuevo en unos momentos.');
+				           }
+				       })
+				       .catch(() => {
+				           // Error en la verificación, intentar abrir de todos modos
+				           window.open(surveyURL, '_blank');
+				       });
+				}
+		        
+		        // Mostrar encuestas
+		        if (availableSurveys.length === 0) {
+		            container.innerHTML = `
+		                <div class="empty-state">
+		                    <div class="empty-icon">
+		                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+		                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+		                            <polyline points="14,2 14,8 20,8"></polyline>
+		                            <line x1="16" y1="13" x2="8" y2="13"></line>
+		                            <line x1="16" y1="17" x2="8" y2="17"></line>
+		                        </svg>
+		                    </div>
+		                    <h3>No hay encuestas disponibles para tu rol</h3>
+		                    <p>No se han asignado encuestas al rol "${currentRole}" o no hay encuestas activas en este momento.</p>
+		                    <a href="../index.html" class="btn btn-primary">Volver al inicio</a>
+		                </div>
+		            `;
+		        } else {
+		            container.innerHTML = `
+		                <div class="surveys-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+		                    ${availableSurveys.map(survey => `
+		                        <div class="survey-card card animate-target">
+		                            <div class="card-header">
+		                                <h3>${survey.title}</h3>
+		                            </div>
+		                            <div class="card-body">
+		                                <p>${survey.description}</p>
+		                                <div class="survey-info">
+		                                    <span class="badge badge-info">${survey.type}</span>
+		                                </div>
+		                            </div>
+		                            <div class="card-footer">
+		                                <button class="btn btn-primary btn-block" onclick="openSurveyPage('${survey.name}')">
+		                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+		                                        <polyline points="9,11 12,14 22,4"></polyline>
+		                                        <path d="m21 12 v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+		                                    </svg>
+		                                    Participar en Encuesta
+		                                </button>
+		                            </div>
+		                        </div>
+		                    `).join('')}
+		                </div>
+		            `;
+		        }
+		        
+		    } catch (error) {
+		        console.error('Error cargando encuestas:', error);
+		        const container = document.getElementById('surveys-container');
+		        if (container) {
+		            container.innerHTML = `
+		                <div class="error-message">
+		                    <p>Error al cargar las encuestas: ${error.message}</p>
+		                    <button onclick="location.reload()" class="btn btn-primary">Reintentar</button>
+		                </div>
+		            `;
+		        }
+		    }
+		});
+	
+		window.openSurveyPage = function(surveyName) {
+		    const surveyHTML = localStorage.getItem(`survey_page_${surveyName}`);
+		    if (surveyHTML) {
+		        const newWindow = window.open('', '_blank');
+		        newWindow.document.write(surveyHTML);
+		        newWindow.document.close();
+		    } else {
+		        alert('Encuesta no disponible. Por favor, contacte al administrador.');
+		    }
+		};
+
     </script>
 
     <style>

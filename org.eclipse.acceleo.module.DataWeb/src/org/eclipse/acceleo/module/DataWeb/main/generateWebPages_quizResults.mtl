@@ -280,87 +280,140 @@
         
         // Función auxiliar para inicializar la base de datos
         async function initDatabase() {
-            try {
-                if (window.localDB && window.localDB.db) {
-                    return window.localDB;
-                }
-                
-                const LocalDBManager = class {
-                    constructor() {
-                        this.dbName = 'DataWeb_DB';
-                        this.version = 1;
-                        this.db = null;
-                    }
-                    
-                    async init() {
-                        return new Promise((resolve, reject) => {
-                            const request = indexedDB.open(this.dbName, this.version);
-                            
-                            request.onerror = () => reject(request.error);
-                            request.onsuccess = () => {
-                                this.db = request.result;
-                                resolve(this.db);
-                            };
-                            
-                            request.onupgradeneeded = (event) => {
-                                const db = event.target.result;
-                                
-                                if (!db.objectStoreNames.contains('RESPUESTAS_CUESTIONARIO')) {
-                                    const store = db.createObjectStore('RESPUESTAS_CUESTIONARIO', { 
-                                        keyPath: 'id', 
-                                        autoIncrement: false 
-                                    });
-                                    store.createIndex('quizName', 'quizName', { unique: false });
-                                    store.createIndex('userId', 'userId', { unique: false });
-                                }
-                            };
-                        });
-                    }
-                    
-                    async getAll(tableName) {
-                        return new Promise((resolve, reject) => {
-                            const transaction = this.db.transaction(['['/]tableName], 'readonly');
-                            const store = transaction.objectStore(tableName);
-                            const request = store.getAll();
-                            
-                            request.onsuccess = () => resolve(request.result);
-                            request.onerror = () => reject(request.error);
-                        });
-                    }
-                    
-                    async query(tableName, filters = {}) {
-                        return new Promise((resolve, reject) => {
-                            const transaction = this.db.transaction(['['/]tableName], 'readonly');
-                            const store = transaction.objectStore(tableName);
-                            const request = store.getAll();
-                            
-                            request.onsuccess = () => {
-                                let results = request.result;
-                                
-                                if (Object.keys(filters).length > 0) {
-                                    results = results.filter(item => {
-                                        return Object.keys(filters).every(key => {
-                                            if (!filters['['/]key]) return true;
-                                            return item['['/]key] === filters['['/]key];
-                                        });
-                                    });
-                                }
-                                
-                                resolve(results);
-                            };
-                            request.onerror = () => reject(request.error);
-                        });
-                    }
-                };
-                
-                const dbManager = new LocalDBManager();
-                await dbManager.init();
-                return dbManager;
-            } catch (error) {
-                console.error('Error initializing database:', error);
-                throw error;
-            }
-        }
+		    try {
+		        if (window.localDB && window.localDB.db) {
+		            return window.localDB;
+		        }
+		        
+		        const LocalDBManager = class {
+		            constructor() {
+		                this.dbName = 'DataWeb_DB';
+		                this.version = 2; // Cambiar de 1 a 2 para coincidir con el resto del sistema
+		                this.db = null;
+		            }
+		            
+		            async init() {
+		                return new Promise((resolve, reject) => {
+		                    const request = indexedDB.open(this.dbName, this.version);
+		                    
+		                    request.onerror = () => reject(request.error);
+		                    request.onsuccess = () => {
+		                        this.db = request.result;
+		                        resolve(this.db);
+		                    };
+		                    
+		                    request.onupgradeneeded = (event) => {
+		                        const db = event.target.result;
+		                        
+		                        // Solo crear stores si no existen (para evitar errores)
+		                        if (!db.objectStoreNames.contains('RESPUESTAS_CUESTIONARIO')) {
+		                            const store = db.createObjectStore('RESPUESTAS_CUESTIONARIO', { 
+		                                keyPath: 'id', 
+		                                autoIncrement: false 
+		                            });
+		                            store.createIndex('quizName', 'quizName', { unique: false });
+		                            store.createIndex('userId', 'userId', { unique: false });
+		                        }
+		                        
+		                        if (!db.objectStoreNames.contains('RESPUESTAS_ENCUESTA')) {
+		                            const store = db.createObjectStore('RESPUESTAS_ENCUESTA', { 
+		                                keyPath: 'id', 
+		                                autoIncrement: false 
+		                            });
+		                            store.createIndex('surveyName', 'surveyName', { unique: false });
+		                            store.createIndex('userId', 'userId', { unique: false });
+		                        }
+		                        
+		                        // Agregar otros stores necesarios
+		                        if (!db.objectStoreNames.contains('CUESTIONARIOS')) {
+		                            db.createObjectStore('CUESTIONARIOS', { keyPath: 'id_cuestionario', autoIncrement: true });
+		                        }
+		                        
+		                        if (!db.objectStoreNames.contains('ENCUESTAS')) {
+		                            db.createObjectStore('ENCUESTAS', { keyPath: 'id_encuesta', autoIncrement: true });
+		                        }
+		                        
+		                        if (!db.objectStoreNames.contains('PREGUNTAS_CUESTIONARIO')) {
+		                            db.createObjectStore('PREGUNTAS_CUESTIONARIO', { keyPath: 'id_pregunta', autoIncrement: true });
+		                        }
+		                        
+		                        if (!db.objectStoreNames.contains('PREGUNTAS_ENCUESTA')) {
+		                            db.createObjectStore('PREGUNTAS_ENCUESTA', { keyPath: 'id_pregunta', autoIncrement: true });
+		                        }
+		                        
+		                        if (!db.objectStoreNames.contains('OPCIONES_CUESTIONARIO')) {
+		                            db.createObjectStore('OPCIONES_CUESTIONARIO', { keyPath: 'id_opcion', autoIncrement: true });
+		                        }
+		                        
+		                        if (!db.objectStoreNames.contains('OPCIONES_PREGUNTA')) {
+		                            db.createObjectStore('OPCIONES_PREGUNTA', { keyPath: 'id_opcion', autoIncrement: true });
+		                        }
+		                    };
+		                });
+		            }
+		            
+		            async getAll(tableName) {
+		                return new Promise((resolve, reject) => {
+		                    if (!this.db.objectStoreNames.contains(tableName)) {
+		                        console.warn(`Store ${tableName} does not exist`);
+		                        resolve(['['/]]);
+		                        return;
+		                    }
+		                    
+		                    const transaction = this.db.transaction(['['/]tableName], 'readonly');
+		                    const store = transaction.objectStore(tableName);
+		                    const request = store.getAll();
+		                    
+		                    request.onsuccess = () => resolve(request.result || ['['/]]);
+		                    request.onerror = () => {
+		                        console.error(`Error reading from ${tableName}:`, request.error);
+		                        resolve(['['/]]);
+		                    };
+		                });
+		            }
+		            
+		            async query(tableName, filters = {}) {
+		                return new Promise((resolve, reject) => {
+		                    if (!this.db.objectStoreNames.contains(tableName)) {
+		                        console.warn(`Store ${tableName} does not exist`);
+		                        resolve(['['/]]);
+		                        return;
+		                    }
+		                    
+		                    const transaction = this.db.transaction(['['/]tableName], 'readonly');
+		                    const store = transaction.objectStore(tableName);
+		                    const request = store.getAll();
+		                    
+		                    request.onsuccess = () => {
+		                        let results = request.result || ['['/]];
+		                        
+		                        if (Object.keys(filters).length > 0) {
+		                            results = results.filter(item => {
+		                                return Object.keys(filters).every(key => {
+		                                    if (!filters['['/]key]) return true;
+		                                    return item['['/]key] === filters['['/]key];
+		                                });
+		                            });
+		                        }
+		                        
+		                        resolve(results);
+		                    };
+		                    request.onerror = () => {
+		                        console.error(`Error querying ${tableName}:`, request.error);
+		                        resolve(['['/]]);
+		                    };
+		                });
+		            }
+		        };
+		        
+		        const dbManager = new LocalDBManager();
+		        await dbManager.init();
+		        return dbManager;
+		    } catch (error) {
+		        console.error('Error initializing database:', error);
+		        throw error;
+		    }
+		}
     </script>
     
     <style>

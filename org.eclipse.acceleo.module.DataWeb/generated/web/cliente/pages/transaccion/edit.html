@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Bancario Digital - Editar Transaccion</title>
+    <meta name="description" content="Editar registro de Transaccion">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../../assets/css/style.css">
+    <link rel="icon" type="image/x-icon" href="../../../assets/icons/favicon.ico">
+</head>
+<body>
+    <header class="app-header">
+        <div class="container">
+            <h1>Editar Transaccion</h1>
+            <p>Modificar la información del registro</p>
+        </div>
+    </header>
+    
+    <nav class="main-nav">
+        <div class="container nav-container">
+            <div class="nav-brand">
+                <a href="../../../index.html" class="nav-logo">Sistema Bancario Digital</a>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="../../dashboard.html" class="nav-link">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a href="index.html" class="nav-link">Gestión Transaccion</a>
+                </li>
+                <li class="nav-item">
+                    <a href="list.html" class="nav-link">Listar</a>
+                </li>
+                <li class="nav-item">
+                    <a href="create.html" class="nav-link">Crear</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link active">Editar</a>
+                </li>
+            </ul>
+            <button class="nav-toggle" aria-label="Abrir menú">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+    
+    <nav class="breadcrumb">
+        <div class="container">
+            <ul class="breadcrumb-list">
+                <li class="breadcrumb-item">
+                    <a href="../../../index.html" class="breadcrumb-link">Inicio</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="../../dashboard.html" class="breadcrumb-link">Cliente</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="index.html" class="breadcrumb-link">Transaccion</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <span>Editar</span>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    
+    <main class="main-content">
+        <div class="container">
+            <div class="form-container">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Editar Transaccion</h2>
+                        <p>Modifique los campos que desee actualizar</p>
+                    </div>
+                    <div class="card-body">
+                        <!-- Loading indicator -->
+                        <div id="loadingForm" class="loading-indicator">
+                            <div class="loading-spinner"></div>
+                            <span>Cargando información...</span>
+                        </div>
+                        
+                        <form id="editForm" class="edit-form" data-validate style="display: none;">
+                            <input type="hidden" id="id_transaccion" name="id_transaccion">
+                            <div class="form-group">
+                                <label for="fecha_transaccion" class="form-label">
+                                    fecha_transaccion <span class="required">*</span>
+                                </label>
+                                <input type="date" id="fecha_transaccion" name="fecha_transaccion" class="form-control" required>
+                                <div class="field-help">
+                                    Ingrese el fecha_transaccion
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="tipo_transaccion" class="form-label">
+                                    tipo_transaccion <span class="required">*</span>
+                                </label>
+                                <input type="text" id="tipo_transaccion" name="tipo_transaccion" class="form-control" required>
+                                <div class="field-help">
+                                    Ingrese el tipo_transaccion
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="monto" class="form-label">
+                                    monto <span class="required">*</span>
+                                </label>
+                                <input type="number" id="monto" name="monto" class="form-control" step="0.01" required>
+                                <div class="field-help">
+                                    Ingrese un número decimal
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="descripcion" class="form-label">
+                                    descripcion <span class="required">*</span>
+                                </label>
+                                <textarea id="descripcion" name="descripcion" class="form-control" rows="4" required></textarea>
+                                <div class="field-help">
+                                    Ingrese el descripcion
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="estado" class="form-label">
+                                    estado <span class="required">*</span>
+                                </label>
+                                <input type="text" id="estado" name="estado" class="form-control" required>
+                                <div class="field-help">
+                                    Ingrese el estado
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="cuenta_origen_ID" class="form-label">
+                                    cuenta_origen <span class="required">*</span>
+                                </label>
+                                <select id="cuenta_origen_ID" name="cuenta_origen_ID" class="form-control" required>
+                                    <option value="">Seleccionar cuenta_origen...</option>
+                                    <!-- Las opciones se cargarán dinámicamente -->
+                                </select>
+                                <div class="field-help">
+                                    Seleccione un cuenta_origen existente
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="cuenta_destino_ID" class="form-label">
+                                    cuenta_destino <span class="required">*</span>
+                                </label>
+                                <select id="cuenta_destino_ID" name="cuenta_destino_ID" class="form-control" required>
+                                    <option value="">Seleccionar cuenta_destino...</option>
+                                    <!-- Las opciones se cargarán dinámicamente -->
+                                </select>
+                                <div class="field-help">
+                                    Seleccione un cuenta_destino existente
+                                </div>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-warning" id="submitBtn">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                    </svg>
+                                    Actualizar Transaccion
+                                </button>
+                                <a href="list.html" class="btn btn-secondary">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="15,18 9,12 15,6"></polyline>
+                                    </svg>
+                                    Cancelar
+                                </a>
+                                <a href="detail.html" id="viewDetailLink" class="btn btn-outline btn-outline-info">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                        <circle cx="12" cy="12" r="3"></circle>
+                                    </svg>
+                                    Ver Detalles
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <footer class="app-footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2025 Sistema Bancario Digital - Editar Transaccion</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script src="../../../assets/js/app.js"></script>
+    <script src="../../../assets/js/data-manager.js"></script>
+	<script src="../../../assets/js/crud-manager.js"></script>
+    <script src="../../../assets/js/form-utilities.js"></script>
+    <script src="../../../assets/js/transaccion.js"></script>
+    
+    <script>
+        // Configuración específica para esta página
+        window.entityConfig = {
+            name: 'transaccion',
+            form: 'edit',
+            primaryKey: 'id_transaccion',
+            fields: [
+                {
+                    name: 'id_transaccion',
+                    type: 'number',
+                    isPrimary: true,
+                    required: false
+                }
+,                {
+                    name: 'fecha_transaccion',
+                    type: 'text',
+                    isPrimary: false,
+                    required: true
+                }
+,                {
+                    name: 'tipo_transaccion',
+                    type: 'text',
+                    isPrimary: false,
+                    required: true
+                }
+,                {
+                    name: 'monto',
+                    type: 'decimal',
+                    isPrimary: false,
+                    required: true
+                }
+,                {
+                    name: 'descripcion',
+                    type: 'text',
+                    isPrimary: false,
+                    required: true
+                }
+,                {
+                    name: 'estado',
+                    type: 'text',
+                    isPrimary: false,
+                    required: true
+                }
+,
+                {
+                    name: 'cuenta_origen_ID',
+                    type: 'select',
+                    required: true,
+                    reference: 'cuenta'
+                }
+,                {
+                    name: 'cuenta_destino_ID',
+                    type: 'select',
+                    required: true,
+                    reference: 'cuenta'
+                }
+            ],
+            validationRules: {
+                'fecha_transaccion': {
+                    required: true,
+                }
+,                'tipo_transaccion': {
+                    required: true,
+                }
+,                'monto': {
+                    required: true,
+                    isDecimal: true
+                }
+,                'descripcion': {
+                    required: true,
+                }
+,                'estado': {
+                    required: true,
+                }
+,
+                'cuenta_origen_ID': {
+                    required: true
+                }
+,                'cuenta_destino_ID': {
+                    required: true
+                }
+            }
+        };
+        
+        let currentEntityId = null;
+        
+        // Inicializar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            // Obtener ID del parámetro URL
+            const urlParams = new URLSearchParams(window.location.search);
+            currentEntityId = urlParams.get('id');
+            
+            if (!currentEntityId) {
+                window.app.showAlert('ID de registro no proporcionado', 'danger');
+                setTimeout(() => {
+                    window.location.href = 'list.html';
+                }, 2000);
+                return;
+            }
+            
+            // Actualizar enlace de ver detalles
+            document.getElementById('viewDetailLink').href = `detail.html?id=${currentEntityId}`;
+            
+            // Cargar opciones para selects de referencias
+            loadReferenceOptions('cuenta_origen_ID', 'cuenta');
+            loadReferenceOptions('cuenta_destino_ID', 'cuenta');
+            
+            // Cargar datos de la entidad
+            loadEntityData();
+            
+            // Manejar envío del formulario
+            document.getElementById('editForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                if (validateForm('editForm', window.entityConfig.validationRules)) {
+                    updateEntity();
+                }
+            });
+        });
+        
+        // Función para cargar opciones de referencia
+        function loadReferenceOptions(selectId, entityName) {
+            const dataManager = new DataManager(entityName);
+            dataManager.getAll(function(response) {
+                if (response.entities) {
+                    const select = document.getElementById(selectId);
+                    response.entities.forEach(function(entity) {
+                        const option = document.createElement('option');
+                        const keys = Object.keys(entity);
+                        option.value = entity[keys[0]];
+                        option.textContent = `${entity[keys[0]]} - ${entity[keys[1]] || 'Item'}`;
+                        select.appendChild(option);
+                    });
+                }
+            });
+        }
+        
+        // Función para cargar los datos de la entidad
+        async function loadEntityData() {
+            const dataManager = new DataManager('transaccion');
+            
+            try {
+                const response = await dataManager.getById(currentEntityId);
+                
+                if (response && response.entity) {
+                    // Cargar datos en el formulario
+                    loadFormData('editForm', response.entity);
+                    
+                    // Mostrar formulario y ocultar loading
+                    document.getElementById('loadingForm').style.display = 'none';
+                    document.getElementById('editForm').style.display = 'block';
+                } else {
+                    window.app.showAlert('Error al cargar los datos: ' + (response?.error || 'Registro no encontrado'), 'danger');
+                    setTimeout(() => {
+                        window.location.href = 'list.html';
+                    }, 2000);
+                }
+            } catch (error) {
+                window.app.showAlert('Error al cargar los datos: ' + error.message, 'danger');
+                setTimeout(() => {
+                    window.location.href = 'list.html';
+                }, 2000);
+            }
+        }
+        
+        // Función para actualizar la entidad
+        async function updateEntity() {
+		    const form = document.getElementById('editForm');
+		    const formData = new FormData(form);
+		    const data = {};
+		    
+		    for (let [key, value] of formData.entries()) {
+		        data[key] = value;
+		    }
+		    
+		    const submitBtn = document.getElementById('submitBtn');
+		    const originalText = submitBtn.innerHTML;
+		    
+		    // Mostrar loading
+		    submitBtn.disabled = true;
+		    submitBtn.innerHTML = '<span class="spinner"></span> Actualizando...';
+		    
+		    try {
+		        const urlParams = new URLSearchParams(window.location.search);
+		        const currentEntityId = urlParams.get('id');
+		        
+		        if (!currentEntityId) {
+		            throw new Error('ID de registro no proporcionado');
+		        }
+		        
+		        const dataManager = new DataManager(window.entityConfig.name);
+		        const response = await dataManager.update(currentEntityId, data);
+		        
+		        if (response && response.success) {
+		            if (window.app && window.app.showAlert) {
+		                window.app.showAlert('Registro actualizado correctamente', 'success');
+		            }
+		            
+		            // Redirigir después de un tiempo
+		            setTimeout(() => {
+		                window.location.href = 'list.html';
+		            }, 1500);
+		        } else {
+		            if (window.app && window.app.showAlert) {
+		                window.app.showAlert('Error al actualizar: ' + (response?.error || 'Error desconocido'), 'danger');
+		            }
+		            submitBtn.disabled = false;
+		            submitBtn.innerHTML = originalText;
+		        }
+		    } catch (error) {
+		        console.error('Error al actualizar:', error);
+		        if (window.app && window.app.showAlert) {
+		            window.app.showAlert('Error al actualizar: ' + error.message, 'danger');
+		        }
+		        submitBtn.disabled = false;
+		        submitBtn.innerHTML = originalText;
+		    }
+		}
+    </script>
+    
+    <style>
+        .form-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .edit-form {
+            display: grid;
+            gap: 1.5rem;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-label {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--gray-700);
+        }
+        
+        .required {
+            color: var(--danger-600);
+            font-weight: 600;
+        }
+        
+        .form-control {
+            padding: 0.75rem;
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius);
+            transition: var(--transition);
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-500);
+            box-shadow: 0 0 0 3px var(--primary-100);
+        }
+        
+        .field-help {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            margin-top: 0.25rem;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--gray-200);
+        }
+        
+        .loading-indicator {
+            text-align: center;
+            padding: 3rem;
+            color: var(--gray-600);
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--gray-300);
+            border-radius: 50%;
+            border-top-color: var(--primary-600);
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 1rem;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid currentColor;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+            margin-right: 0.5rem;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .form-actions {
+                flex-direction: column;
+            }
+            
+            .form-actions .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</body>
+</html>

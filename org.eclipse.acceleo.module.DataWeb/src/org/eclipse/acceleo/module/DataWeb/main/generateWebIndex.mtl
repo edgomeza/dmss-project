@@ -87,6 +87,7 @@
 	    });
 	});
 	</script>
+	<script src="assets/js/dynamic-page-generator.js"></script>
 </body>
 </html>
 [/file]

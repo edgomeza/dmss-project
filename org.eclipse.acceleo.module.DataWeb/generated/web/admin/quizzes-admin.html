@@ -110,36 +110,34 @@
                     </div>
                     <div class="card-body">
                         <div class="quizzes-grid grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <div class="quiz-card" data-quiz="satisfaccionBiblioteca">
+                            <div class="quiz-card" data-quiz="satisfaccionCliente">
                                 <div class="quiz-header">
-                                    <h3>Cuestionario de Satisfacción</h3>
+                                    <h3>Encuesta de Satisfacción Bancaria</h3>
                                     <span class="quiz-badge">Activo</span>
                                 </div>
                                 <div class="quiz-details">
-                                    <p>Evalúa tu experiencia con la biblioteca</p>
+                                    <p>Evalúa tu experiencia con nuestros servicios</p>
                                     <div class="quiz-stats">
                                         <div class="stat-item">
                                             <span class="stat-label">Preguntas:</span>
-                                            <span class="stat-value">3</span>
+                                            <span class="stat-value">2</span>
                                         </div>
                                         <div class="stat-item">
                                             <span class="stat-label">Pendientes:</span>
-                                            <span class="stat-value pending" id="pending-review-satisfaccionBiblioteca">--</span>
+                                            <span class="stat-value pending" id="pending-review-satisfaccionCliente">--</span>
                                         </div>
                                         <div class="stat-item">
                                             <span class="stat-label">Nota Media:</span>
-                                            <span class="stat-value" id="avg-score-satisfaccionBiblioteca">--</span>
+                                            <span class="stat-value" id="avg-score-satisfaccionCliente">--</span>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="quiz-actions">
-                                    <button class="btn btn-info btn-sm" onclick="viewQuizResults('satisfaccionBiblioteca')">
+                                    <button class="btn btn-info btn-sm" onclick="viewQuizResults('satisfaccionCliente')">
                                         Ver Resultados
                                     </button>
-                                    <button class="btn btn-warning btn-sm" onclick="editQuiz('satisfaccionBiblioteca')">
-                                        Editar
-                                    </button>
-                                    <button class="btn btn-danger btn-sm" onclick="deleteQuiz('satisfaccionBiblioteca')">
+                                    <a href="edit-quiz.html?id=${quiz.id_cuestionario}" class="btn btn-warning btn-sm">Editar</a>
+                                    <button class="btn btn-danger btn-sm" onclick="deleteQuiz('satisfaccionCliente')">
                                         Eliminar
                                     </button>
                                 </div>
@@ -177,42 +175,53 @@
                             <thead>
                                 <tr>
                                     <th>Cuestionario</th>
-                                    <th>Administrador</th>
-                                    <th>Bibliotecario</th>
-                                    <th>Estudiante</th>
+                                    <th>AdministradorBanco</th>
+                                    <th>GerenteOperaciones</th>
+                                    <th>EmpleadoBanco</th>
+                                    <th>Cliente</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td>Cuestionario de Satisfacción</td>
+                                    <td>Encuesta de Satisfacción Bancaria</td>
                                     <td>
                                         <div class="role-toggle">
-                                            <input type="checkbox" id="role_satisfaccionBiblioteca_Administrador" 
+                                            <input type="checkbox" id="role_satisfaccionCliente_AdministradorBanco" 
                                                    class="role-checkbox"
-                                                   data-quiz="satisfaccionBiblioteca" 
-                                                   data-role="Administrador"
-                                                   checked>
-                                            <label for="role_satisfaccionBiblioteca_Administrador" class="role-label"></label>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="role-toggle">
-                                            <input type="checkbox" id="role_satisfaccionBiblioteca_Bibliotecario" 
-                                                   class="role-checkbox"
-                                                   data-quiz="satisfaccionBiblioteca" 
-                                                   data-role="Bibliotecario"
+                                                   data-quiz="satisfaccionCliente" 
+                                                   data-role="AdministradorBanco"
                                                    >
-                                            <label for="role_satisfaccionBiblioteca_Bibliotecario" class="role-label"></label>
+                                            <label for="role_satisfaccionCliente_AdministradorBanco" class="role-label"></label>
                                         </div>
                                     </td>
                                     <td>
                                         <div class="role-toggle">
-                                            <input type="checkbox" id="role_satisfaccionBiblioteca_Estudiante" 
+                                            <input type="checkbox" id="role_satisfaccionCliente_GerenteOperaciones" 
                                                    class="role-checkbox"
-                                                   data-quiz="satisfaccionBiblioteca" 
-                                                   data-role="Estudiante"
-                                                   checked>
-                                            <label for="role_satisfaccionBiblioteca_Estudiante" class="role-label"></label>
+                                                   data-quiz="satisfaccionCliente" 
+                                                   data-role="GerenteOperaciones"
+                                                   >
+                                            <label for="role_satisfaccionCliente_GerenteOperaciones" class="role-label"></label>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="role-toggle">
+                                            <input type="checkbox" id="role_satisfaccionCliente_EmpleadoBanco" 
+                                                   class="role-checkbox"
+                                                   data-quiz="satisfaccionCliente" 
+                                                   data-role="EmpleadoBanco"
+                                                   >
+                                            <label for="role_satisfaccionCliente_EmpleadoBanco" class="role-label"></label>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="role-toggle">
+                                            <input type="checkbox" id="role_satisfaccionCliente_Cliente" 
+                                                   class="role-checkbox"
+                                                   data-quiz="satisfaccionCliente" 
+                                                   data-role="Cliente"
+                                                   >
+                                            <label for="role_satisfaccionCliente_Cliente" class="role-label"></label>
                                         </div>
                                     </td>
                                 </tr>
@@ -270,6 +279,7 @@
     
     <script src="../assets/js/app.js"></script>
     <script src="../assets/js/admin-quizzes.js"></script>
+	<script src="../assets/js/dynamic-page-generator.js"></script>
     
     <style>
         .stats-grid {
