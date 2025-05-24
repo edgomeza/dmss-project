@@ -1,19 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<genmodel:GenModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:genmodel="http://www.eclipse.org/emf/2002/GenModel"
-    modelDirectory="/dmss.dataweb/src-gen" creationIcons="false" editDirectory="/dmss.dataweb.edit/src-gen"
-    editorDirectory="/dmss.dataweb.editor/src-gen" modelPluginID="dmss.dataweb" modelName="Dataweb"
-    rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl$Container" codeFormatting="true"
+<genmodel:GenModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore"
+    xmlns:genmodel="http://www.eclipse.org/emf/2002/GenModel" modelDirectory="/dmss.dataweb/src" modelPluginID="dmss.dataweb"
+    modelName="Dataweb" rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl$Container"
     importerID="org.eclipse.emf.importer.ecore" complianceLevel="17.0" copyrightFields="false"
     operationReflection="true" importOrganizing="true">
   <foreignModel>dataweb.ecore</foreignModel>
-  <testsDirectory xsi:nil="true"/>
-  <genPackages prefix="Dataweb" basePackage="dmss" disposableProviderFactory="true"
-      ecorePackage="dataweb.ecore#/">
+  <genPackages prefix="Dataweb" disposableProviderFactory="true" ecorePackage="dataweb.ecore#/">
     <genEnums typeSafeEnumCompatible="false" ecoreEnum="dataweb.ecore#//TipoAtributo">
       <genEnumLiterals ecoreEnumLiteral="dataweb.ecore#//TipoAtributo/STRING"/>
       <genEnumLiterals ecoreEnumLiteral="dataweb.ecore#//TipoAtributo/INTEGER"/>
       <genEnumLiterals ecoreEnumLiteral="dataweb.ecore#//TipoAtributo/BOOLEAN"/>
+      <genEnumLiterals ecoreEnumLiteral="dataweb.ecore#//TipoAtributo/DECIMAL"/>
     </genEnums>
     <genEnums typeSafeEnumCompatible="false" ecoreEnum="dataweb.ecore#//TipoRepresentacion">
       <genEnumLiterals ecoreEnumLiteral="dataweb.ecore#//TipoRepresentacion/TEXTO"/>
@@ -63,11 +60,12 @@
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference dataweb.ecore#//Referencia/target"/>
     </genClasses>
     <genClasses image="false" ecoreClass="dataweb.ecore#//Pagina">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute dataweb.ecore#//Pagina/titulo"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute dataweb.ecore#//Pagina/descripcion"/>
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference dataweb.ecore#//Pagina/enlaces"/>
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference dataweb.ecore#//Pagina/redesSociales"/>
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference dataweb.ecore#//Pagina/fuentesRSS"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute dataweb.ecore#//Pagina/nombre"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute dataweb.ecore#//Pagina/titulo"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute dataweb.ecore#//Pagina/descripcion"/>
     </genClasses>
     <genClasses ecoreClass="dataweb.ecore#//PaginaHome"/>
     <genClasses ecoreClass="dataweb.ecore#//PaginaContenido">
@@ -85,21 +83,24 @@
     <genClasses ecoreClass="dataweb.ecore#//PaginaBorrado"/>
     <genClasses ecoreClass="dataweb.ecore#//PaginaIndiceDetalle"/>
     <genClasses ecoreClass="dataweb.ecore#//Encuesta">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute dataweb.ecore#//Encuesta/titulo"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute dataweb.ecore#//Encuesta/descripcion"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute dataweb.ecore#//Encuesta/tipoRepresentacion"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute dataweb.ecore#//Encuesta/numeroPregVF"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute dataweb.ecore#//Encuesta/numeroPregSelect"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference dataweb.ecore#//Encuesta/preguntas"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute dataweb.ecore#//Encuesta/nombre"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute dataweb.ecore#//Encuesta/descripcion"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute dataweb.ecore#//Encuesta/tipoRepresentacion"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute dataweb.ecore#//Encuesta/titulo"/>
     </genClasses>
     <genClasses ecoreClass="dataweb.ecore#//Cuestionario">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute dataweb.ecore#//Cuestionario/titulo"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute dataweb.ecore#//Cuestionario/descripcion"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute dataweb.ecore#//Cuestionario/numeroPregVF"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute dataweb.ecore#//Cuestionario/numeroPregSelect"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference dataweb.ecore#//Cuestionario/preguntas"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute dataweb.ecore#//Cuestionario/nombre"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute dataweb.ecore#//Cuestionario/descripcion"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute dataweb.ecore#//Cuestionario/titulo"/>
     </genClasses>
     <genClasses image="false" ecoreClass="dataweb.ecore#//Pregunta">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute dataweb.ecore#//Pregunta/nombre"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute dataweb.ecore#//Pregunta/texto"/>
     </genClasses>
     <genClasses ecoreClass="dataweb.ecore#//PreguntaOpcionMultiple">
@@ -107,6 +108,7 @@
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference dataweb.ecore#//PreguntaOpcionMultiple/respuestaCorrecta"/>
     </genClasses>
     <genClasses ecoreClass="dataweb.ecore#//OpcionRespuesta">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute dataweb.ecore#//OpcionRespuesta/nombre"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute dataweb.ecore#//OpcionRespuesta/texto"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute dataweb.ecore#//OpcionRespuesta/valor"/>
     </genClasses>
@@ -118,8 +120,9 @@
     </genClasses>
     <genClasses ecoreClass="dataweb.ecore#//RedSocial">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute dataweb.ecore#//RedSocial/tipo"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute dataweb.ecore#//RedSocial/nombreCuenta"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute dataweb.ecore#//RedSocial/nombre"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute dataweb.ecore#//RedSocial/codigoEmbed"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute dataweb.ecore#//RedSocial/nombreCuenta"/>
     </genClasses>
     <genClasses ecoreClass="dataweb.ecore#//Rol">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute dataweb.ecore#//Rol/nombre"/>
@@ -128,6 +131,7 @@
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference dataweb.ecore#//Rol/paginasAccesibles"/>
     </genClasses>
     <genClasses ecoreClass="dataweb.ecore#//FuenteRSS">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute dataweb.ecore#//FuenteRSS/nombre"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute dataweb.ecore#//FuenteRSS/url"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute dataweb.ecore#//FuenteRSS/titulo"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute dataweb.ecore#//FuenteRSS/numItems"/>

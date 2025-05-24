@@ -1,0 +1,360 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dataweb:Aplicacion
+    xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:dataweb="http://www.unex.es/dmss/dataweb"
+    xsi:schemaLocation="http://www.unex.es/dmss/dataweb ../metamodel/dataweb.ecore"
+    nombre="Sistema Bancario Digital"
+    descripcion="Sistema integral de gestión bancaria para clientes y empleados">
+  
+  <!-- Entidades del Sistema Bancario -->
+  <entidades
+      nombre="Cliente"
+      tableName="CLIENTES"
+      hasCRUD="true">
+    <atributos
+        nombre="id_cliente"
+        isPrimaryKey="true"
+        tipo="INTEGER"/>
+    <atributos
+        nombre="dni"/>
+    <atributos
+        nombre="nombre"/>
+    <atributos
+        nombre="apellidos"/>
+    <atributos
+        nombre="email"/>
+    <atributos
+        nombre="telefono"/>
+    <atributos
+        nombre="fecha_registro"/>
+    <atributos
+        nombre="activo"
+        tipo="BOOLEAN"/>
+  </entidades>
+  
+  <entidades
+      nombre="Cuenta"
+      tableName="CUENTAS"
+      hasCRUD="true">
+    <atributos
+        nombre="numero_cuenta"
+        isPrimaryKey="true"/>
+    <atributos
+        nombre="tipo_cuenta"/>
+    <atributos
+        nombre="saldo"
+        tipo="DECIMAL"/>
+    <atributos
+        nombre="fecha_apertura"/>
+    <atributos
+        nombre="activa"
+        tipo="BOOLEAN"/>
+    <referencias
+        nombre="cliente_titular"
+        multiplicidad="1"
+        source="//@entidades.1"
+        target="//@entidades.0"/>
+  </entidades>
+  
+  <entidades
+      nombre="Transaccion"
+      tableName="TRANSACCIONES"
+      hasIndex="true"
+      hasDetails="true"
+      hasCreate="true">
+    <atributos
+        nombre="id_transaccion"
+        isPrimaryKey="true"
+        tipo="INTEGER"/>
+    <atributos
+        nombre="fecha_transaccion"/>
+    <atributos
+        nombre="tipo_transaccion"/>
+    <atributos
+        nombre="monto"
+        tipo="DECIMAL"/>
+    <atributos
+        nombre="descripcion"/>
+    <atributos
+        nombre="estado"/>
+    <referencias
+        nombre="cuenta_origen"
+        multiplicidad="1"
+        source="//@entidades.2"
+        target="//@entidades.1"/>
+    <referencias
+        nombre="cuenta_destino"
+        multiplicidad="1"
+        source="//@entidades.2"
+        target="//@entidades.1"/>
+  </entidades>
+  
+  <entidades
+      nombre="Empleado"
+      tableName="EMPLEADOS"
+      hasIndex="true"
+      hasDetails="true"
+      hasCreate="true"
+      hasUpdate="true">
+    <atributos
+        nombre="id_empleado"
+        isPrimaryKey="true"
+        tipo="INTEGER"/>
+    <atributos
+        nombre="codigo_empleado"/>
+    <atributos
+        nombre="nombre"/>
+    <atributos
+        nombre="puesto"/>
+    <atributos
+        nombre="departamento"/>
+    <atributos
+        nombre="email"/>
+    <atributos
+        nombre="activo"
+        tipo="BOOLEAN"/>
+  </entidades>
+  
+  <entidades
+      nombre="Prestamo"
+      tableName="PRESTAMOS"
+      hasCRUD="true">
+    <atributos
+        nombre="id_prestamo"
+        isPrimaryKey="true"
+        tipo="INTEGER"/>
+    <atributos
+        nombre="monto_solicitado"
+        tipo="DECIMAL"/>
+    <atributos
+        nombre="tasa_interes"
+        tipo="DECIMAL"/>
+    <atributos
+        nombre="plazo_meses"
+        tipo="INTEGER"/>
+    <atributos
+        nombre="estado_prestamo"/>
+    <atributos
+        nombre="fecha_solicitud"/>
+    <atributos
+        nombre="fecha_aprobacion"/>
+    <referencias
+        nombre="cliente_solicitante"
+        multiplicidad="1"
+        source="//@entidades.4"
+        target="//@entidades.0"/>
+    <referencias
+        nombre="empleado_aprobador"
+        multiplicidad="1"
+        source="//@entidades.4"
+        target="//@entidades.3"/>
+  </entidades>
+  
+  <entidades
+      nombre="TarjetaCredito"
+      tableName="TARJETAS_CREDITO"
+      hasIndex="true"
+      hasCreate="true"
+      hasUpdate="true">
+    <atributos
+        nombre="numero_tarjeta"
+        isPrimaryKey="true"/>
+    <atributos
+        nombre="limite_credito"
+        tipo="DECIMAL"/>
+    <atributos
+        nombre="saldo_actual"
+        tipo="DECIMAL"/>
+    <atributos
+        nombre="fecha_vencimiento"/>
+    <atributos
+        nombre="activa"
+        tipo="BOOLEAN"/>
+    <referencias
+        nombre="cliente_propietario"
+        multiplicidad="1"
+        source="//@entidades.5"
+        target="//@entidades.0"/>
+  </entidades>
+  
+  <!-- Páginas del Sistema -->
+  <paginas xsi:type="dataweb:PaginaHome"
+      enlaces="//@paginas.1 //@paginas.3 //@paginas.5"
+      redesSociales="twBanco"
+      fuentesRSS="//@fuentesRSS.0"
+      nombre="inicio"
+      titulo="Sistema Bancario Digital - Inicio"
+      descripcion="Portal de acceso al sistema bancario"/>
+  
+  <paginas xsi:type="dataweb:PaginaContenido"
+      enlaces="//@paginas.0"
+      redesSociales="fbBanco"
+      nombre="informacion"
+      titulo="Información del Banco"
+      descripcion="Información institucional del banco"
+      contenido="Nuestro banco ofrece servicios financieros integrales con la más alta tecnología y seguridad."/>
+  
+  <paginas xsi:type="dataweb:PaginaIndicePaginada"
+      enlaces="//@paginas.3 //@paginas.4"
+      nombre="indiceClientes"
+      titulo="Listado de Clientes"
+      descripcion="Lista paginada de todos los clientes"
+      entidad="//@entidades.0"
+      atributosMostrados="//@entidades.0/@atributos.0 //@entidades.0/@atributos.1 //@entidades.0/@atributos.2"
+      pageSize="20"/>
+  
+  <paginas xsi:type="dataweb:PaginaDetalle"
+      enlaces="//@paginas.2 //@paginas.6"
+      nombre="detalleCliente"
+      titulo="Detalle de Cliente"
+      descripcion="Ver información completa del cliente"
+      entidad="//@entidades.0"/>
+  
+  <paginas xsi:type="dataweb:PaginaCreacion"
+      enlaces="//@paginas.2"
+      nombre="crearCliente"
+      titulo="Registro de Nuevo Cliente"
+      descripcion="Formulario para registrar un nuevo cliente"
+      entidad="//@entidades.0"/>
+  
+  <paginas xsi:type="dataweb:PaginaActualizacion"
+      enlaces="//@paginas.3"
+      nombre="actualizarCliente"
+      titulo="Actualizar Datos Cliente"
+      descripcion="Formulario para actualizar información del cliente"
+      entidad="//@entidades.0"/>
+  
+  <paginas xsi:type="dataweb:PaginaIndiceFiltros"
+      enlaces="//@paginas.7"
+      nombre="indiceTransacciones"
+      titulo="Historial de Transacciones"
+      descripcion="Consulta de movimientos bancarios"
+      entidad="//@entidades.2"
+      atributosMostrados="//@entidades.2/@atributos.0 //@entidades.2/@atributos.1 //@entidades.2/@atributos.2"
+      atributosFiltro="//@entidades.2/@atributos.1 //@entidades.2/@atributos.5"/>
+  
+  <paginas xsi:type="dataweb:PaginaDetalle"
+      enlaces="//@paginas.6"
+      nombre="detalleTransaccion"
+      titulo="Detalle de Transacción"
+      descripcion="Ver información completa de la transacción"
+      entidad="//@entidades.2"/>
+  
+  <paginas xsi:type="dataweb:PaginaCreacion"
+      enlaces="//@paginas.0"
+      nombre="nuevaTransferencia"
+      titulo="Nueva Transferencia"
+      descripcion="Realizar transferencia entre cuentas"
+      entidad="//@entidades.2"/>
+  
+  <paginas xsi:type="dataweb:PaginaIndicePaginadaFiltrada"
+      enlaces="//@paginas.0"
+      nombre="gestionPrestamos"
+      titulo="Gestión de Préstamos"
+      descripcion="Administración de solicitudes de préstamos"
+      entidad="//@entidades.4"
+      atributosMostrados="//@entidades.4/@atributos.0 //@entidades.4/@atributos.1 //@entidades.4/@atributos.4"
+      pageSize="10"
+      atributosFiltro="//@entidades.4/@atributos.4 //@entidades.4/@atributos.5"/>
+  
+  <!-- Roles del Sistema -->
+  <roles nombre="AdministradorBanco"
+      descripcion="Acceso completo al sistema bancario"
+      paginasAccesibles="//@paginas.0 //@paginas.1 //@paginas.2 //@paginas.3 //@paginas.4 //@paginas.5 //@paginas.6 //@paginas.7 //@paginas.8 //@paginas.9"/>
+  
+  <roles nombre="GerenteOperaciones"
+      descripcion="Gestión de operaciones y transacciones"
+      paginasAccesibles="//@paginas.0 //@paginas.1 //@paginas.2 //@paginas.3 //@paginas.6 //@paginas.7 //@paginas.9"/>
+  
+  <roles nombre="EmpleadoBanco"
+      descripcion="Operaciones básicas bancarias"
+      paginasAccesibles="//@paginas.0 //@paginas.2 //@paginas.3 //@paginas.4 //@paginas.8"/>
+  
+  <roles nombre="Cliente"
+      descripcion="Acceso a servicios de cliente"
+      paginasAccesibles="//@paginas.0 //@paginas.1 //@paginas.6 //@paginas.7 //@paginas.8"/>
+  
+  <!-- Cuestionarios y Encuestas -->
+  <cuestionarios
+      nombre="satisfaccionCliente"
+      descripcion="Evalúa tu experiencia con nuestros servicios"
+      titulo="Encuesta de Satisfacción Bancaria">
+    <preguntas
+        xsi:type="dataweb:PreguntaOpcionMultiple"
+        nombre="calificacionServicio"
+        texto="¿Cómo calificarías nuestro servicio?"
+        respuestaCorrecta="//@cuestionarios.0/@preguntas.0/@opciones.0">
+      <opciones
+          nombre="satisfaccionOpcion1"
+          texto="Excelente"
+          valor="5"/>
+      <opciones
+          nombre="satisfaccionOpcion2"
+          texto="Bueno"
+          valor="4"/>
+      <opciones
+          nombre="satisfaccionOpcion3"
+          texto="Regular"
+          valor="3"/>
+      <opciones
+          nombre="satisfaccionOpcion4"
+          texto="Malo"
+          valor="2"/>
+    </preguntas>
+    <preguntas
+        xsi:type="dataweb:PreguntaVerdaderoFalso"
+        nombre="recomiendaBanco"
+        texto="¿Recomendarías nuestro banco a otros?"
+        respuestaCorrecta="true"/>
+  </cuestionarios>
+  
+  <encuestas
+      nombre="preferenciasBancarias"
+      descripcion="Ayúdanos a conocer tus preferencias bancarias"
+      tipoRepresentacion="CIRCULAR"
+      titulo="Encuesta de Servicios Preferidos">
+    <preguntas
+        xsi:type="dataweb:PreguntaOpcionMultiple"
+        nombre="servicioPreferido"
+        texto="¿Qué servicio utilizas más frecuentemente?">
+      <opciones
+          nombre="servicioOpcion1"
+          texto="Banca en línea"
+          valor="banca_online"/>
+      <opciones
+          nombre="servicioOpcion2"
+          texto="Transferencias"
+          valor="transferencias"/>
+      <opciones
+          nombre="servicioOpcion3"
+          texto="Depósitos"
+          valor="depositos"/>
+      <opciones
+          nombre="servicioOpcion4"
+          texto="Préstamos"
+          valor="prestamos"/>
+    </preguntas>
+  </encuestas>
+  
+  <!-- Redes Sociales -->
+  <redesSociales
+      nombre="twBanco"
+      codigoEmbed="&lt;a class=\&quot;twitter-timeline\&quot; data-width=\&quot;220\&quot; data-height=\&quot;600\&quot; href=\&quot;https://twitter.com/BancoDigital\&quot;>Tweets by BancoDigital&lt;/a>&quot;"
+      nombreCuenta="BancoDigital"/>
+  
+  <redesSociales
+      tipo="FACEBOOK"
+      nombre="fbBanco"
+      codigoEmbed="&lt;iframe src=\&quot;https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2FBancoDigital\&quot; width=\&quot;500\&quot; height=\&quot;700\&quot; style=\&quot;border:none;overflow:hidden\&quot; scrolling=\&quot;no\&quot; frameborder=\&quot;0\&quot;>&lt;/iframe>"
+      nombreCuenta="BancoDigital"/>
+  
+  <!-- Fuentes RSS -->
+  <fuentesRSS
+      nombre="noticiasEconomicas"
+      url="https://banco.example.com/noticias/feed"
+      titulo="Noticias Económicas"
+      numItems="5"
+      mostrarDescripcion="true"/>
+</dataweb:Aplicacion>

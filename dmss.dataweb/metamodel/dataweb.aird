@@ -1,14 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xmi:XMI xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:description="http://www.eclipse.org/sirius/description/1.1.0" xmlns:description_1="http://www.eclipse.org/sirius/diagram/description/1.1.0" xmlns:diagram="http://www.eclipse.org/sirius/diagram/1.1.0" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:notation="http://www.eclipse.org/gmf/runtime/1.0.3/notation" xmlns:style="http://www.eclipse.org/sirius/diagram/description/style/1.1.0" xmlns:viewpoint="http://www.eclipse.org/sirius/1.1.0" xsi:schemaLocation="http://www.eclipse.org/sirius/description/1.1.0 http://www.eclipse.org/sirius/1.1.0#//description http://www.eclipse.org/sirius/diagram/description/1.1.0 http://www.eclipse.org/sirius/diagram/1.1.0#//description http://www.eclipse.org/sirius/diagram/description/style/1.1.0 http://www.eclipse.org/sirius/diagram/1.1.0#//description/style">
-  <viewpoint:DAnalysis uid="_ipnsMBuxEfCmQI4lfh_30Q" selectedViews="_jh-3kBuxEfCmQI4lfh_30Q" version="15.2.0.202303281325">
+  <viewpoint:DAnalysis uid="_ipnsMBuxEfCmQI4lfh_30Q" selectedViews="_jh-3kBuxEfCmQI4lfh_30Q _LW5hICUIEfCEN-jKXX-b6w _LXA14CUIEfCEN-jKXX-b6w _MGH-oCUIEfCEN-jKXX-b6w" version="15.2.0.202303281325">
     <semanticResources>dataweb.ecore</semanticResources>
     <semanticResources>../model/Aplicacion.xmi</semanticResources>
+    <semanticResources>dataweb.genmodel</semanticResources>
     <ownedViews xmi:type="viewpoint:DView" uid="_jh-3kBuxEfCmQI4lfh_30Q">
       <viewpoint xmi:type="description:Viewpoint" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']"/>
-      <ownedRepresentationDescriptors xmi:type="viewpoint:DRepresentationDescriptor" uid="_jjsu0BuxEfCmQI4lfh_30Q" name="dataweb" repPath="#_jjHgABuxEfCmQI4lfh_30Q" changeId="1745407651968">
+      <ownedRepresentationDescriptors xmi:type="viewpoint:DRepresentationDescriptor" uid="_jjsu0BuxEfCmQI4lfh_30Q" name="dataweb" repPath="#_jjHgABuxEfCmQI4lfh_30Q" changeId="1746980781217">
         <description xmi:type="description_1:DiagramDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']"/>
         <target xmi:type="ecore:EPackage" href="dataweb.ecore#/"/>
       </ownedRepresentationDescriptors>
+    </ownedViews>
+    <ownedViews xmi:type="viewpoint:DView" uid="_LW5hICUIEfCEN-jKXX-b6w">
+      <viewpoint xmi:type="description:Viewpoint" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Review']"/>
+    </ownedViews>
+    <ownedViews xmi:type="viewpoint:DView" uid="_LXA14CUIEfCEN-jKXX-b6w">
+      <viewpoint xmi:type="description:Viewpoint" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Archetype']"/>
+    </ownedViews>
+    <ownedViews xmi:type="viewpoint:DView" uid="_MGH-oCUIEfCEN-jKXX-b6w">
+      <viewpoint xmi:type="description:Viewpoint" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Generation']"/>
     </ownedViews>
   </viewpoint:DAnalysis>
   <diagram:DSemanticDiagram uid="_jjHgABuxEfCmQI4lfh_30Q">
@@ -111,6 +121,10 @@
             <children xmi:type="notation:Node" xmi:id="_0C69khu1EfCmQI4lfh_30Q" type="3010" element="_0C5vYBu1EfCmQI4lfh_30Q">
               <styles xmi:type="notation:FontStyle" xmi:id="_0C69kxu1EfCmQI4lfh_30Q" fontName="Segoe UI" fontHeight="8"/>
               <layoutConstraint xmi:type="notation:Location" xmi:id="_0C69lBu1EfCmQI4lfh_30Q"/>
+            </children>
+            <children xmi:type="notation:Node" xmi:id="_qqZuAC6EEfCLhJbPw4ZvXA" type="3010" element="_qpPQaS6EEfCLhJbPw4ZvXA">
+              <styles xmi:type="notation:FontStyle" xmi:id="_qqaVEC6EEfCLhJbPw4ZvXA" fontName="Segoe UI" fontHeight="8"/>
+              <layoutConstraint xmi:type="notation:Location" xmi:id="_qqaVES6EEfCLhJbPw4ZvXA"/>
             </children>
             <styles xmi:type="notation:SortingStyle" xmi:id="_yNlzkhu1EfCmQI4lfh_30Q"/>
             <styles xmi:type="notation:FilteringStyle" xmi:id="_yNlzkxu1EfCmQI4lfh_30Q"/>
@@ -1371,6 +1385,14 @@
         </ownedStyle>
         <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EEnum']/@subNodeMappings[name='EC%20EEnumLiteral']"/>
       </ownedElements>
+      <ownedElements xmi:type="diagram:DNodeListElement" uid="_qpPQaS6EEfCLhJbPw4ZvXA" name="DECIMAL" tooltipText="">
+        <target xmi:type="ecore:EEnumLiteral" href="dataweb.ecore#//TipoAtributo/DECIMAL"/>
+        <semanticElements xmi:type="ecore:EEnumLiteral" href="dataweb.ecore#//TipoAtributo/DECIMAL"/>
+        <ownedStyle xmi:type="diagram:BundledImage" uid="_qpRsoC6EEfCLhJbPw4ZvXA" labelAlignment="LEFT">
+          <description xmi:type="style:BundledImageDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EEnum']/@subNodeMappings[name='EC%20EEnumLiteral']/@style"/>
+        </ownedStyle>
+        <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EEnum']/@subNodeMappings[name='EC%20EEnumLiteral']"/>
+      </ownedElements>
     </ownedDiagramElements>
     <ownedDiagramElements xmi:type="diagram:DNodeList" uid="_-_ZSIBu1EfCmQI4lfh_30Q" name="Referencia" tooltipText="" outgoingEdges="_MBWskBu2EfCmQI4lfh_30Q _PQW_Nhu2EfCmQI4lfh_30Q" incomingEdges="_ayzHoxu2EfCmQI4lfh_30Q" width="12" height="10">
       <target xmi:type="ecore:EClass" href="dataweb.ecore#//Referencia"/>
@@ -2456,6 +2478,7 @@
     <activatedLayers xmi:type="description_1:Layer" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer"/>
     <activatedLayers xmi:type="description_1:AdditionalLayer" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@additionalLayers[name='Package']"/>
     <activatedLayers xmi:type="description_1:AdditionalLayer" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@additionalLayers[name='Validation']"/>
+    <activatedLayers xmi:type="description_1:AdditionalLayer" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Archetype']/@ownedRepresentationExtensions[name='Entities%20With%20Archetypes']/@layers[name='Archetypes']"/>
     <target xmi:type="ecore:EPackage" href="dataweb.ecore#/"/>
   </diagram:DSemanticDiagram>
 </xmi:XMI>

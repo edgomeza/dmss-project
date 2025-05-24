@@ -81,6 +81,7 @@
     <eLiterals name="STRING"/>
     <eLiterals name="INTEGER" value="1"/>
     <eLiterals name="BOOLEAN" value="2"/>
+    <eLiterals name="DECIMAL" value="2"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Referencia">
     <eAnnotations source="http://www.eclipse.org/emf/2002/Ecore">
