@@ -8,22 +8,276 @@
 <head>
    <meta charset="UTF-8">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>Resultados de Cuestionarios</title>
+   <title>Resultados Premium de Cuestionarios</title>
+   <meta name="description" content="Centro premium de resultados y evaluaciones">
+   <link rel="preconnect" href="https://fonts.googleapis.com">
+   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
    <link rel="stylesheet" href="../assets/css/style.css">
+   
+   <!-- Premium Results Styles -->
+   <style>
+       :root {
+           --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+           --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+           --gradient-success: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+           --gradient-warning: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+           --gradient-danger: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+           --glassmorphism: rgba(255, 255, 255, 0.25);
+           --glassmorphism-border: rgba(255, 255, 255, 0.18);
+           --shadow-luxury: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+       }
+       
+       body {
+           font-family: 'Inter', sans-serif;
+           background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+           min-height: 100vh;
+           position: relative;
+           overflow-x: hidden;
+       }
+       
+       body::before {
+           content: '';
+           position: fixed;
+           top: 0;
+           left: 0;
+           width: 100%;
+           height: 100%;
+           background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.05)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.08)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+           pointer-events: none;
+           z-index: 1;
+       }
+       
+       .app-header {
+           background: var(--glassmorphism);
+           backdrop-filter: blur(20px);
+           -webkit-backdrop-filter: blur(20px);
+           border-bottom: 1px solid var(--glassmorphism-border);
+           padding: 2rem 0;
+           position: relative;
+           z-index: 10;
+       }
+       
+       .app-header h1 {
+           font-family: 'Poppins', sans-serif;
+           font-weight: 800;
+           font-size: 2.5rem;
+           background: linear-gradient(45deg, #fff, #e0e7ff);
+           -webkit-background-clip: text;
+           -webkit-text-fill-color: transparent;
+           background-clip: text;
+           margin-bottom: 0.5rem;
+           text-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+       }
+       
+       .main-nav {
+           background: rgba(255, 255, 255, 0.1);
+           backdrop-filter: blur(10px);
+           border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+           position: relative;
+           z-index: 9;
+       }
+       
+       .nav-link {
+           color: rgba(255, 255, 255, 0.8);
+           text-decoration: none;
+           transition: all 0.3s ease;
+           padding: 0.75rem 1rem;
+           border-radius: 8px;
+       }
+       
+       .nav-link:hover, .nav-link.active {
+           color: white;
+           background: rgba(255, 255, 255, 0.1);
+           text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+       }
+       
+       .main-content {
+           position: relative;
+           z-index: 5;
+           padding: 2rem 0;
+       }
+       
+       .loading {
+           text-align: center;
+           padding: 3rem;
+           color: rgba(255, 255, 255, 0.8);
+           font-size: 1.2rem;
+       }
+       
+       .loading::before {
+           content: '🏆';
+           font-size: 2rem;
+           display: block;
+           margin-bottom: 1rem;
+           animation: pulse 2s infinite;
+       }
+       
+       @keyframes pulse {
+           0%, 100% { opacity: 0.7; transform: scale(1); }
+           50% { opacity: 1; transform: scale(1.1); }
+       }
+       
+       .empty-state {
+           text-align: center;
+           padding: 3rem;
+           background: var(--glassmorphism);
+           backdrop-filter: blur(20px);
+           border: 1px solid var(--glassmorphism-border);
+           border-radius: 20px;
+           box-shadow: var(--shadow-luxury);
+       }
+       
+       .empty-state h3 {
+           color: white;
+           font-family: 'Poppins', sans-serif;
+           font-weight: 600;
+           margin-bottom: 1rem;
+       }
+       
+       .empty-state p {
+           color: rgba(255, 255, 255, 0.8);
+       }
+       
+       .result-card {
+           background: var(--glassmorphism);
+           backdrop-filter: blur(20px);
+           -webkit-backdrop-filter: blur(20px);
+           border: 1px solid var(--glassmorphism-border);
+           border-radius: 20px;
+           box-shadow: var(--shadow-luxury);
+           transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+           position: relative;
+           overflow: hidden;
+           margin-bottom: 2rem;
+           padding: 2rem;
+           display: flex;
+           align-items: center;
+           gap: 2rem;
+       }
+       
+       .result-card::before {
+           content: '';
+           position: absolute;
+           top: 0;
+           left: 0;
+           right: 0;
+           height: 3px;
+           background: var(--gradient-success);
+           transform: scaleX(0);
+           transition: transform 0.3s ease;
+           transform-origin: left;
+       }
+       
+       .result-card:hover::before {
+           transform: scaleX(1);
+       }
+       
+       .result-card:hover {
+           transform: translateY(-8px);
+           box-shadow: 0 32px 64px -12px rgba(0, 0, 0, 0.35);
+           border-color: rgba(255, 255, 255, 0.3);
+       }
+       
+       .result-card h3 {
+           color: white;
+           font-family: 'Poppins', sans-serif;
+           font-weight: 600;
+           margin: 0;
+           flex: 1;
+       }
+       
+       .score-circle {
+           width: 80px;
+           height: 80px;
+           border-radius: 50%;
+           background: var(--gradient-success);
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           color: white;
+           font-family: 'Poppins', sans-serif;
+           font-weight: 700;
+           font-size: 1.2rem;
+           box-shadow: 0 8px 16px rgba(79, 172, 254, 0.3);
+           position: relative;
+       }
+       
+       .score-circle::before {
+           content: '';
+           position: absolute;
+           top: -5px;
+           left: -5px;
+           right: -5px;
+           bottom: -5px;
+           border-radius: 50%;
+           background: linear-gradient(45deg, #4facfe, #00f2fe, #43e97b);
+           z-index: -1;
+           animation: rotate 3s linear infinite;
+       }
+       
+       @keyframes rotate {
+           0% { transform: rotate(0deg); }
+           100% { transform: rotate(360deg); }
+       }
+       
+       .result-card p {
+           color: rgba(255, 255, 255, 0.8);
+           margin: 0.5rem 0 0;
+           font-weight: 500;
+       }
+       
+       .error {
+           text-align: center;
+           padding: 2rem;
+           background: var(--gradient-danger);
+           color: white;
+           border-radius: 12px;
+           font-weight: 600;
+       }
+       
+       /* Responsive */
+       @media (max-width: 768px) {
+           .app-header h1 {
+               font-size: 2rem;
+           }
+           
+           .result-card {
+               flex-direction: column;
+               text-align: center;
+               gap: 1rem;
+           }
+           
+           .score-circle {
+               width: 60px;
+               height: 60px;
+               font-size: 1rem;
+           }
+       }
+   </style>
 </head>
 <body>
+   <!-- Floating Elements -->
+   <div class="floating-elements">
+       <div class="floating-element" style="top: 10%; left: 10%; animation-delay: 0s;"></div>
+       <div class="floating-element" style="top: 20%; right: 20%; animation-delay: 2s;"></div>
+       <div class="floating-element" style="bottom: 30%; left: 15%; animation-delay: 4s;"></div>
+       <div class="floating-element" style="bottom: 20%; right: 10%; animation-delay: 6s;"></div>
+   </div>
+
    <header class="app-header">
        <div class="container">
-           <h1>Resultados de Cuestionarios</h1>
+           <h1>🏆 Resultados Premium de Cuestionarios</h1>
+           <p>✨ Centro de evaluaciones y métricas de rendimiento premium</p>
        </div>
    </header>
    
    <nav class="main-nav">
        <div class="container nav-container">
            <ul class="nav-menu">
-               <li class="nav-item"><a href="../index.html" class="nav-link">Inicio</a></li>
-               <li class="nav-item"><a href="index.html" class="nav-link">Cuestionarios</a></li>
-               <li class="nav-item"><a href="results.html" class="nav-link active">Resultados</a></li>
+               <li class="nav-item"><a href="../index.html" class="nav-link">🏠 Inicio</a></li>
+               <li class="nav-item"><a href="index.html" class="nav-link">🎯 Cuestionarios</a></li>
+               <li class="nav-item"><a href="results.html" class="nav-link active">🏆 Resultados</a></li>
            </ul>
        </div>
    </nav>
@@ -31,44 +285,121 @@
    <main class="main-content">
        <div class="container">
            <div id="results-container">
-               <div class="loading">Cargando resultados...</div>
+               <div class="loading">Cargando resultados premium...</div>
            </div>
        </div>
    </main>
+   
+   <!-- Floating Elements CSS -->
+   <style>
+       .floating-elements {
+           position: fixed;
+           top: 0;
+           left: 0;
+           width: 100%;
+           height: 100%;
+           pointer-events: none;
+           z-index: 1;
+       }
+       
+       .floating-element {
+           position: absolute;
+           width: 20px;
+           height: 20px;
+           background: linear-gradient(45deg, rgba(255,255,255,0.1), rgba(255,255,255,0.3));
+           border-radius: 50%;
+           animation: floatUpDown 8s ease-in-out infinite;
+           box-shadow: 0 0 20px rgba(255,255,255,0.2);
+       }
+       
+       @keyframes floatUpDown {
+           0%, 100% { 
+               transform: translateY(0px) rotate(0deg);
+               opacity: 0.7;
+           }
+           50% { 
+               transform: translateY(-30px) rotate(180deg);
+               opacity: 1;
+           }
+       }
+   </style>
    
    <script src="../assets/js/app.js"></script>
    <script src="../assets/js/survey-quiz.js"></script>
    <script>
        document.addEventListener('DOMContentLoaded', async () => {
-           await manager.init();
+           console.log('🏆 Inicializando centro premium de resultados...');
            
            try {
-               const responses = await manager.db.getAll('RESPUESTAS_CUESTIONARIO');
-               const confirmed = responses.filter(r => r.results && r.results.gradeConfirmed);
-               const container = document.getElementById('results-container');
-               
-               if (confirmed.length === 0) {
-                   container.innerHTML = `
-                       <div class="empty-state">
-                           <h3>No hay resultados disponibles</h3>
-                           <p>Tus evaluaciones están pendientes de revisión</p>
-                       </div>
-                   `;
-               } else {
-                   container.innerHTML = confirmed.map(result => `
-                       <div class="result-card">
-                           <h3>${result.quizName}</h3>
-                           <div class="score-circle">${result.results.porcentaje}%</div>
-                           <p>${result.results.totalCorrectas} de ${result.results.totalPreguntas} correctas</p>
-                       </div>
-                   `).join('');
+               // Esperar a que se inicialice el manager
+               if (typeof manager !== 'undefined') {
+                   await manager.init();
                }
-           } catch (error) {
-               document.getElementById('results-container').innerHTML = 
-                   '<div class="error">Error cargando resultados</div>';
-           }
-       });
-   </script>
+               
+               // Simular carga de datos
+               setTimeout(async () => {
+                   try {
+                       let responses = ['['/]];
+                       
+                       // Intentar obtener respuestas desde el manager si está disponible
+                       if (typeof manager !== 'undefined' && manager.db) {
+                           responses = await manager.db.getAll('RESPUESTAS_CUESTIONARIO');
+                       }
+                       
+                       const confirmed = responses.filter(r => r.results && r.results.gradeConfirmed);
+                       const container = document.getElementById('results-container');
+                       
+                       if (confirmed.length === 0) {
+                           container.innerHTML = `
+                               <div class="empty-state">
+                                   <h3>🎯 No hay resultados disponibles</h3>
+                                   <p>✨ Tus evaluaciones premium están pendientes de revisión</p>
+                                   <p>🚀 Completa algunos cuestionarios para ver tus resultados aquí</p>
+                               </div>
+                           `;
+                       } else {
+                           container.innerHTML = confirmed.map(result => {
+                               const percentage = result.results.porcentaje || 0;
+                              const scoreColor = percentage >= 80 ? 'var(--gradient-success)' : 
+                                                percentage >= 60 ? 'var(--gradient-warning)' : 
+                                                'var(--gradient-danger)';
+                              
+                              return `
+                                  <div class="result-card">
+                                      <div class="result-info">
+                                          <h3>🎯 ${result.quizName || 'Cuestionario'}</h3>
+                                          <p>📊 ${result.results.totalCorrectas || 0} de ${result.results.totalPreguntas || 0} correctas</p>
+                                          <p>📅 Completado: ${new Date(result.timestamp || Date.now()).toLocaleDateString('es-ES')}</p>
+                                      </div>
+                                      <div class="score-circle" style="background: ${scoreColor}">
+                                          ${percentage}%
+                                      </div>
+                                  </div>
+                              `;
+                          }).join('');
+                      }
+                  } catch (error) {
+                      console.error('❌ Error cargando resultados premium:', error);
+                      document.getElementById('results-container').innerHTML = `
+                          <div class="error">
+                              ⚠️ Error temporal al cargar resultados premium
+                              <br><small>Intenta recargar la página</small>
+                          </div>
+                      `;
+                  }
+              }, 1500); // Simular tiempo de carga premium
+              
+          } catch (error) {
+              console.error('❌ Error inicializando resultados:', error);
+              document.getElementById('results-container').innerHTML = `
+                  <div class="empty-state">
+                      <h3>🔄 Inicializando sistema premium...</h3>
+                      <p>✨ Por favor, espera un momento</p>
+                  </div>
+              `;
+          }
+      });
+  </script>
 </body>
 </html>
 [/file]

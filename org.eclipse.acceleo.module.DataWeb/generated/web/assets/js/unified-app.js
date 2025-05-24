@@ -1,17 +1,18 @@
 /**
- * GESTOR PRINCIPAL DE LA APLICACIÓN - Biblioteca Universitaria
+ * GESTOR PRINCIPAL DE LA APLICACIÓN - Sistema Bancario Digital
  * Coordina todos los módulos del sistema
  */
 
 class UnifiedAppManager {
     constructor() {
         this.config = {
-            appName: 'Biblioteca Universitaria',
+            appName: 'Sistema Bancario Digital',
             debug: true,
             roles: [
-                'Administrador'
-,                 'Bibliotecario'
-,                 'Estudiante'
+                'AdministradorBanco'
+,                 'GerenteOperaciones'
+,                 'EmpleadoBanco'
+,                 'Cliente'
             ],
             currentRole: localStorage.getItem('current_role') || null
         };
@@ -20,20 +21,30 @@ class UnifiedAppManager {
         this.ui = null;
         this.entities = null;
         this.surveys = null;
+        this.initialized = false;
         
-        this.init();
+        // No inicializar automáticamente en el constructor
+        // Se inicializará cuando se llame explícitamente
     }
 
     async init() {
+        if (this.initialized) return;
+        
         try {
-            await this.db.init();
+            // Esperar a que la base de datos esté lista
+            if (!this.db.initialized) {
+                await this.db.init();
+            }
             
+            // Inicializar módulos en orden
             this.ui = new UnifiedUIManager(this);
             this.entities = new UnifiedEntityManager(this);
             this.surveys = new UnifiedSurveyQuizManager(this);
             
             this.setupGlobalEvents();
-            this.initCurrentPage();
+            await this.initCurrentPage();
+            
+            this.initialized = true;
             
             if (this.config.debug) {
                 console.log(`✅ ${this.config.appName} inicializado correctamente`);
@@ -68,14 +79,12 @@ class UnifiedAppManager {
         });
 
         // Auto-dismiss alerts
-        document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => {
-                document.querySelectorAll('.alert[data-auto-dismiss="true"]').forEach(alert => {
-                    alert.style.opacity = '0';
-                    setTimeout(() => alert.remove(), 500);
-                });
-            }, 5000);
-        });
+        setTimeout(() => {
+            document.querySelectorAll('.alert[data-auto-dismiss="true"]').forEach(alert => {
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 500);
+            });
+        }, 5000);
     }
 
     async handleFormSubmit(form) {
@@ -160,19 +169,20 @@ class UnifiedAppManager {
 
     isAdmin() {
         const adminRoles = [
-            'Administrador', 
+            'AdministradorBanco', 
+            'GerenteOperaciones', 
             
             
         ];
         return adminRoles.includes(this.config.currentRole);
     }
 
-    initCurrentPage() {
+    async initCurrentPage() {
         const path = window.location.pathname;
         
         // Dashboard pages
         if (path.includes('dashboard.html')) {
-            this.initDashboard();
+            await this.initDashboard();
         }
         // Entity pages
         else if (path.includes('/pages/')) {
@@ -189,7 +199,7 @@ class UnifiedAppManager {
         }
         // Admin pages
         else if (path.includes('admin')) {
-            this.initAdminPage();
+            await this.initAdminPage();
         }
     }
 
@@ -252,6 +262,9 @@ class UnifiedAppManager {
     }
 }
 
+// Hacer disponible globalmente
+window.UnifiedAppManager = UnifiedAppManager;
+
 // Funciones globales para compatibilidad
 window.selectRole = function(roleName) {
     if (window.DataWebApp) {
@@ -272,7 +285,35 @@ window.openQuizPage = function(quizName) {
     }
 };
 
-// Inicialización global
-document.addEventListener('DOMContentLoaded', () => {
-    window.DataWebApp = new UnifiedAppManager();
+// Inicialización global - esperar a que todos los módulos estén disponibles
+document.addEventListener('DOMContentLoaded', async () => {
+    // Verificar que todos los módulos estén disponibles
+    const checkModules = () => {
+        return typeof window.UnifiedDatabaseManager !== 'undefined' && 
+               typeof window.UnifiedUIManager !== 'undefined' &&
+               typeof window.UnifiedEntityManager !== 'undefined' &&
+               typeof window.UnifiedSurveyQuizManager !== 'undefined';
+    };
+    
+    // Esperar a que los módulos estén disponibles
+    let attempts = 0;
+    const maxAttempts = 10;
+    
+    const waitForModules = () => {
+        if (checkModules() || attempts >= maxAttempts) {
+            // Inicializar la aplicación
+            window.DataWebApp = new UnifiedAppManager();
+            window.DataWebApp.init().then(() => {
+                console.log('✅ DataWebApp inicializado completamente');
+            }).catch(error => {
+                console.error('❌ Error inicializando DataWebApp:', error);
+            });
+        } else {
+            attempts++;
+            setTimeout(waitForModules, 200);
+        }
+    };
+    
+    // Comenzar la verificación
+    setTimeout(waitForModules, 100);
 });

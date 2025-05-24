@@ -1,5 +1,5 @@
 /**
-* GENERADOR DINÁMICO DE PÁGINAS - Biblioteca Universitaria
+* GENERADOR DINÁMICO DE PÁGINAS - Sistema Bancario Digital
 * Genera páginas HTML en tiempo real para encuestas y cuestionarios
 */
 
@@ -70,7 +70,7 @@ class DynamicPageGenerator {
 <head>
    <meta charset="UTF-8">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>{{TITLE}} - Biblioteca Universitaria</title>
+   <title>{{TITLE}} - Sistema Bancario Digital</title>
    <link rel="stylesheet" href="../assets/css/style.css">
 </head>
 <body>
@@ -84,7 +84,7 @@ class DynamicPageGenerator {
    <nav class="main-nav">
        <div class="container nav-container">
            <div class="nav-brand">
-               <a href="../index.html" class="nav-logo">Biblioteca Universitaria</a>
+               <a href="../index.html" class="nav-logo">Sistema Bancario Digital</a>
            </div>
            <ul class="nav-menu">
                <li class="nav-item"><a href="../index.html" class="nav-link">Inicio</a></li>
@@ -377,7 +377,7 @@ class DynamicPageGenerator {
 <head>
    <meta charset="UTF-8">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>{{TITLE}} - Biblioteca Universitaria</title>
+   <title>{{TITLE}} - Sistema Bancario Digital</title>
    <link rel="stylesheet" href="../assets/css/style.css">
 </head>
 <body>
@@ -391,7 +391,7 @@ class DynamicPageGenerator {
    <nav class="main-nav">
        <div class="container nav-container">
            <div class="nav-brand">
-               <a href="../index.html" class="nav-logo">Biblioteca Universitaria</a>
+               <a href="../index.html" class="nav-logo">Sistema Bancario Digital</a>
            </div>
            <ul class="nav-menu">
                <li class="nav-item"><a href="../index.html" class="nav-link">Inicio</a></li>
@@ -926,7 +926,7 @@ class DynamicPageGenerator {
 <head>
    <meta charset="UTF-8">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>Error - Biblioteca Universitaria</title>
+   <title>Error - Sistema Bancario Digital</title>
    <link rel="stylesheet" href="../assets/css/style.css">
 </head>
 <body>

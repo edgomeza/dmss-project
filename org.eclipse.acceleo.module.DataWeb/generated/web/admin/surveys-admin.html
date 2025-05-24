@@ -3,79 +3,358 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Administración de Encuestas</title>
+    <title>Administración Premium de Encuestas</title>
+    <meta name="description" content="Panel de administración premium para encuestas">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../assets/css/style.css">
+    
+    <!-- Premium Admin Styles -->
+    <style>
+        :root {
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-success: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --gradient-warning: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            --gradient-danger: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            --glassmorphism: rgba(255, 255, 255, 0.25);
+            --glassmorphism-border: rgba(255, 255, 255, 0.18);
+            --shadow-luxury: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.05)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.08)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .app-header {
+            background: var(--glassmorphism);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glassmorphism-border);
+            padding: 2rem 0;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .app-header h1 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 800;
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, #fff, #e0e7ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+        }
+        
+        .main-nav {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            z-index: 9;
+        }
+        
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+        }
+        
+        .main-content {
+            position: relative;
+            z-index: 5;
+            padding: 2rem 0;
+        }
+        
+        .card {
+            background: var(--glassmorphism);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glassmorphism-border);
+            border-radius: 20px;
+            box-shadow: var(--shadow-luxury);
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 32px 64px -12px rgba(0, 0, 0, 0.35);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .card-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card-header h2 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            color: black;
+            margin: 0;
+        }
+        
+        .card-body {
+            padding: 2rem;
+        }
+        
+        .stat-card {
+            background: var(--glassmorphism);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--glassmorphism-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-12px) scale(1.02);
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+            border-color: #00d4ff;
+        }
+        
+        .stat-number {
+           font-family: 'Poppins', sans-serif;
+           font-size: 2.5rem;
+           font-weight: 800;
+           background: linear-gradient(45deg, #fff, #e0e7ff);
+           -webkit-background-clip: text;
+           -webkit-text-fill-color: transparent;
+           background-clip: text;
+           line-height: 1;
+           margin-bottom: 0.5rem;
+       }
+       
+       .stat-label {
+           color: rgba(255, 255, 255, 0.8);
+           font-weight: 500;
+           font-size: 0.95rem;
+       }
+       
+       .btn {
+           font-weight: 600;
+           border-radius: 12px;
+           padding: 0.75rem 1.5rem;
+           transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+           position: relative;
+           overflow: hidden;
+           text-transform: none;
+           letter-spacing: 0.5px;
+           text-decoration: none;
+           display: inline-block;
+           border: none;
+           cursor: pointer;
+       }
+       
+       .btn::before {
+           content: '';
+           position: absolute;
+           top: 0;
+           left: -100%;
+           width: 100%;
+           height: 100%;
+           background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+           transition: left 0.5s ease;
+       }
+       
+       .btn:hover::before {
+           left: 100%;
+       }
+       
+       .btn-success {
+           background: var(--gradient-success);
+           color: white;
+           box-shadow: 0 8px 16px rgba(79, 172, 254, 0.3);
+       }
+       
+       .btn-success:hover {
+           transform: translateY(-2px);
+           box-shadow: 0 12px 24px rgba(79, 172, 254, 0.4);
+           color: white;
+           text-decoration: none;
+       }
+       
+       .btn-primary {
+           background: var(--gradient-primary);
+           color: white;
+           box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+       }
+       
+       .btn-primary:hover {
+           transform: translateY(-2px);
+           box-shadow: 0 12px 24px rgba(102, 126, 234, 0.4);
+           color: white;
+           text-decoration: none;
+       }
+       
+       .table {
+           width: 100%;
+           border-collapse: collapse;
+           background: transparent;
+       }
+       
+       .table thead th {
+           background: rgba(255, 255, 255, 0.2);
+           color: white;
+           font-weight: 600;
+           padding: 1rem;
+           text-align: left;
+           border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+       }
+       
+       .table tbody td {
+           padding: 1rem;
+           color: rgba(255, 255, 255, 0.9);
+           border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+       }
+       
+       .table tbody tr:hover {
+           background: rgba(255, 255, 255, 0.1);
+       }
+       
+       /* Responsive */
+       @media (max-width: 768px) {
+           .app-header h1 {
+               font-size: 2rem;
+           }
+           
+           .card-header {
+               padding: 1rem 1.5rem;
+               flex-direction: column;
+               gap: 1rem;
+               text-align: center;
+           }
+           
+           .card-body {
+               padding: 1.5rem;
+           }
+       }
+   </style>
 </head>
 <body>
-    <header class="app-header">
-        <div class="container">
-            <h1>Administración de Encuestas</h1>
-        </div>
-    </header>
-    
-    <nav class="main-nav">
-        <div class="container nav-container">
-            <ul class="nav-menu">
-                <li class="nav-item"><a href="../index.html" class="nav-link">Inicio</a></li>
-                <li class="nav-item"><a href="surveys-admin.html" class="nav-link active">Encuestas</a></li>
-                <li class="nav-item"><a href="quizzes-admin.html" class="nav-link">Cuestionarios</a></li>
-                <li class="nav-item"><a href="create-survey.html" class="nav-link">Crear Nueva</a></li>
-            </ul>
-        </div>
-    </nav>
-    
-    <main class="main-content">
-        <div class="container">
-            <section class="admin-overview mb-6">
-                <div class="card">
-                    <div class="card-header"><h2>Resumen de Encuestas</h2></div>
-                    <div class="card-body">
-                        <div class="stats-grid">
-                            <div class="stat-card">
-                                <div class="stat-number">1</div>
-                                <div class="stat-label">Encuestas Activas</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-            
-            <section class="surveys-section mb-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h2>Encuestas Disponibles</h2>
-                        <a href="create-survey.html" class="btn btn-success">Crear Nueva Encuesta</a>
-                    </div>
-                    <div class="card-body">
-                        <div id="surveys-list"></div>
-                    </div>
-                </div>
-            </section>
-            
-            <section class="role-assignments mb-6">
-                <div class="card">
-                    <div class="card-header"><h2>Asignación a Roles</h2></div>
-                    <div class="card-body">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Encuesta</th>
-                                    <th>Administrador</th>
-                                    <th>Bibliotecario</th>
-                                    <th>Estudiante</th>
-                                </tr>
-                            </thead>
-                            <tbody id="role-assignments-table"></tbody>
-                        </table>
-                        <button id="saveRoleAssignments" class="btn btn-primary">Guardar Asignaciones</button>
-                    </div>
-                </div>
-            </section>
-        </div>
-    </main>
-    
-    <script src="../assets/js/app.js"></script>
-    <script src="../assets/js/survey-quiz.js"></script>
-    <script>initAdmin('surveys');</script>
+   <header class="app-header">
+       <div class="container">
+           <h1>🛡️ Administración Premium de Encuestas</h1>
+           <p>✨ Panel de control avanzado para gestión de encuestas</p>
+       </div>
+   </header>
+   
+   <nav class="main-nav">
+       <div class="container nav-container">
+           <ul class="nav-menu">
+               <li class="nav-item"><a href="../index.html" class="nav-link">🏠 Inicio</a></li>
+               <li class="nav-item"><a href="surveys-admin.html" class="nav-link active">📋 Encuestas</a></li>
+               <li class="nav-item"><a href="quizzes-admin.html" class="nav-link">🎯 Cuestionarios</a></li>
+               <li class="nav-item"><a href="create-survey.html" class="nav-link">✨ Crear Nueva</a></li>
+           </ul>
+       </div>
+   </nav>
+   
+   <main class="main-content">
+       <div class="container">
+           <section class="admin-overview mb-6">
+               <div class="card">
+                   <div class="card-header">
+                       <h2>📊 Resumen Premium de Encuestas</h2>
+                   </div>
+                   <div class="card-body">
+                       <div class="stats-grid">
+                           <div class="stat-card">
+                               <div class="stat-number">1</div>
+                               <div class="stat-label">📋 Encuestas Activas</div>
+                           </div>
+                       </div>
+                   </div>
+               </div>
+           </section>
+           
+           <section class="surveys-section mb-6">
+               <div class="card">
+                   <div class="card-header">
+                       <h2>🗂️ Encuestas Disponibles</h2>
+                       <a href="create-survey.html" class="btn btn-success">✨ Crear Nueva Encuesta</a>
+                   </div>
+                   <div class="card-body">
+                       <div id="surveys-list"></div>
+                   </div>
+               </div>
+           </section>
+           
+           <section class="role-assignments mb-6">
+               <div class="card">
+                   <div class="card-header">
+                       <h2>👥 Asignación Premium a Roles</h2>
+                   </div>
+                   <div class="card-body">
+                       <div style="overflow-x: auto;">
+                           <table class="table">
+                               <thead>
+                                   <tr>
+                                       <th>📋 Encuesta</th>
+                                       <th>👤 AdministradorBanco</th>
+                                       <th>👤 GerenteOperaciones</th>
+                                       <th>👤 EmpleadoBanco</th>
+                                       <th>👤 Cliente</th>
+                                   </tr>
+                               </thead>
+                               <tbody id="role-assignments-table"></tbody>
+                           </table>
+                       </div>
+                       <button id="saveRoleAssignments" class="btn btn-primary">💾 Guardar Asignaciones</button>
+                   </div>
+               </div>
+           </section>
+       </div>
+   </main>
+   
+   <!-- Módulos del sistema -->
+   <script src="../assets/js/unified-database.js"></script>
+   <script src="../assets/js/unified-ui.js"></script>
+   <script src="../assets/js/unified-entities.js"></script>
+   <script src="../assets/js/unified-surveys.js"></script>
+   <script src="../assets/js/unified-app.js"></script>
+   
+   <!-- Gestores -->
+   <script src="../assets/js/data-manager.js"></script>
+   
+   <!-- Script principal -->
+   <script src="../assets/js/app.js"></script>
+   <script src="../assets/js/survey-quiz.js"></script>
+   <script>initAdmin('surveys');</script>
 </body>
 </html>

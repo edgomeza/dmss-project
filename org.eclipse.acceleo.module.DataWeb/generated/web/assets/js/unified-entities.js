@@ -1,5 +1,5 @@
 /**
- * GESTOR UNIFICADO DE ENTIDADES - Biblioteca Universitaria
+ * GESTOR UNIFICADO DE ENTIDADES - Sistema Bancario Digital
  * Maneja CRUD para todas las entidades del sistema
  */
 
@@ -11,57 +11,124 @@ class UnifiedEntityManager {
         this.currentPage = null;
         
         this.entityConfig = {
-            'libro': {
-                name: 'Libro',
-                tableName: 'LIBROS',
-                primaryKey: 'id_libro',
+            'cliente': {
+                name: 'Cliente',
+                tableName: 'CLIENTES',
+                primaryKey: 'id_cliente',
                 fields: [
                     {
-                        name: 'id_libro',
+                        name: 'id_cliente',
                         type: 'INTEGER',
                         isPrimaryKey: true,
                         required: true
                     }
 ,                    {
-                        name: 'titulo',
+                        name: 'dni',
                         type: 'STRING',
                         isPrimaryKey: false,
                         required: true
                     }
 ,                    {
-                        name: 'autor',
+                        name: 'nombre',
                         type: 'STRING',
                         isPrimaryKey: false,
                         required: true
                     }
 ,                    {
-                        name: 'añoPublicacion',
-                        type: 'INTEGER',
+                        name: 'apellidos',
+                        type: 'STRING',
                         isPrimaryKey: false,
                         required: true
                     }
 ,                    {
-                        name: 'disponible',
+                        name: 'email',
+                        type: 'STRING',
+                        isPrimaryKey: false,
+                        required: true
+                    }
+,                    {
+                        name: 'telefono',
+                        type: 'STRING',
+                        isPrimaryKey: false,
+                        required: true
+                    }
+,                    {
+                        name: 'fecha_registro',
+                        type: 'STRING',
+                        isPrimaryKey: false,
+                        required: true
+                    }
+,                    {
+                        name: 'activo',
                         type: 'BOOLEAN',
                         isPrimaryKey: false,
                         required: true
                     }
                 ]
             }
-,            'categoria': {
-                name: 'Categoria',
-                tableName: 'CATEGORIAS',
-                primaryKey: 'id_categoria',
+,            'cuenta': {
+                name: 'Cuenta',
+                tableName: 'CUENTAS',
+                primaryKey: 'numero_cuenta',
                 fields: [
                     {
-                        name: 'id_categoria',
+                        name: 'numero_cuenta',
+                        type: 'STRING',
+                        isPrimaryKey: true,
+                        required: true
+                    }
+,                    {
+                        name: 'tipo_cuenta',
+                        type: 'STRING',
+                        isPrimaryKey: false,
+                        required: true
+                    }
+,                    {
+                        name: 'saldo',
+                        type: 'DECIMAL',
+                        isPrimaryKey: false,
+                        required: true
+                    }
+,                    {
+                        name: 'fecha_apertura',
+                        type: 'STRING',
+                        isPrimaryKey: false,
+                        required: true
+                    }
+,                    {
+                        name: 'activa',
+                        type: 'BOOLEAN',
+                        isPrimaryKey: false,
+                        required: true
+                    }
+                ]
+            }
+,            'transaccion': {
+                name: 'Transaccion',
+                tableName: 'TRANSACCIONES',
+                primaryKey: 'id_transaccion',
+                fields: [
+                    {
+                        name: 'id_transaccion',
                         type: 'INTEGER',
                         isPrimaryKey: true,
                         required: true
                     }
 ,                    {
-                        name: 'nombre_categoria',
+                        name: 'fecha_transaccion',
                         type: 'STRING',
+                        isPrimaryKey: false,
+                        required: true
+                    }
+,                    {
+                        name: 'tipo_transaccion',
+                        type: 'STRING',
+                        isPrimaryKey: false,
+                        required: true
+                    }
+,                    {
+                        name: 'monto',
+                        type: 'DECIMAL',
                         isPrimaryKey: false,
                         required: true
                     }
@@ -71,21 +138,45 @@ class UnifiedEntityManager {
                         isPrimaryKey: false,
                         required: true
                     }
+,                    {
+                        name: 'estado',
+                        type: 'STRING',
+                        isPrimaryKey: false,
+                        required: true
+                    }
                 ]
             }
-,            'usuario': {
-                name: 'Usuario',
-                tableName: 'USUARIOS',
-                primaryKey: 'id_usuario',
+,            'empleado': {
+                name: 'Empleado',
+                tableName: 'EMPLEADOS',
+                primaryKey: 'id_empleado',
                 fields: [
                     {
-                        name: 'id_usuario',
+                        name: 'id_empleado',
                         type: 'INTEGER',
                         isPrimaryKey: true,
                         required: true
                     }
 ,                    {
-                        name: 'nombre_usuario',
+                        name: 'codigo_empleado',
+                        type: 'STRING',
+                        isPrimaryKey: false,
+                        required: true
+                    }
+,                    {
+                        name: 'nombre',
+                        type: 'STRING',
+                        isPrimaryKey: false,
+                        required: true
+                    }
+,                    {
+                        name: 'puesto',
+                        type: 'STRING',
+                        isPrimaryKey: false,
+                        required: true
+                    }
+,                    {
+                        name: 'departamento',
                         type: 'STRING',
                         isPrimaryKey: false,
                         required: true
@@ -116,14 +207,75 @@ class UnifiedEntityManager {
                         required: true
                     }
 ,                    {
-                        name: 'fechaPrestamo',
+                        name: 'monto_solicitado',
+                        type: 'DECIMAL',
+                        isPrimaryKey: false,
+                        required: true
+                    }
+,                    {
+                        name: 'tasa_interes',
+                        type: 'DECIMAL',
+                        isPrimaryKey: false,
+                        required: true
+                    }
+,                    {
+                        name: 'plazo_meses',
+                        type: 'INTEGER',
+                        isPrimaryKey: false,
+                        required: true
+                    }
+,                    {
+                        name: 'estado_prestamo',
                         type: 'STRING',
                         isPrimaryKey: false,
                         required: true
                     }
 ,                    {
-                        name: 'fechaDevolucion',
+                        name: 'fecha_solicitud',
                         type: 'STRING',
+                        isPrimaryKey: false,
+                        required: true
+                    }
+,                    {
+                        name: 'fecha_aprobacion',
+                        type: 'STRING',
+                        isPrimaryKey: false,
+                        required: true
+                    }
+                ]
+            }
+,            'tarjetacredito': {
+                name: 'TarjetaCredito',
+                tableName: 'TARJETAS_CREDITO',
+                primaryKey: 'numero_tarjeta',
+                fields: [
+                    {
+                        name: 'numero_tarjeta',
+                        type: 'STRING',
+                        isPrimaryKey: true,
+                        required: true
+                    }
+,                    {
+                        name: 'limite_credito',
+                        type: 'DECIMAL',
+                        isPrimaryKey: false,
+                        required: true
+                    }
+,                    {
+                        name: 'saldo_actual',
+                        type: 'DECIMAL',
+                        isPrimaryKey: false,
+                        required: true
+                    }
+,                    {
+                        name: 'fecha_vencimiento',
+                        type: 'STRING',
+                        isPrimaryKey: false,
+                        required: true
+                    }
+,                    {
+                        name: 'activa',
+                        type: 'BOOLEAN',
                         isPrimaryKey: false,
                         required: true
                     }
@@ -196,7 +348,7 @@ class UnifiedEntityManager {
                     ).join('')}
                     <td>
                         <a href="detail.html?id=${item[config.primaryKey]}" class="btn btn-info btn-sm">Ver</a>
-                        <a href="edit.html?id=${item[[config.primaryKey]}" class="btn btn-warning btn-sm">Editar</a>
+                        <a href="edit.html?id=${item[config.primaryKey]}" class="btn btn-warning btn-sm">Editar</a>
                         <button class="btn btn-danger btn-sm delete-btn" 
                                 data-entity="${config.tableName}" 
                                 data-id="${item[config.primaryKey]}"
@@ -236,7 +388,8 @@ class UnifiedEntityManager {
         }
 
         try {
-            const item = await this.db.execute('get', config.tableName, parseInt(id) || id);
+            const parsedId = this.parseIdValue(id, config.fields.find(f => f.isPrimaryKey).type);
+            const item = await this.db.execute('get', config.tableName, null, parsedId);
             
             if (!item) {
                 this.app.ui.showAlert('Elemento no encontrado', 'danger');
@@ -284,7 +437,8 @@ class UnifiedEntityManager {
         }
 
         try {
-            const item = await this.db.execute('get', config.tableName, parseInt(id) || id);
+            const parsedId = this.parseIdValue(id, config.fields.find(f => f.isPrimaryKey).type);
+            const item = await this.db.execute('get', config.tableName, null, parsedId);
             
             if (!item) {
                 this.app.ui.showAlert('Elemento no encontrado', 'danger');
@@ -354,7 +508,8 @@ class UnifiedEntityManager {
             } else if (formType === 'entity-update') {
                 const form = document.querySelector(`[data-entity="${entityTableName}"]`);
                 const id = form.dataset.id;
-                data[config.primaryKey] = parseInt(id) || id;
+                const parsedId = this.parseIdValue(id, config.fields.find(f => f.isPrimaryKey).type);
+                data[config.primaryKey] = parsedId;
                 
                 result = await this.db.execute('update', config.tableName, data);
                 return {
@@ -379,7 +534,8 @@ class UnifiedEntityManager {
         }
 
         try {
-            await this.db.execute('delete', config.tableName, parseInt(itemId) || itemId);
+            const parsedId = this.parseIdValue(itemId, config.fields.find(f => f.isPrimaryKey).type);
+            await this.db.execute('delete', config.tableName, null, parsedId);
             return {
                 success: true,
                 message: `${config.name} eliminado correctamente`,
@@ -421,4 +577,20 @@ class UnifiedEntityManager {
                 return String(value);
         }
     }
+    
+    parseIdValue(value, type) {
+        switch (type) {
+            case 'INTEGER':
+                return parseInt(value);
+            case 'DECIMAL':
+                return parseFloat(value);
+            case 'BOOLEAN':
+                return value === 'true' || value === true;
+            default:
+                return String(value);
+        }
+    }
 }
+
+// Hacer disponible globalmente
+window.UnifiedEntityManager = UnifiedEntityManager;

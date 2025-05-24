@@ -1,66 +1,62 @@
 /**
-* ARCHIVO PRINCIPAL DE APLICACIÓN - Biblioteca Universitaria
+* ARCHIVO PRINCIPAL DE APLICACIÓN - Sistema Bancario Digital
 * Este archivo inicializa todo el sistema unificado
 */
 
-// Verificar que todos los módulos estén disponibles
-const REQUIRED_MODULES = ['UnifiedDatabaseManager', 'UnifiedAppManager', 'UnifiedEntityManager', 'UnifiedSurveyQuizManager', 'UnifiedUIManager'];
-const MISSING_MODULES = [];
-
-REQUIRED_MODULES.forEach(module => {
-   if (typeof window[module] === 'undefined') {
-       MISSING_MODULES.push(module);
-   }
-});
-
-if (MISSING_MODULES.length > 0) {
-   console.error('❌ Módulos faltantes:', MISSING_MODULES);
-   console.error('Asegúrate de que todos los archivos JS estén cargados correctamente');
-}
-
 // Configuración global de la aplicación
 window.AppGlobalConfig = {
-   name: 'Biblioteca Universitaria',
+   name: 'Sistema Bancario Digital',
    version: '1.0.0',
    debug: true,
    entities: [
        {
-           name: 'Libro',
-           tableName: 'LIBROS',
-           primaryKey: 'id_libro'
+           name: 'Cliente',
+           tableName: 'CLIENTES',
+           primaryKey: 'id_cliente'
        }
 ,       {
-           name: 'Categoria',
-           tableName: 'CATEGORIAS',
-           primaryKey: 'id_categoria'
+           name: 'Cuenta',
+           tableName: 'CUENTAS',
+           primaryKey: 'numero_cuenta'
        }
 ,       {
-           name: 'Usuario',
-           tableName: 'USUARIOS',
-           primaryKey: 'id_usuario'
+           name: 'Transaccion',
+           tableName: 'TRANSACCIONES',
+           primaryKey: 'id_transaccion'
+       }
+,       {
+           name: 'Empleado',
+           tableName: 'EMPLEADOS',
+           primaryKey: 'id_empleado'
        }
 ,       {
            name: 'Prestamo',
            tableName: 'PRESTAMOS',
            primaryKey: 'id_prestamo'
        }
+,       {
+           name: 'TarjetaCredito',
+           tableName: 'TARJETAS_CREDITO',
+           primaryKey: 'numero_tarjeta'
+       }
    ],
    roles: [
-       'Administrador'
-,        'Bibliotecario'
-,        'Estudiante'
+       'AdministradorBanco'
+,        'GerenteOperaciones'
+,        'EmpleadoBanco'
+,        'Cliente'
    ],
    surveys: [
        {
-           name: 'preferenciasBiblioteca',
-           title: 'Encuesta de Preferencias',
+           name: 'preferenciasBancarias',
+           title: 'Encuesta de Servicios Preferidos',
            type: 'survey'
        }
    ],
    quizzes: [
        {
-           name: 'satisfaccionBiblioteca',
-           title: 'Cuestionario de Satisfacción',
+           name: 'satisfaccionCliente',
+           title: 'Encuesta de Satisfacción Bancaria',
            type: 'quiz'
        }
    ]
@@ -69,7 +65,8 @@ window.AppGlobalConfig = {
 // Función de inicialización administrativa
 function initializeAdminRoles() {
    const adminRoles = [
-       'Administrador', 
+       'AdministradorBanco', 
+       'GerenteOperaciones', 
        
        
    ];
@@ -156,7 +153,7 @@ window.DataWebUtils = {
    
    isAdmin: function() {
        const currentRole = this.getCurrentRole();
-       const adminRoles = JSON.parse(localStorage.getItem('admin_roles') || '[']');
+       const adminRoles = JSON.parse(localStorage.getItem('admin_roles') || '[]');
        return adminRoles.includes(currentRole);
    }
 };
@@ -170,10 +167,33 @@ document.addEventListener('DOMContentLoaded', function() {
    // Inicializar roles administrativos
    initializeAdminRoles();
    
-   // El UnifiedAppManager se inicializa automáticamente mediante su propio DOMContentLoaded
-   // Solo necesitamos esperar a que esté disponible
+   // Esperar a que todos los módulos estén disponibles antes de inicializar
+   const checkModules = () => {
+       const requiredModules = ['UnifiedDatabaseManager', 'UnifiedAppManager', 'UnifiedEntityManager', 'UnifiedSurveyQuizManager', 'UnifiedUIManager'];
+       const availableModules = requiredModules.filter(module => typeof window[module] !== 'undefined');
+       
+       if (availableModules.length === requiredModules.length) {
+           // Todos los módulos están disponibles, inicializar la aplicación
+           if (window.AppGlobalConfig.debug) {
+               console.log('✅ Todos los módulos cargados, inicializando aplicación...');
+           }
+           
+           // El UnifiedAppManager se inicializa automáticamente mediante su propio DOMContentLoaded
+           
+       } else {
+           // Faltan módulos, mostrar advertencia pero no bloquear
+           const missingModules = requiredModules.filter(module => typeof window[module] === 'undefined');
+           if (window.AppGlobalConfig.debug) {
+               console.warn('⚠️ Módulos faltantes:', missingModules);
+               console.warn('Algunas funcionalidades pueden no estar disponibles');
+           }
+       }
+   };
    
-   // Verificar si todos los scripts se cargaron correctamente
+   // Verificar módulos después de un breve delay para permitir que se carguen
+   setTimeout(checkModules, 500);
+   
+   // Verificar si todos los scripts se cargaron correctamente después de más tiempo
    setTimeout(() => {
        if (window.DataWebApp) {
            if (window.AppGlobalConfig.debug) {
@@ -184,10 +204,12 @@ document.addEventListener('DOMContentLoaded', function() {
                console.log('- Survey Manager:', window.DataWebApp.surveys ? '✅' : '❌');
            }
        } else {
-           console.error('❌ Error: DataWebApp no se inicializó correctamente');
-           console.error('Verifica que todos los archivos JS estén incluidos en el HTML');
+           if (window.AppGlobalConfig.debug) {
+               console.warn('⚠️ DataWebApp no se inicializó completamente');
+               console.warn('Algunas funcionalidades avanzadas pueden no estar disponibles');
+           }
        }
-   }, 1000);
+   }, 2000);
 });
 
 // Manejo de errores globales
@@ -202,7 +224,7 @@ window.addEventListener('error', function(event) {
 window.addEventListener('unhandledrejection', function(event) {
    if (window.AppGlobalConfig.debug) {
        console.error('❌ Promise rechazada no manejada:', event.reason);
-	}
+   }
    
    // Prevenir que el error se muestre en consola del navegador
    event.preventDefault();
@@ -225,6 +247,8 @@ if (window.AppGlobalConfig.debug) {
                        console.log(`❌ ${store}: Error cargando`);
                    }
                }
+           } else {
+               console.warn('Base de datos no disponible');
            }
        },
        clearDB: async () => {

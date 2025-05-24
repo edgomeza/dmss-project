@@ -3,26 +3,183 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Biblioteca Universitaria - Encuestas</title>
+    <title>Sistema Bancario Digital - Encuestas</title>
+    <meta name="description" content="Centro premium de encuestas en Sistema Bancario Digital">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../assets/css/style.css">
+    
+    <!-- Premium Survey Styles -->
+    <style>
+        :root {
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-success: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --gradient-warning: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            --gradient-danger: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            --glassmorphism: rgba(255, 255, 255, 0.25);
+            --glassmorphism-border: rgba(255, 255, 255, 0.18);
+            --shadow-luxury: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.05)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.08)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .app-header {
+            background: var(--glassmorphism);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glassmorphism-border);
+            padding: 2rem 0;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .app-header h1 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 800;
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, #fff, #e0e7ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+        }
+        
+        .app-header p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.1rem;
+            font-weight: 400;
+        }
+        
+        .main-nav {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            z-index: 9;
+        }
+        
+        .nav-brand .nav-logo {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            color: white;
+            text-decoration: none;
+            font-size: 1.5rem;
+        }
+        
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+        }
+        
+        .main-content {
+            position: relative;
+            z-index: 5;
+            padding: 2rem 0;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.2rem;
+        }
+        
+        .loading::before {
+            content: '✨';
+            font-size: 2rem;
+            display: block;
+            margin-bottom: 1rem;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.1); }
+        }
+        
+        /* Survey Cards */
+        .survey-card {
+            background: var(--glassmorphism);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glassmorphism-border);
+            border-radius: 20px;
+            box-shadow: var(--shadow-luxury);
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        
+        .survey-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 32px 64px -12px rgba(0, 0, 0, 0.35);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .app-header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
 </head>
 <body>
+    <!-- Floating Elements -->
+    <div class="floating-elements">
+        <div class="floating-element" style="top: 10%; left: 10%; animation-delay: 0s;"></div>
+        <div class="floating-element" style="top: 20%; right: 20%; animation-delay: 2s;"></div>
+        <div class="floating-element" style="bottom: 30%; left: 15%; animation-delay: 4s;"></div>
+        <div class="floating-element" style="bottom: 20%; right: 10%; animation-delay: 6s;"></div>
+    </div>
+
     <header class="app-header">
         <div class="container">
-            <h1>Encuestas Disponibles</h1>
-            <p>Participa en nuestras encuestas</p>
+            <h1>📋 Encuestas Premium Disponibles</h1>
+            <p>✨ Participa en nuestras encuestas interactivas y comparte tu opinión</p>
         </div>
     </header>
     
     <nav class="main-nav">
         <div class="container nav-container">
             <div class="nav-brand">
-                <a href="../index.html" class="nav-logo">Biblioteca Universitaria</a>
+                <a href="../index.html" class="nav-logo">🏠 Sistema Bancario Digital</a>
             </div>
             <ul class="nav-menu">
-                <li class="nav-item"><a href="../index.html" class="nav-link">Inicio</a></li>
-                <li class="nav-item"><a href="index.html" class="nav-link active">Encuestas</a></li>
-                <li class="nav-item"><a href="../quizzes/index.html" class="nav-link">Cuestionarios</a></li>
+                <li class="nav-item"><a href="../index.html" class="nav-link">🏠 Inicio</a></li>
+                <li class="nav-item"><a href="index.html" class="nav-link active">📋 Encuestas</a></li>
+                <li class="nav-item"><a href="../quizzes/index.html" class="nav-link">🎯 Cuestionarios</a></li>
             </ul>
         </div>
     </nav>
@@ -30,12 +187,57 @@
     <main class="main-content">
         <div class="container">
             <div id="surveys-container">
-                <div class="loading">Cargando encuestas...</div>
+                <div class="loading">Cargando encuestas premium...</div>
             </div>
         </div>
     </main>
     
-    <script src="../assets/js/app.js"></script>
+    <!-- Floating Elements CSS -->
+    <style>
+        .floating-elements {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .floating-element {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(45deg, rgba(255,255,255,0.1), rgba(255,255,255,0.3));
+            border-radius: 50%;
+            animation: floatUpDown 8s ease-in-out infinite;
+            box-shadow: 0 0 20px rgba(255,255,255,0.2);
+        }
+        
+        @keyframes floatUpDown {
+            0%, 100% { 
+                transform: translateY(0px) rotate(0deg);
+                opacity: 0.7;
+            }
+            50% { 
+                transform: translateY(-30px) rotate(180deg);
+                opacity: 1;
+            }
+        }
+    </style>
+    
+    <!-- Módulos del sistema -->
+	<script src="../assets/js/unified-database.js"></script>
+	<script src="../assets/js/unified-ui.js"></script>
+	<script src="../assets/js/unified-entities.js"></script>
+	<script src="../assets/js/unified-surveys.js"></script>
+	<script src="../assets/js/unified-app.js"></script>
+	
+	<!-- Gestores -->
+	<script src="../assets/js/data-manager.js"></script>
+	
+	<!-- Script principal-->
+	<script src="../assets/js/app.js"></script>
     <script src="../assets/js/survey-quiz.js"></script>
     <script>loadContent('surveys');</script>
 </body>

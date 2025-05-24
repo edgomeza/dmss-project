@@ -1,5 +1,5 @@
 /**
-* GESTOR UNIFICADO DE INTERFAZ - Biblioteca Universitaria
+* GESTOR UNIFICADO DE INTERFAZ - Sistema Bancario Digital
 * Maneja alertas, modales y elementos de UI
 */
 
@@ -117,7 +117,7 @@ class UnifiedUIManager {
        return colors[type] || colors.info;
    }
 
-   showModal(title, content, actions = [) {
+   showModal(title, content, actions = []) {
        const modal = document.createElement('div');
        modal.className = 'modal';
        modal.style.cssText = `
@@ -333,6 +333,9 @@ class UnifiedUIManager {
    }
 }
 
+// Hacer disponible globalmente
+window.UnifiedUIManager = UnifiedUIManager;
+
 // Estilos CSS que se inyectan automáticamente
 const unifiedStyles = `
    @keyframes slideIn {
@@ -383,7 +386,7 @@ const unifiedStyles = `
    }
 `;
 
-// Inyectar estilos
+// Inyectar estilos solo una vez
 if (!document.getElementById('unified-styles')) {
    const styleElement = document.createElement('style');
    styleElement.id = 'unified-styles';

@@ -1,68 +1,12 @@
 [comment encoding = UTF-8 /]
 [module generateWebIndex_sections('http://www.unex.es/dmss/dataweb')]
 
-[template public generateNavigation(app : Aplicacion)]
-<nav class="main-nav">
-    <div class="container nav-container">
-        <div class="nav-brand">
-            <a href="/" class="nav-logo">[app.nombre/]</a>
-        </div>
-        <ul class="nav-menu">
-            <li class="nav-item">
-                <a href="#home" class="nav-link active">Inicio</a>
-            </li>
-            <li class="nav-item">
-                <a href="#roles" class="nav-link">Acceso por Roles</a>
-            </li>
-            <li class="nav-item">
-                <a href="#features" class="nav-link">Características</a>
-            </li>
-            <li class="nav-item">
-                <a href="#contact" class="nav-link">Contacto</a>
-            </li>
-        </ul>
-        <button class="nav-toggle" aria-label="Abrir menú">
-            <span></span>
-            <span></span>
-            <span></span>
-        </button>
-    </div>
-</nav>
-[/template]
-
-[template public generateHeroSection(app : Aplicacion)]
-<section id="home" class="hero-section mb-8">
-    <div class="hero-card card">
-        <div class="card-header">
-            <h2>Bienvenido a [app.nombre/]</h2>
-        </div>
-        <div class="card-body">
-            <p class="lead">Sistema moderno de gestión de datos con interfaces intuitivas y funcionalidades avanzadas.</p>
-            <div class="stats-grid grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-                <div class="stat-card">
-                    <div class="stat-number">[app.entidades->size()/]</div>
-                    <div class="stat-label">Entidades Gestionadas</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">[app.roles->size()/]</div>
-                    <div class="stat-label">Roles de Usuario</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">[app.paginas->size()/]</div>
-                    <div class="stat-label">Páginas Disponibles</div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-[/template]
-
 [template public generateRolesSection(app : Aplicacion)]
 <section id="roles" class="roles-section mb-8">
-    <div class="card">
+    <div class="card hero-card">
         <div class="card-header">
-            <h2>Acceso por Roles de Usuario</h2>
-            <p>Seleccione su rol para acceder a las funcionalidades correspondientes</p>
+            <h2>🎭 Acceso Premium por Roles</h2>
+            <p>Seleccione su rol para acceder a una experiencia personalizada y funcionalidades exclusivas</p>
         </div>
         <div class="card-body">
             <div class="roles-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -76,17 +20,17 @@
                                 <path d="m22 2-5 10-5-5 10-5z"></path>
                             </svg>
                         </div>
-                        <h3>[rol.nombre/]</h3>
+                        <h3>👤 [rol.nombre/]</h3>
                     </div>
                     <div class="card-body">
-                        <p>[if (rol.descripcion.oclIsUndefined() = false)][rol.descripcion/][else]Panel de control especializado para usuarios con rol [rol.nombre/][/if]</p>
+                        <p>[if (rol.descripcion.oclIsUndefined() = false)][rol.descripcion/][else]Panel de control premium especializado para usuarios con rol [rol.nombre/][/if]</p>
                         <div class="role-stats">
                             <div class="role-stat">
-                                <span class="role-stat-label">Páginas Accesibles:</span>
+                                <span class="role-stat-label">📄 Páginas Accesibles:</span>
                                 <span class="role-stat-value">[rol.paginasAccesibles->size()/]</span>
                             </div>
                             <div class="role-stat">
-                                <span class="role-stat-label">Entidades Gestionadas:</span>
+                                <span class="role-stat-label">🏢 Entidades Gestionadas:</span>
                                 <span class="role-stat-value">[rol.numeroEntidadesAccesibles/]</span>
                             </div>
                         </div>
@@ -97,7 +41,7 @@
                                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                                 <polyline points="9,22 9,12 15,12 15,22"></polyline>
                             </svg>
-                            Acceder como [rol.nombre/]
+                            ✨ Acceder como [rol.nombre/]
                         </a>
                     </div>
                 </div>
@@ -110,34 +54,35 @@
 
 [template public generateFeaturesSection(app : Aplicacion)]
 <section id="features" class="features-section mb-8">
-    <div class="card">
+    <div class="card hero-card">
         <div class="card-header">
-            <h2>Características del Sistema</h2>
+            <h2>🚀 Características Premium del Sistema</h2>
+            <p>Tecnología de vanguardia para una experiencia empresarial excepcional</p>
         </div>
         <div class="card-body">
-            <div class="features-grid grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="features-grid grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div class="feature-item animate-target">
                     <div class="feature-icon">
                         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                            <line x1="9" y1="9" x2="15" y2="15"></line>
-                            <line x1="15" y1="9" x2="9" y2="15"></line>
+                            <path d="M7 7h10v10H7z"></path>
+                            <path d="M12 7v10"></path>
+                            <path d="M7 12h10"></path>
                         </svg>
                     </div>
-                    <h3>Gestión CRUD Completa</h3>
-                    <p>Sistema completo de creación, lectura, actualización y eliminación de datos para todas las entidades.</p>
+                    <h3>🔧 Gestión CRUD Premium</h3>
+                    <p>Sistema avanzado de creación, lectura, actualización y eliminación de datos con interfaz intuitiva y validaciones inteligentes para todas las entidades.</p>
                 </div>
                 
                 <div class="feature-item animate-target">
                     <div class="feature-icon">
                         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M9 12l2 2 4-4"></path>
-                            <path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3"></path>
-                            <path d="M3 12c1 0 3-1 3-3s-2-3-3-3-3 1-3 3 2 3 3 3"></path>
+                            <circle cx="12" cy="12" r="10"></circle>
                         </svg>
                     </div>
-                    <h3>Control de Acceso por Roles</h3>
-                    <p>Sistema robusto de autenticación y autorización con diferentes niveles de acceso según el rol del usuario.</p>
+                    <h3>🛡️ Control de Acceso Inteligente</h3>
+                    <p>Sistema de seguridad multicapa con autenticación robusta y autorización granular, adaptándose dinámicamente a los permisos de cada rol.</p>
                 </div>
                 
                 <div class="feature-item animate-target">
@@ -147,18 +92,18 @@
                             <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"></path>
                         </svg>
                     </div>
-                    <h3>Encuestas y Cuestionarios</h3>
-                    <p>Herramientas integradas para crear encuestas y cuestionarios con análisis de resultados en tiempo real.</p>
+                    <h3>📊 Analytics y Evaluaciones</h3>
+                    <p>Herramientas profesionales para crear encuestas interactivas y cuestionarios inteligentes con análisis de resultados en tiempo real y reportes avanzados.</p>
                 </div>
                 
                 <div class="feature-item animate-target">
                     <div class="feature-icon">
                         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                            <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path>
                         </svg>
                     </div>
-                    <h3>Integración Social y RSS</h3>
-                    <p>Conectividad con redes sociales y fuentes RSS para mantener el contenido actualizado y relevante.</p>
+                    <h3>🌐 Conectividad Social Premium</h3>
+                    <p>Integración seamless con redes sociales y fuentes RSS para mantener contenido dinámico, relevante y siempre actualizado con las últimas tendencias.</p>
                 </div>
             </div>
         </div>
@@ -166,186 +111,49 @@
 </section>
 [/template]
 
-[template public generateSocialContent(app : Aplicacion)]
-<div class="content-grid grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-    <!-- Redes Sociales -->
-    [if (not app.redesSociales->isEmpty())]
-    <div class="social-section">
-        <div class="social-header">
-            <div class="social-icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path>
-                </svg>
-            </div>
-            <h3>Síguenos en Redes Sociales</h3>
-        </div>
-        <div class="social-feeds">
-            [let maxRedSociales : Integer = if (app.redesSociales->size() > 2) then 2 else app.redesSociales->size() endif]
-            [for (i : Integer | Sequence{1..maxRedSociales})]
-            [let redSocial : RedSocial = app.redesSociales->asSequence()->at(i)]
-            <div class="social-feed">
-                <h4>[redSocial.tipo/]: @[redSocial.nombreCuenta/]</h4>
-                <div class="social-content">
-                    [redSocial.codigoEmbed/]
-                </div>
-            </div>
-            [/let]
-            [/for]
-            [/let]
-        </div>
-    </div>
-    [/if]
-    
-    <!-- Fuentes RSS -->
-    [if (not app.fuentesRSS->isEmpty())]
-    <div class="rss-section">
-        <div class="rss-header">
-            <div class="rss-icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M4 11a9 9 0 0 1 9 9"></path>
-                    <path d="M4 4a16 16 0 0 1 16 16"></path>
-                    <circle cx="5" cy="19" r="1"></circle>
-                </svg>
-            </div>
-            <h3>Últimas Actualizaciones</h3>
-        </div>
-        <div class="rss-feeds">
-            [for (fuente : FuenteRSS | app.fuentesRSS)]
-            <div class="rss-feed">
-                <h4>[fuente.titulo/]</h4>
-                <div class="rss-content">
-                    <script type="text/javascript">
-                        document.write('<script src="https://feed2js.org//feed2js.php?src=' + encodeURIComponent('[fuente.url/]') + '&num=[fuente.numItems/]&desc=[if (fuente.mostrarDescripcion)]1[else]0[/if]&targ=y" type="text/javascript"><\/script>');
-                    </script>
-                    <noscript>
-                        <p>Para ver el contenido RSS necesitas tener JavaScript habilitado.</p>
-                    </noscript>
-                </div>
-            </div>
-            [/for]
-        </div>
-    </div>
-    [/if]
-</div>
-[/template]
-
-[template public generateInteractiveContent(app : Aplicacion)]
-<div class="interactive-content grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-    <!-- Encuestas -->
-    [if (not app.encuestas->isEmpty())]
-    <div class="card">
-        <div class="card-header">
-            <div class="flex items-center gap-3">
-                <div class="card-icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                        <polyline points="14,2 14,8 20,8"></polyline>
-                        <line x1="16" y1="13" x2="8" y2="13"></line>
-                        <line x1="16" y1="17" x2="8" y2="17"></line>
-                        <polyline points="10,9 9,9 8,9"></polyline>
-                    </svg>
-                </div>
-                <h3>Encuestas Disponibles</h3>
-            </div>
-        </div>
-        <div class="card-body">
-            <div class="content-list">
-                [for (encuesta : Encuesta | app.encuestas)]
-                <div class="content-item">
-                    <h4>[encuesta.titulo/]</h4>
-                    <p>[if (encuesta.descripcion.oclIsUndefined() = false)][encuesta.descripcion/][else]Participar en la encuesta [encuesta.titulo/][/if]</p>
-                    <a href="surveys/index.html" class="btn btn-outline btn-outline-primary btn-sm">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="9,11 12,14 22,4"></polyline>
-                            <path d="m21 12 v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-                        </svg>
-                        Participar
-                    </a>
-                </div>
-                [/for]
-            </div>
-        </div>
-    </div>
-    [/if]
-    
-    <!-- Cuestionarios -->
-    [if (not app.cuestionarios->isEmpty())]
-    <div class="card">
-        <div class="card-header">
-            <div class="flex items-center gap-3">
-                <div class="card-icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M9 11H3a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-6"></path>
-                        <path d="M9 15h6"></path>
-                        <path d="M12 3l3 3h-6l3-3z"></path>
-                    </svg>
-                </div>
-                <h3>Cuestionarios de Evaluación</h3>
-            </div>
-        </div>
-        <div class="card-body">
-            <div class="content-list">
-                [for (cuestionario : Cuestionario | app.cuestionarios)]
-                <div class="content-item">
-                    <h4>[cuestionario.titulo/]</h4>
-                    <p>[if (cuestionario.descripcion.oclIsUndefined() = false)][cuestionario.descripcion/][else]Evalúa tus conocimientos con el cuestionario [cuestionario.titulo/][/if]</p>
-                    <div class="quiz-info">
-                        <span class="badge badge-primary">[cuestionario.preguntas->size()/] preguntas</span>
-                    </div>
-                    <a href="quizzes/index.html" class="btn btn-outline btn-outline-primary btn-sm">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <path d="m9 12 2 2 4-4"></path>
-                        </svg>
-                        Realizar
-                    </a>
-                </div>
-                [/for]
-            </div>
-        </div>
-    </div>
-    [/if]
-</div>
-[/template]
-
 [template public generateFooter(app : Aplicacion)]
-<footer class="app-footer">
+<footer class="app-footer premium-footer">
     <div class="container">
         <div class="footer-content">
             <div class="footer-section">
-                <h3>[app.nombre/]</h3>
+                <h3>✨ [app.nombre/]</h3>
                 <p>[app.descripcion/]</p>
-                <p>Sistema moderno y eficiente para la gestión de datos empresariales.</p>
+                <p>Sistema empresarial de nueva generación con tecnología de vanguardia para la gestión inteligente de datos.</p>
+                <div class="footer-badges">
+                    <span class="footer-badge">🚀 Premium</span>
+                    <span class="footer-badge">🔒 Seguro</span>
+                    <span class="footer-badge">⚡ Rápido</span>
+                </div>
             </div>
             <div class="footer-section">
-                <h3>Entidades Gestionadas</h3>
+                <h3>🏢 Entidades Gestionadas</h3>
                 [let maxEntidades : Integer = if (app.entidades->size() > 5) then 5 else app.entidades->size() endif]
                 [for (i : Integer | Sequence{1..maxEntidades})]
                 [let entidad : Entidad = app.entidades->asSequence()->at(i)]
-                <a href="#">[entidad.nombre/]</a>
+                <a href="#" class="footer-link">📊 [entidad.nombre/]</a>
                 [/let]
                 [/for]
                 [if (app.entidades->size() > 5)]
-                <a href="#">Y [app.entidades->size() - 5/] más...</a>
+                <a href="#" class="footer-link">🔥 Y [app.entidades->size() - 5/] más...</a>
                 [/if]
                 [/let]
             </div>
             <div class="footer-section">
-                <h3>Roles de Usuario</h3>
+                <h3>👥 Roles Premium</h3>
                 [for (rol : Rol | app.roles)]
-                <a href="[rol.nombre.toLowerCase()/]/dashboard.html">[rol.nombre/]</a>
+                <a href="[rol.nombre.toLowerCase()/]/dashboard.html" class="footer-link">🎭 [rol.nombre/]</a>
                 [/for]
             </div>
             <div class="footer-section">
-                <h3>Enlaces Útiles</h3>
-                <a href="#ayuda">Centro de Ayuda</a>
-                <a href="#documentacion">Documentación</a>
-                <a href="#soporte">Soporte Técnico</a>
-                <a href="#contacto">Contacto</a>
+                <h3>🔗 Recursos Útiles</h3>
+                <a href="#ayuda" class="footer-link">💡 Centro de Ayuda</a>
+                <a href="#documentacion" class="footer-link">📚 Documentación</a>
+                <a href="#soporte" class="footer-link">🛠️ Soporte Premium</a>
+                <a href="#contacto" class="footer-link">📧 Contacto VIP</a>
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2025 [app.nombre/]. Todos los derechos reservados.</p>
+            <p>&copy; 2025 [app.nombre/] Premium Edition. Experiencia empresarial de élite. ✨</p>
         </div>
     </div>
 </footer>
@@ -353,10 +161,72 @@
 
 [template public generateCustomCSS(app : Aplicacion)]
 <style>
+    /* ============================
+       VARIABLES CSS PREMIUM
+       ============================ */
+    :root {
+        --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --gradient-success: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --gradient-warning: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        --gradient-danger: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        
+        --glassmorphism: rgba(255, 255, 255, 0.25);
+        --glassmorphism-border: rgba(255, 255, 255, 0.18);
+        
+        --neon-blue: #00d4ff;
+        --neon-purple: #b847ff;
+        
+        --shadow-luxury: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        --shadow-neon: 0 0 30px rgba(0, 212, 255, 0.3);
+        
+        --transition-smooth: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    /* ============================
+       ESTRUCTURA BASE PREMIUM
+       ============================ */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+        min-height: 100vh;
+        position: relative;
+        overflow-x: hidden;
+    }
+    
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.05)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.08)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    /* ============================
+       SECCIÓN HERO PREMIUM
+       ============================ */
     .hero-section {
-        background: linear-gradient(135deg, var(--primary-50) 0%, white 100%);
-        border-radius: var(--radius-xl);
+        background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 100%);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--glassmorphism-border);
+        border-radius: 20px;
+        box-shadow: var(--shadow-luxury);
         overflow: hidden;
+        position: relative;
+    }
+    
+    .hero-card {
+        background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 100%);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255,255,255,0.3);
+        border-radius: 20px;
+        box-shadow: var(--shadow-luxury);
     }
     
     .stats-grid {
@@ -365,95 +235,340 @@
     
     .stat-card {
         text-align: center;
-        padding: 1.5rem;
-        background: white;
-        border-radius: var(--radius);
-        box-shadow: var(--shadow-sm);
+        padding: 2rem 1.5rem;
+        background: var(--glassmorphism);
+        backdrop-filter: blur(15px);
+        border: 1px solid var(--glassmorphism-border);
+        border-radius: 16px;
+        box-shadow: var(--shadow-luxury);
+        transition: var(--transition-smooth);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+        transform: rotate(45deg);
+        transition: all 0.6s ease;
+        opacity: 0;
+    }
+    
+    .stat-card:hover::before {
+        opacity: 1;
+        transform: rotate(45deg) translate(50%, 50%);
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-12px) scale(1.02);
+        box-shadow: var(--shadow-neon);
+        border-color: var(--neon-blue);
     }
     
     .stat-number {
-        font-size: 2rem;
-        font-weight: 700;
-        color: var(--primary-600);
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: linear-gradient(45deg, #fff, #e0e7ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
         display: block;
+        margin-bottom: 0.5rem;
     }
     
     .stat-label {
-        font-size: 0.875rem;
-        color: var(--gray-600);
+        font-size: 0.95rem;
+        color: rgba(255, 255, 255, 0.8);
+        font-weight: 500;
         margin-top: 0.25rem;
     }
-    
+
+    /* ============================
+       TARJETAS DE ROLES PREMIUM
+       ============================ */
     .role-card {
-        border: 1px solid var(--gray-200);
-        transition: var(--transition);
+        background: var(--glassmorphism);
+        backdrop-filter: blur(15px);
+        border: 1px solid var(--glassmorphism-border);
+        border-radius: 16px;
+        transition: var(--transition-smooth);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .role-card::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--gradient-primary);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+        transform-origin: left;
+    }
+    
+    .role-card:hover::after {
+        transform: scaleX(1);
     }
     
     .role-card:hover {
-        border-color: var(--primary-300);
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-lg);
+        transform: translateY(-12px);
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+        border-color: rgba(255, 255, 255, 0.4);
     }
     
     .role-icon {
-        width: 3rem;
-        height: 3rem;
-        background: var(--primary-100);
-        border-radius: 50%;
+        width: 4rem;
+        height: 4rem;
+        background: var(--gradient-primary);
+        border-radius: 20px;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-bottom: 1rem;
-        color: var(--primary-600);
+        margin: 0 auto 1rem;
+        color: black;
+        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        transition: all 0.3s ease;
+    }
+    
+    .role-card:hover .role-icon {
+        transform: scale(1.1) rotate(5deg);
+        box-shadow: 0 15px 30px rgba(102, 126, 234, 0.5);
     }
     
     .role-stats {
-        margin-top: 1rem;
+        margin-top: 1.5rem;
         font-size: 0.875rem;
     }
     
     .role-stat {
         display: flex;
         justify-content: space-between;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.75rem;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .role-stat:last-child {
+        border-bottom: none;
     }
     
     .role-stat-label {
-        color: var(--gray-600);
+        color: rgba(255, 255, 255, 0.8);
+        font-weight: 500;
     }
     
     .role-stat-value {
-        font-weight: 600;
-        color: var(--primary-600);
+        font-weight: 700;
+        color: white;
+        background: var(--gradient-success);
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.8rem;
+    }
+
+    /* ============================
+       CARACTERÍSTICAS PREMIUM
+       ============================ */
+    .feature-item {
+        padding: 2rem;
+        text-align: center;
+        background: var(--glassmorphism);
+        backdrop-filter: blur(15px);
+        border: 1px solid var(--glassmorphism-border);
+        border-radius: 16px;
+        transition: var(--transition-smooth);
+        position: relative;
+        overflow: hidden;
     }
     
-    .feature-item {
-        padding: 1.5rem;
-        text-align: center;
+    .feature-item::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+        transition: left 0.6s ease;
+    }
+    
+    .feature-item:hover::before {
+        left: 100%;
+    }
+    
+    .feature-item:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        border-color: rgba(255, 255, 255, 0.4);
     }
     
     .feature-icon {
-        width: 4rem;
-        height: 4rem;
-        background: var(--primary-100);
-        border-radius: var(--radius-lg);
+        width: 5rem;
+        height: 5rem;
+        background: var(--gradient-success);
+        border-radius: 20px;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 1rem;
-        color: var(--primary-600);
+        margin: 0 auto 1.5rem;
+        color: white;
+        box-shadow: 0 12px 24px rgba(79, 172, 254, 0.3);
+        transition: all 0.3s ease;
+    }
+    
+    .feature-item:hover .feature-icon {
+        transform: scale(1.1) rotate(-5deg);
+        box-shadow: 0 16px 32px rgba(79, 172, 254, 0.5);
     }
     
     .feature-item h3 {
-        margin: 1rem 0 0.5rem;
-        color: var(--gray-900);
+        margin: 1rem 0 1rem;
+        color: white;
+        font-family: 'Poppins', sans-serif;
+        font-weight: 700;
+        font-size: 1.25rem;
     }
     
     .feature-item p {
-        color: var(--gray-600);
-        font-size: 0.875rem;
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+
+    /* ============================
+       FOOTER PREMIUM
+       ============================ */
+    .premium-footer {
+        background: var(--glassmorphism);
+        backdrop-filter: blur(20px);
+        border-top: 1px solid var(--glassmorphism-border);
+        margin-top: 4rem;
     }
     
+    .footer-content {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .footer-section h3 {
+        color: white;
+        font-family: 'Poppins', sans-serif;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+    
+    .footer-section p {
+        color: rgba(255, 255, 255, 0.8);
+        line-height: 1.6;
+        margin-bottom: 1rem;
+    }
+    
+    .footer-link {
+        display: block;
+        color: rgba(255, 255, 255, 0.7);
+        text-decoration: none;
+        padding: 0.5rem 0;
+        transition: var(--transition-smooth);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .footer-link:hover {
+        color: white;
+        padding-left: 1rem;
+        text-decoration: none;
+    }
+    
+    .footer-badges {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+    
+    .footer-badge {
+        background: var(--gradient-warning);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        box-shadow: 0 4px 8px rgba(67, 233, 123, 0.3);
+    }
+    
+    .footer-bottom {
+        text-align: center;
+        padding-top: 2rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .footer-bottom p {
+        color: rgba(255, 255, 255, 0.7);
+        margin: 0;
+    }
+
+    /* ============================
+       BOTONES PREMIUM
+       ============================ */
+    .btn {
+        font-weight: 600;
+        border-radius: 12px;
+        padding: 0.75rem 1.5rem;
+        transition: var(--transition-smooth);
+        position: relative;
+        overflow: hidden;
+        text-transform: none;
+        letter-spacing: 0.5px;
+    }
+    
+    .btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s ease;
+    }
+    
+    .btn:hover::before {
+        left: 100%;
+    }
+    
+    .btn-primary {
+        background: var(--gradient-primary);
+        border: none;
+        color: white;
+        box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 24px rgba(102, 126, 234, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-block {
+        width: 100%;
+        justify-content: center;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* ============================
+       ELEMENTOS VARIOS
+       ============================ */
     .content-list {
         display: flex;
         flex-direction: column;
@@ -461,57 +576,141 @@
     }
     
     .content-item {
-        padding: 1rem;
-        border-radius: var(--radius);
-        background: var(--gray-50);
-        border-left: 3px solid var(--primary-500);
+        padding: 1.5rem;
+        border-radius: 16px;
+        background: var(--glassmorphism);
+        backdrop-filter: blur(15px);
+        border: 1px solid var(--glassmorphism-border);
+        border-left: 4px solid var(--neon-blue);
+        transition: var(--transition-smooth);
+    }
+    
+    .content-item:hover {
+        transform: translateX(8px);
+        border-left-color: var(--neon-purple);
     }
     
     .content-item h4 {
-        margin: 0 0 0.5rem;
-        color: var(--gray-900);
+        margin: 0 0 0.75rem;
+        color: white;
+        font-weight: 600;
     }
     
     .content-item p {
         margin: 0 0 1rem;
-        color: var(--gray-600);
+        color: rgba(255, 255, 255, 0.8);
         font-size: 0.875rem;
+        line-height: 1.5;
     }
     
     .quiz-info {
-        margin-bottom: 1rem;
-    }
-    
-    .btn-block {
-        width: 100%;
-        justify-content: center;
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.15);
     }
     
     .card-icon {
         width: 2rem;
         height: 2rem;
-        color: var(--primary-600);
+        color: white;
     }
     
     .lead {
         font-size: 1.125rem;
-        color: var(--gray-600);
+        color: rgba(255, 255, 255, 0.9);
         margin-bottom: 1.5rem;
+        line-height: 1.6;
+    }
+
+    /* ============================
+       ANIMACIONES FLOATING
+       ============================ */
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
     }
     
-    /* Responsive adjustments */
+    .animate-target:nth-child(1) { animation: float 6s ease-in-out infinite; }
+    .animate-target:nth-child(2) { animation: float 6s ease-in-out infinite 1.5s; }
+    .animate-target:nth-child(3) { animation: float 6s ease-in-out infinite 3s; }
+    .animate-target:nth-child(4) { animation: float 6s ease-in-out infinite 4.5s; }
+
+    /* ============================
+       RESPONSIVE DESIGN
+       ============================ */
+    @media (max-width: 1024px) {
+        .roles-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        
+        .features-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    
     @media (max-width: 768px) {
+        .roles-grid {
+            grid-template-columns: 1fr;
+        }
+        
         .stats-grid {
             grid-template-columns: repeat(1, minmax(0, 1fr));
         }
         
         .stat-number {
-            font-size: 1.5rem;
+            font-size: 2rem;
+        }
+        
+        .stat-card {
+            padding: 1.5rem 1rem;
         }
         
         .feature-icon {
+            width: 4rem;
+            height: 4rem;
+        }
+        
+        .feature-item {
+            padding: 1.5rem;
+        }
+        
+        .role-icon {
             width: 3rem;
             height: 3rem;
+        }
+        
+        .footer-content {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* ============================
+       ACCESIBILIDAD
+       ============================ */
+    @media (prefers-reduced-motion: reduce) {
+        * {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
+    }
+    
+    @media (prefers-contrast: high) {
+        .role-card,
+        .feature-item,
+        .content-item,
+        .stat-card {
+            border-width: 2px;
+        }
+    }
+    
+    @media (prefers-color-scheme: dark) {
+        .role-card h3,
+        .feature-item h3,
+        .content-item h4 {
+            color: #000000;
         }
     }
 </style>

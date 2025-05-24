@@ -1,11 +1,11 @@
 /**
- * GESTOR DE BASE DE DATOS UNIFICADO - Biblioteca Universitaria
+ * GESTOR DE BASE DE DATOS UNIFICADO - Sistema Bancario Digital
  * Centraliza toda la gestión de IndexedDB
  */
 
 class UnifiedDatabaseManager {
     constructor() {
-        this.dbName = 'Biblioteca_Universitaria_DB';
+        this.dbName = 'Sistema_Bancario Digital_DB';
         this.version = 2;
         this.db = null;
         this.initialized = false;
@@ -22,18 +22,22 @@ class UnifiedDatabaseManager {
             request.onsuccess = () => {
                 this.db = request.result;
                 this.initialized = true;
+                console.log(`✅ Base de datos ${this.dbName} inicializada`);
                 resolve(this.db);
             };
             
             request.onupgradeneeded = (event) => {
                 const db = event.target.result;
+                console.log(`🔄 Actualizando base de datos a versión ${this.version}`);
                 
                 // Stores de entidades
                 const entityStores = {
-                    'LIBROS': 'id_libro'
-,                    'CATEGORIAS': 'id_categoria'
-,                    'USUARIOS': 'id_usuario'
+                    'CLIENTES': 'id_cliente'
+,                    'CUENTAS': 'numero_cuenta'
+,                    'TRANSACCIONES': 'id_transaccion'
+,                    'EMPLEADOS': 'id_empleado'
 ,                    'PRESTAMOS': 'id_prestamo'
+,                    'TARJETAS_CREDITO': 'numero_tarjeta'
                 };
                 
                 // Stores del sistema
@@ -52,76 +56,309 @@ class UnifiedDatabaseManager {
                 
                 Object.entries(allStores).forEach(([storeName, keyPath]) => {
                     if (!db.objectStoreNames.contains(storeName)) {
-                        db.createObjectStore(storeName, { keyPath, autoIncrement: true });
+                        console.log(`📊 Creando store: ${storeName}`);
+                        const autoIncrement = storeName === 'CLIENTES' ? true : storeName === 'CUENTAS' ? false : storeName === 'TRANSACCIONES' ? true : storeName === 'EMPLEADOS' ? true : storeName === 'PRESTAMOS' ? true : storeName === 'TARJETAS_CREDITO' ? false : keyPath.includes('id_');
+                        db.createObjectStore(storeName, { keyPath, autoIncrement });
                     }
                 });
                 
-                this.seedInitialData(db);
+                // Programar la inserción de datos iniciales después de que se complete la transacción
+                request.transaction.oncomplete = () => {
+                    this.seedInitialData(db);
+                };
             };
         });
     }
 
-    seedInitialData(db) {
-        // Datos iniciales para entidades
-        if (db.objectStoreNames.contains('LIBROS')) {
-            const libroStore = db.transaction([[entidad.tableName/]'], 'readwrite').objectStore('LIBROS');
-            for (let i = 1; i <= 3; i++) {
-                libroStore.add({
-                    titulo: `Libro ${i}`
-,                    autor: `Libro ${i}`
-,                    añoPublicacion: (Math.floor(Math.random() * 100))
-,                    disponible: (Math.random() > 0.5)
-                });
-            }
-        }
-        if (db.objectStoreNames.contains('CATEGORIAS')) {
-            const categoriaStore = db.transaction([[entidad.tableName/]'], 'readwrite').objectStore('CATEGORIAS');
-            for (let i = 1; i <= 3; i++) {
-                categoriaStore.add({
-                    nombre_categoria: `Categoria ${i}`
-,                    descripcion: `Categoria ${i}`
-                });
-            }
-        }
-        if (db.objectStoreNames.contains('USUARIOS')) {
-            const usuarioStore = db.transaction([[entidad.tableName/]'], 'readwrite').objectStore('USUARIOS');
-            for (let i = 1; i <= 3; i++) {
-                usuarioStore.add({
-                    nombre_usuario: `Usuario ${i}`
-,                    email: `Usuario ${i}`
-,                    activo: (Math.random() > 0.5)
-                });
-            }
-        }
-        if (db.objectStoreNames.contains('PRESTAMOS')) {
-            const prestamoStore = db.transaction([[entidad.tableName/]'], 'readwrite').objectStore('PRESTAMOS');
-            for (let i = 1; i <= 3; i++) {
-                prestamoStore.add({
-                    fechaPrestamo: `Prestamo ${i}`
-,                    fechaDevolucion: `Prestamo ${i}`
-                });
-            }
-        }
+    async seedInitialData(db) {
+        console.log('🌱 Insertando datos iniciales...');
         
-        // Datos iniciales para encuestas y cuestionarios
-        if (db.objectStoreNames.contains('ENCUESTAS')) {
-            const encuestasStore = db.transaction(['ENCUESTAS'], 'readwrite').objectStore('ENCUESTAS');
-            encuestasStore.add({
-                nombre: 'preferenciasBiblioteca',
-                titulo: 'Encuesta de Preferencias',
-                descripcion: 'Ayúdanos a conocer tus preferencias de lectura',
-                tipo_representacion: 'BARRAS'
-            });
+        try {
+            // Datos iniciales para entidades - métodos específicos
+            await this.seedClienteData(db);
+            await this.seedCuentaData(db);
+            await this.seedTransaccionData(db);
+            await this.seedEmpleadoData(db);
+            await this.seedPrestamoData(db);
+            await this.seedTarjetaCreditoData(db);
+            
+            // Datos iniciales para encuestas
+            await this.seedSurveyData(db);
+            
+            // Datos iniciales para cuestionarios
+            await this.seedQuizData(db);
+            
+            console.log('✅ Datos iniciales insertados correctamente');
+        } catch (error) {
+            console.error('❌ Error insertando datos iniciales:', error);
         }
+    }
+    
+    async seedClienteData(db) {
+        const tableName = 'CLIENTES';
         
-        if (db.objectStoreNames.contains('CUESTIONARIOS')) {
-            const cuestionariosStore = db.transaction(['CUESTIONARIOS'], 'readwrite').objectStore('CUESTIONARIOS');
-            cuestionariosStore.add({
-                nombre: 'satisfaccionBiblioteca',
-                titulo: 'Cuestionario de Satisfacción',
-                descripcion: 'Evalúa tu experiencia con la biblioteca',
-                tiempoLimite: 30
-            });
+        if (!db.objectStoreNames.contains(tableName)) return;
+        
+        try {
+            const transaction = db.transaction([tableName], 'readwrite');
+            const store = transaction.objectStore(tableName);
+            
+            for (let i = 1; i <= 3; i++) {
+                const data = {
+                    dni: `Cliente ${i}`,
+                    nombre: `Cliente ${i}`,
+                    apellidos: `Cliente ${i}`,
+                    email: `Cliente ${i}`,
+                    telefono: `Cliente ${i}`,
+                    fecha_registro: `Cliente ${i}`,
+                    activo: (Math.random() > 0.5)
+                };
+                
+                // Añadir clave primaria si no es auto-increment
+                
+                await new Promise((resolve, reject) => {
+                    const request = store.add(data);
+                    request.onsuccess = () => resolve();
+                    request.onerror = () => reject(request.error);
+                });
+            }
+            
+            console.log(`📊 Datos de ejemplo creados para Cliente`);
+        } catch (error) {
+            console.error(`❌ Error creando datos para Cliente:`, error);
+        }
+    }
+    
+    async seedCuentaData(db) {
+        const tableName = 'CUENTAS';
+        
+        if (!db.objectStoreNames.contains(tableName)) return;
+        
+        try {
+            const transaction = db.transaction([tableName], 'readwrite');
+            const store = transaction.objectStore(tableName);
+            
+            for (let i = 1; i <= 3; i++) {
+                const data = {
+                    tipo_cuenta: `Cuenta ${i}`,
+                    saldo: (Math.round(Math.random() * 1000 * 100) / 100),
+                    fecha_apertura: `Cuenta ${i}`,
+                    activa: (Math.random() > 0.5)
+                };
+                
+                // Añadir clave primaria si no es auto-increment
+                data.numero_cuenta = `cuenta_${i}`;
+                
+                await new Promise((resolve, reject) => {
+                    const request = store.add(data);
+                    request.onsuccess = () => resolve();
+                    request.onerror = () => reject(request.error);
+                });
+            }
+            
+            console.log(`📊 Datos de ejemplo creados para Cuenta`);
+        } catch (error) {
+            console.error(`❌ Error creando datos para Cuenta:`, error);
+        }
+    }
+    
+    async seedTransaccionData(db) {
+        const tableName = 'TRANSACCIONES';
+        
+        if (!db.objectStoreNames.contains(tableName)) return;
+        
+        try {
+            const transaction = db.transaction([tableName], 'readwrite');
+            const store = transaction.objectStore(tableName);
+            
+            for (let i = 1; i <= 3; i++) {
+                const data = {
+                    fecha_transaccion: `Transaccion ${i}`,
+                    tipo_transaccion: `Transaccion ${i}`,
+                    monto: (Math.round(Math.random() * 1000 * 100) / 100),
+                    descripcion: `Transaccion ${i}`,
+                    estado: `Transaccion ${i}`
+                };
+                
+                // Añadir clave primaria si no es auto-increment
+                
+                await new Promise((resolve, reject) => {
+                    const request = store.add(data);
+                    request.onsuccess = () => resolve();
+                    request.onerror = () => reject(request.error);
+                });
+            }
+            
+            console.log(`📊 Datos de ejemplo creados para Transaccion`);
+        } catch (error) {
+            console.error(`❌ Error creando datos para Transaccion:`, error);
+        }
+    }
+    
+    async seedEmpleadoData(db) {
+        const tableName = 'EMPLEADOS';
+        
+        if (!db.objectStoreNames.contains(tableName)) return;
+        
+        try {
+            const transaction = db.transaction([tableName], 'readwrite');
+            const store = transaction.objectStore(tableName);
+            
+            for (let i = 1; i <= 3; i++) {
+                const data = {
+                    codigo_empleado: `Empleado ${i}`,
+                    nombre: `Empleado ${i}`,
+                    puesto: `Empleado ${i}`,
+                    departamento: `Empleado ${i}`,
+                    email: `Empleado ${i}`,
+                    activo: (Math.random() > 0.5)
+                };
+                
+                // Añadir clave primaria si no es auto-increment
+                
+                await new Promise((resolve, reject) => {
+                    const request = store.add(data);
+                    request.onsuccess = () => resolve();
+                    request.onerror = () => reject(request.error);
+                });
+            }
+            
+            console.log(`📊 Datos de ejemplo creados para Empleado`);
+        } catch (error) {
+            console.error(`❌ Error creando datos para Empleado:`, error);
+        }
+    }
+    
+    async seedPrestamoData(db) {
+        const tableName = 'PRESTAMOS';
+        
+        if (!db.objectStoreNames.contains(tableName)) return;
+        
+        try {
+            const transaction = db.transaction([tableName], 'readwrite');
+            const store = transaction.objectStore(tableName);
+            
+            for (let i = 1; i <= 3; i++) {
+                const data = {
+                    monto_solicitado: (Math.round(Math.random() * 1000 * 100) / 100),
+                    tasa_interes: (Math.round(Math.random() * 1000 * 100) / 100),
+                    plazo_meses: (Math.floor(Math.random() * 100) + 1),
+                    estado_prestamo: `Prestamo ${i}`,
+                    fecha_solicitud: `Prestamo ${i}`,
+                    fecha_aprobacion: `Prestamo ${i}`
+                };
+                
+                // Añadir clave primaria si no es auto-increment
+                
+                await new Promise((resolve, reject) => {
+                    const request = store.add(data);
+                    request.onsuccess = () => resolve();
+                    request.onerror = () => reject(request.error);
+                });
+            }
+            
+            console.log(`📊 Datos de ejemplo creados para Prestamo`);
+        } catch (error) {
+            console.error(`❌ Error creando datos para Prestamo:`, error);
+        }
+    }
+    
+    async seedTarjetaCreditoData(db) {
+        const tableName = 'TARJETAS_CREDITO';
+        
+        if (!db.objectStoreNames.contains(tableName)) return;
+        
+        try {
+            const transaction = db.transaction([tableName], 'readwrite');
+            const store = transaction.objectStore(tableName);
+            
+            for (let i = 1; i <= 3; i++) {
+                const data = {
+                    limite_credito: (Math.round(Math.random() * 1000 * 100) / 100),
+                    saldo_actual: (Math.round(Math.random() * 1000 * 100) / 100),
+                    fecha_vencimiento: `TarjetaCredito ${i}`,
+                    activa: (Math.random() > 0.5)
+                };
+                
+                // Añadir clave primaria si no es auto-increment
+                data.numero_tarjeta = `tarjetacredito_${i}`;
+                
+                await new Promise((resolve, reject) => {
+                    const request = store.add(data);
+                    request.onsuccess = () => resolve();
+                    request.onerror = () => reject(request.error);
+                });
+            }
+            
+            console.log(`📊 Datos de ejemplo creados para TarjetaCredito`);
+        } catch (error) {
+            console.error(`❌ Error creando datos para TarjetaCredito:`, error);
+        }
+    }
+    
+    
+    async seedSurveyData(db) {
+        if (!db.objectStoreNames.contains('ENCUESTAS')) return;
+        
+        try {
+            const transaction = db.transaction(['ENCUESTAS'], 'readwrite');
+            const store = transaction.objectStore('ENCUESTAS');
+            
+            const surveys = [
+                {
+                    nombre: 'preferenciasBancarias',
+                    titulo: 'Encuesta de Servicios Preferidos',
+                    descripcion: 'Ayúdanos a conocer tus preferencias bancarias',
+                    tipo_representacion: 'CIRCULAR',
+                    activa: true,
+                    fecha_creacion: new Date().toISOString()
+                }
+            ];
+            
+            for (const survey of surveys) {
+                await new Promise((resolve, reject) => {
+                    const request = store.add(survey);
+                    request.onsuccess = () => resolve();
+                    request.onerror = () => reject(request.error);
+                });
+            }
+            
+            console.log('📊 Encuestas iniciales creadas');
+        } catch (error) {
+            console.error('❌ Error creando encuestas:', error);
+        }
+    }
+    
+    async seedQuizData(db) {
+        if (!db.objectStoreNames.contains('CUESTIONARIOS')) return;
+        
+        try {
+            const transaction = db.transaction('CUESTIONARIOS', 'readwrite');
+            const store = transaction.objectStore('CUESTIONARIOS');
+            
+            const quizzes = [
+                {
+                    nombre: 'satisfaccionCliente',
+                    titulo: 'Encuesta de Satisfacción Bancaria',
+                    descripcion: 'Evalúa tu experiencia con nuestros servicios',
+                    tiempoLimite: 30,
+                    puntuacion_minima: 60,
+                    activo: true,
+                    fecha_creacion: new Date().toISOString()
+                }
+            ];
+            
+            for (const quiz of quizzes) {
+                await new Promise((resolve, reject) => {
+                    const request = store.add(quiz);
+                    request.onsuccess = () => resolve();
+                    request.onerror = () => reject(request.error);
+                });
+            }
+            
+            console.log('📊 Cuestionarios iniciales creados');
+        } catch (error) {
+            console.error('❌ Error creando cuestionarios:', error);
         }
     }
 
@@ -130,41 +367,127 @@ class UnifiedDatabaseManager {
         
         return new Promise((resolve, reject) => {
             if (!this.db.objectStoreNames.contains(storeName)) {
-                console.warn(`Store ${storeName} no existe`);
+                console.warn(`⚠️ Store ${storeName} no existe`);
                 resolve(operation === 'getAll' ? [] : null);
                 return;
             }
             
-            const mode = operation === 'get' || operation === 'getAll' ? 'readonly' : 'readwrite';
-            const transaction = this.db.transaction([storeName], mode);
-            const store = transaction.objectStore(storeName);
-            
-            let request;
-            switch(operation) {
-                case 'create': request = store.add(data); break;
-                case 'getAll': request = store.getAll(); break;
-                case 'get': request = store.get(id); break;
-                case 'update': request = store.put(data); break;
-                case 'delete': request = store.delete(id); break;
-                default: reject(new Error(`Operación ${operation} no válida`)); return;
+            try {
+                const mode = operation === 'get' || operation === 'getAll' ? 'readonly' : 'readwrite';
+                const transaction = this.db.transaction([storeName], mode);
+                const store = transaction.objectStore(storeName);
+                
+                let request;
+                switch(operation) {
+                    case 'create': 
+                        request = store.add(data); 
+                        break;
+                    case 'getAll': 
+                        request = store.getAll(); 
+                        break;
+                    case 'get': 
+                        request = store.get(id); 
+                        break;
+                    case 'update': 
+                        request = store.put(data); 
+                        break;
+                    case 'delete': 
+                        request = store.delete(id); 
+                        break;
+                    default: 
+                        reject(new Error(`Operación ${operation} no válida`)); 
+                        return;
+                }
+                
+                request.onsuccess = () => {
+                    const result = request.result;
+                    resolve(result || (operation === 'getAll' ? [] : null));
+                };
+                
+                request.onerror = () => {
+                    console.error(`❌ Error en operación ${operation} en ${storeName}:`, request.error);
+                    reject(request.error);
+                };
+                
+                transaction.onerror = () => {
+                    console.error(`❌ Error en transacción ${operation} en ${storeName}:`, transaction.error);
+                    reject(transaction.error);
+                };
+            } catch (error) {
+                console.error(`❌ Error ejecutando ${operation} en ${storeName}:`, error);
+                reject(error);
             }
-            
-            request.onsuccess = () => resolve(request.result || (operation === 'getAll' ? [] : null));
-            request.onerror = () => reject(request.error);
         });
     }
 
     async query(storeName, filters = {}) {
-        const all = await this.execute('getAll', storeName);
-        if (!Object.keys(filters).length) return all;
+        try {
+            const all = await this.execute('getAll', storeName);
+            if (!Object.keys(filters).length) return all;
+            
+            return all.filter(item => 
+                Object.entries(filters).every(([key, value]) => 
+                    item[key] == value
+                )
+            );
+        } catch (error) {
+            console.error(`❌ Error en query de ${storeName}:`, error);
+            return [];
+        }
+    }
+    
+    async count(storeName, filters = {}) {
+        try {
+            const items = await this.query(storeName, filters);
+            return items.length;
+        } catch (error) {
+            console.error(`❌ Error contando ${storeName}:`, error);
+            return 0;
+        }
+    }
+    
+    async clear(storeName) {
+        await this.init();
         
-        return all.filter(item => 
-            Object.entries(filters).every(([key, value]) => 
-                item[key] == value
-            )
-        );
+        return new Promise((resolve, reject) => {
+            if (!this.db.objectStoreNames.contains(storeName)) {
+                console.warn(`⚠️ Store ${storeName} no existe`);
+                resolve();
+                return;
+            }
+            
+            try {
+                const transaction = this.db.transaction(storeName, 'readwrite');
+                const store = transaction.objectStore(storeName);
+                const request = store.clear();
+                
+                request.onsuccess = () => {
+                    console.log(`🗑️ Store ${storeName} limpiado`);
+                    resolve();
+                };
+                
+                request.onerror = () => {
+                    console.error(`❌ Error limpiando ${storeName}:`, request.error);
+                    reject(request.error);
+                };
+            } catch (error) {
+                console.error(`❌ Error en clear de ${storeName}:`, error);
+                reject(error);
+            }
+        });
     }
 }
 
 // Singleton global
+window.UnifiedDatabaseManager = UnifiedDatabaseManager;
 window.UnifiedDB = new UnifiedDatabaseManager();
+
+// Auto-inicializar cuando se carga el módulo
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        await window.UnifiedDB.init();
+        console.log('✅ UnifiedDB inicializado automáticamente');
+    } catch (error) {
+        console.error('❌ Error inicializando UnifiedDB:', error);
+    }
+});

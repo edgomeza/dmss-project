@@ -35,16 +35,18 @@ class UnifiedDatabaseManager {
             request.onsuccess = () => {
                 this.db = request.result;
                 this.initialized = true;
+                console.log(`✅ Base de datos ${this.dbName} inicializada`);
                 resolve(this.db);
             };
             
             request.onupgradeneeded = (event) => {
                 const db = event.target.result;
+                console.log(`🔄 Actualizando base de datos a versión ${this.version}`);
                 
                 // Stores de entidades
                 const entityStores = {
                     [for (entidad : Entidad | app.entidades) separator(',')]
-                    '[entidad.tableName/]': '[entidad.atributos->select(a | a.isPrimaryKey)->first().nombre/]'
+                    '[if (entidad.tableName.oclIsUndefined() = false)][entidad.tableName/][else][entidad.nombre.toUpperCase()/][/if]': '[entidad.atributos->select(a | a.isPrimaryKey)->first().nombre/]'
                     [/for]
                 };
                 
@@ -64,54 +66,147 @@ class UnifiedDatabaseManager {
                 
                 Object.entries(allStores).forEach((['['/]storeName, keyPath]) => {
                     if (!db.objectStoreNames.contains(storeName)) {
-                        db.createObjectStore(storeName, { keyPath, autoIncrement: true });
+                        console.log(`📊 Creando store: ${storeName}`);
+                        const autoIncrement = [for (entidad : Entidad | app.entidades)]storeName === '[if (entidad.tableName.oclIsUndefined() = false)][entidad.tableName/][else][entidad.nombre.toUpperCase()/][/if]' ? [entidad.atributos->select(a | a.isPrimaryKey)->first().tipo = TipoAtributo::INTEGER/] : [/for]keyPath.includes('id_');
+                        db.createObjectStore(storeName, { keyPath, autoIncrement });
                     }
                 });
                 
-                this.seedInitialData(db);
+                // Programar la inserción de datos iniciales después de que se complete la transacción
+                request.transaction.oncomplete = () => {
+                    this.seedInitialData(db);
+                };
             };
         });
     }
 
-    seedInitialData(db) {
-        // Datos iniciales para entidades
-        [for (entidad : Entidad | app.entidades)]
-        if (db.objectStoreNames.contains('[entidad.tableName/]')) {
-            const [entidad.nombre.toLowerCase()/]Store = db.transaction(['['/]['['/]entidad.tableName/]'], 'readwrite').objectStore('[entidad.tableName/]');
+    async seedInitialData(db) {
+        console.log('🌱 Insertando datos iniciales...');
+        
+        try {
+            // Datos iniciales para entidades - métodos específicos
+            [for (entidad : Entidad | app.entidades)]
+            await this.seed[entidad.nombre/]Data(db);
+            [/for]
+            
+            // Datos iniciales para encuestas
+            await this.seedSurveyData(db);
+            
+            // Datos iniciales para cuestionarios
+            await this.seedQuizData(db);
+            
+            console.log('✅ Datos iniciales insertados correctamente');
+        } catch (error) {
+            console.error('❌ Error insertando datos iniciales:', error);
+        }
+    }
+    
+    [for (entidad : Entidad | app.entidades)]
+    async seed[entidad.nombre/]Data(db) {
+        const tableName = '[if (entidad.tableName.oclIsUndefined() = false)][entidad.tableName/][else][entidad.nombre.toUpperCase()/][/if]';
+        
+        if (!db.objectStoreNames.contains(tableName)) return;
+        
+        try {
+            const transaction = db.transaction(['['/]tableName], 'readwrite');
+            const store = transaction.objectStore(tableName);
+            
             for (let i = 1; i <= 3; i++) {
-                [entidad.nombre.toLowerCase()/]Store.add({
-                    [for (atrib : Atributo | entidad.atributos->select(a | not a.isPrimaryKey)) separator(',')]
-                    [atrib.nombre/]: [if (atrib.tipo = TipoAtributo::BOOLEAN)](Math.random() > 0.5)[elseif (atrib.tipo = TipoAtributo::INTEGER)](Math.floor(Math.random() * 100))[elseif (atrib.tipo = TipoAtributo::DECIMAL)](Math.round(Math.random() * 100 * 100) / 100)[else]`[entidad.nombre/] ${i}`[/if]
+                const data = {
+                    [let nonPKAttribs : OrderedSet(Atributo) = entidad.atributos->select(a | not a.isPrimaryKey)]
+                    [for (atrib : Atributo | nonPKAttribs)]
+                    [atrib.nombre/]: [if (atrib.tipo = TipoAtributo::BOOLEAN)](Math.random() > 0.5)[elseif (atrib.tipo = TipoAtributo::INTEGER)](Math.floor(Math.random() * 100) + 1)[elseif (atrib.tipo = TipoAtributo::DECIMAL)](Math.round(Math.random() * 1000 * 100) / 100)[else]`[entidad.nombre/] ${i}`[/if][if (atrib <> nonPKAttribs->last())],[/if]
                     [/for]
+                    [/let]
+                };
+                
+                // Añadir clave primaria si no es auto-increment
+                [if (entidad.atributos->select(a | a.isPrimaryKey)->first().tipo <> TipoAtributo::INTEGER)]
+                data.[entidad.atributos->select(a | a.isPrimaryKey)->first().nombre/] = `[entidad.nombre.toLowerCase()/]_${i}`;
+                [/if]
+                
+                await new Promise((resolve, reject) => {
+                    const request = store.add(data);
+                    request.onsuccess = () => resolve();
+                    request.onerror = () => reject(request.error);
                 });
             }
+            
+            console.log(`📊 Datos de ejemplo creados para [entidad.nombre/]`);
+        } catch (error) {
+            console.error(`❌ Error creando datos para [entidad.nombre/]:`, error);
         }
-        [/for]
+    }
+    
+    [/for]
+    
+    async seedSurveyData(db) {
+        if (!db.objectStoreNames.contains('ENCUESTAS')) return;
         
-        // Datos iniciales para encuestas y cuestionarios
-        [for (encuesta : Encuesta | app.encuestas)]
-        if (db.objectStoreNames.contains('ENCUESTAS')) {
-            const encuestasStore = db.transaction(['['/]'ENCUESTAS'], 'readwrite').objectStore('ENCUESTAS');
-            encuestasStore.add({
-                nombre: '[encuesta.nombre/]',
-                titulo: '[encuesta.titulo/]',
-                descripcion: '[if (encuesta.descripcion.oclIsUndefined() = false)][encuesta.descripcion/][else]Encuesta [encuesta.nombre/][/if]',
-                tipo_representacion: '[encuesta.tipoRepresentacion/]'
-            });
+        try {
+            const transaction = db.transaction(['['/]'ENCUESTAS'], 'readwrite');
+            const store = transaction.objectStore('ENCUESTAS');
+            
+            const surveys = ['['/]
+                [for (encuesta : Encuesta | app.encuestas) separator(',')]
+                {
+                    nombre: '[encuesta.nombre/]',
+                    titulo: '[encuesta.titulo/]',
+                    descripcion: '[if (encuesta.descripcion.oclIsUndefined() = false)][encuesta.descripcion/][else]Encuesta [encuesta.nombre/][/if]',
+                    tipo_representacion: '[encuesta.tipoRepresentacion/]',
+                    activa: true,
+                    fecha_creacion: new Date().toISOString()
+                }
+                [/for]
+            ];
+            
+            for (const survey of surveys) {
+                await new Promise((resolve, reject) => {
+                    const request = store.add(survey);
+                    request.onsuccess = () => resolve();
+                    request.onerror = () => reject(request.error);
+                });
+            }
+            
+            console.log('📊 Encuestas iniciales creadas');
+        } catch (error) {
+            console.error('❌ Error creando encuestas:', error);
         }
-        [/for]
+    }
+    
+    async seedQuizData(db) {
+        if (!db.objectStoreNames.contains('CUESTIONARIOS')) return;
         
-        [for (cuestionario : Cuestionario | app.cuestionarios)]
-        if (db.objectStoreNames.contains('CUESTIONARIOS')) {
-            const cuestionariosStore = db.transaction(['['/]'CUESTIONARIOS'], 'readwrite').objectStore('CUESTIONARIOS');
-            cuestionariosStore.add({
-                nombre: '[cuestionario.nombre/]',
-                titulo: '[cuestionario.titulo/]',
-                descripcion: '[if (cuestionario.descripcion.oclIsUndefined() = false)][cuestionario.descripcion/][else]Cuestionario [cuestionario.nombre/][/if]',
-                tiempoLimite: 30
-            });
+        try {
+            const transaction = db.transaction('CUESTIONARIOS', 'readwrite');
+            const store = transaction.objectStore('CUESTIONARIOS');
+            
+            const quizzes = ['['/]
+                [for (cuestionario : Cuestionario | app.cuestionarios) separator(',')]
+                {
+                    nombre: '[cuestionario.nombre/]',
+                    titulo: '[cuestionario.titulo/]',
+                    descripcion: '[if (cuestionario.descripcion.oclIsUndefined() = false)][cuestionario.descripcion/][else]Cuestionario [cuestionario.nombre/][/if]',
+                    tiempoLimite: 30,
+                    puntuacion_minima: 60,
+                    activo: true,
+                    fecha_creacion: new Date().toISOString()
+                }
+                [/for]
+            ];
+            
+            for (const quiz of quizzes) {
+                await new Promise((resolve, reject) => {
+                    const request = store.add(quiz);
+                    request.onsuccess = () => resolve();
+                    request.onerror = () => reject(request.error);
+                });
+            }
+            
+            console.log('📊 Cuestionarios iniciales creados');
+        } catch (error) {
+            console.error('❌ Error creando cuestionarios:', error);
         }
-        [/for]
     }
 
     async execute(operation, storeName, data = null, id = null) {
@@ -119,44 +214,130 @@ class UnifiedDatabaseManager {
         
         return new Promise((resolve, reject) => {
             if (!this.db.objectStoreNames.contains(storeName)) {
-                console.warn(`Store ${storeName} no existe`);
+                console.warn(`⚠️ Store ${storeName} no existe`);
                 resolve(operation === 'getAll' ? ['['/]] : null);
                 return;
             }
             
-            const mode = operation === 'get' || operation === 'getAll' ? 'readonly' : 'readwrite';
-            const transaction = this.db.transaction(['['/]storeName], mode);
-            const store = transaction.objectStore(storeName);
-            
-            let request;
-            switch(operation) {
-                case 'create': request = store.add(data); break;
-                case 'getAll': request = store.getAll(); break;
-                case 'get': request = store.get(id); break;
-                case 'update': request = store.put(data); break;
-                case 'delete': request = store.delete(id); break;
-                default: reject(new Error(`Operación ${operation} no válida`)); return;
+            try {
+                const mode = operation === 'get' || operation === 'getAll' ? 'readonly' : 'readwrite';
+                const transaction = this.db.transaction(['['/]storeName], mode);
+                const store = transaction.objectStore(storeName);
+                
+                let request;
+                switch(operation) {
+                    case 'create': 
+                        request = store.add(data); 
+                        break;
+                    case 'getAll': 
+                        request = store.getAll(); 
+                        break;
+                    case 'get': 
+                        request = store.get(id); 
+                        break;
+                    case 'update': 
+                        request = store.put(data); 
+                        break;
+                    case 'delete': 
+                        request = store.delete(id); 
+                        break;
+                    default: 
+                        reject(new Error(`Operación ${operation} no válida`)); 
+                        return;
+                }
+                
+                request.onsuccess = () => {
+                    const result = request.result;
+                    resolve(result || (operation === 'getAll' ? ['['/]] : null));
+                };
+                
+                request.onerror = () => {
+                    console.error(`❌ Error en operación ${operation} en ${storeName}:`, request.error);
+                    reject(request.error);
+                };
+                
+                transaction.onerror = () => {
+                    console.error(`❌ Error en transacción ${operation} en ${storeName}:`, transaction.error);
+                    reject(transaction.error);
+                };
+            } catch (error) {
+                console.error(`❌ Error ejecutando ${operation} en ${storeName}:`, error);
+                reject(error);
             }
-            
-            request.onsuccess = () => resolve(request.result || (operation === 'getAll' ? ['['/]] : null));
-            request.onerror = () => reject(request.error);
         });
     }
 
     async query(storeName, filters = {}) {
-        const all = await this.execute('getAll', storeName);
-        if (!Object.keys(filters).length) return all;
+        try {
+            const all = await this.execute('getAll', storeName);
+            if (!Object.keys(filters).length) return all;
+            
+            return all.filter(item => 
+                Object.entries(filters).every((['['/]key, value]) => 
+                    item['['/]key] == value
+                )
+            );
+        } catch (error) {
+            console.error(`❌ Error en query de ${storeName}:`, error);
+            return ['['/]];
+        }
+    }
+    
+    async count(storeName, filters = {}) {
+        try {
+            const items = await this.query(storeName, filters);
+            return items.length;
+        } catch (error) {
+            console.error(`❌ Error contando ${storeName}:`, error);
+            return 0;
+        }
+    }
+    
+    async clear(storeName) {
+        await this.init();
         
-        return all.filter(item => 
-            Object.entries(filters).every((['['/]key, value]) => 
-                item['['/]key] == value
-            )
-        );
+        return new Promise((resolve, reject) => {
+            if (!this.db.objectStoreNames.contains(storeName)) {
+                console.warn(`⚠️ Store ${storeName} no existe`);
+                resolve();
+                return;
+            }
+            
+            try {
+                const transaction = this.db.transaction(storeName, 'readwrite');
+                const store = transaction.objectStore(storeName);
+                const request = store.clear();
+                
+                request.onsuccess = () => {
+                    console.log(`🗑️ Store ${storeName} limpiado`);
+                    resolve();
+                };
+                
+                request.onerror = () => {
+                    console.error(`❌ Error limpiando ${storeName}:`, request.error);
+                    reject(request.error);
+                };
+            } catch (error) {
+                console.error(`❌ Error en clear de ${storeName}:`, error);
+                reject(error);
+            }
+        });
     }
 }
 
 // Singleton global
+window.UnifiedDatabaseManager = UnifiedDatabaseManager;
 window.UnifiedDB = new UnifiedDatabaseManager();
+
+// Auto-inicializar cuando se carga el módulo
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        await window.UnifiedDB.init();
+        console.log('✅ UnifiedDB inicializado automáticamente');
+    } catch (error) {
+        console.error('❌ Error inicializando UnifiedDB:', error);
+    }
+});
 [/file]
 [/template]
 
@@ -184,20 +365,30 @@ class UnifiedAppManager {
         this.ui = null;
         this.entities = null;
         this.surveys = null;
+        this.initialized = false;
         
-        this.init();
+        // No inicializar automáticamente en el constructor
+        // Se inicializará cuando se llame explícitamente
     }
 
     async init() {
+        if (this.initialized) return;
+        
         try {
-            await this.db.init();
+            // Esperar a que la base de datos esté lista
+            if (!this.db.initialized) {
+                await this.db.init();
+            }
             
+            // Inicializar módulos en orden
             this.ui = new UnifiedUIManager(this);
             this.entities = new UnifiedEntityManager(this);
             this.surveys = new UnifiedSurveyQuizManager(this);
             
             this.setupGlobalEvents();
-            this.initCurrentPage();
+            await this.initCurrentPage();
+            
+            this.initialized = true;
             
             if (this.config.debug) {
                 console.log(`✅ ${this.config.appName} inicializado correctamente`);
@@ -232,14 +423,12 @@ class UnifiedAppManager {
         });
 
         // Auto-dismiss alerts
-        document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => {
-                document.querySelectorAll('.alert['['/]data-auto-dismiss="true"]').forEach(alert => {
-                    alert.style.opacity = '0';
-                    setTimeout(() => alert.remove(), 500);
-                });
-            }, 5000);
-        });
+        setTimeout(() => {
+            document.querySelectorAll('.alert['['/]data-auto-dismiss="true"]').forEach(alert => {
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 500);
+            });
+        }, 5000);
     }
 
     async handleFormSubmit(form) {
@@ -337,12 +526,12 @@ class UnifiedAppManager {
         return adminRoles.includes(this.config.currentRole);
     }
 
-    initCurrentPage() {
+    async initCurrentPage() {
         const path = window.location.pathname;
         
         // Dashboard pages
         if (path.includes('dashboard.html')) {
-            this.initDashboard();
+            await this.initDashboard();
         }
         // Entity pages
         else if (path.includes('/pages/')) {
@@ -359,7 +548,7 @@ class UnifiedAppManager {
         }
         // Admin pages
         else if (path.includes('admin')) {
-            this.initAdminPage();
+            await this.initAdminPage();
         }
     }
 
@@ -422,6 +611,9 @@ class UnifiedAppManager {
     }
 }
 
+// Hacer disponible globalmente
+window.UnifiedAppManager = UnifiedAppManager;
+
 // Funciones globales para compatibilidad
 window.selectRole = function(roleName) {
     if (window.DataWebApp) {
@@ -442,9 +634,37 @@ window.openQuizPage = function(quizName) {
     }
 };
 
-// Inicialización global
-document.addEventListener('DOMContentLoaded', () => {
-    window.DataWebApp = new UnifiedAppManager();
+// Inicialización global - esperar a que todos los módulos estén disponibles
+document.addEventListener('DOMContentLoaded', async () => {
+    // Verificar que todos los módulos estén disponibles
+    const checkModules = () => {
+        return typeof window.UnifiedDatabaseManager !== 'undefined' && 
+               typeof window.UnifiedUIManager !== 'undefined' &&
+               typeof window.UnifiedEntityManager !== 'undefined' &&
+               typeof window.UnifiedSurveyQuizManager !== 'undefined';
+    };
+    
+    // Esperar a que los módulos estén disponibles
+    let attempts = 0;
+    const maxAttempts = 10;
+    
+    const waitForModules = () => {
+        if (checkModules() || attempts >= maxAttempts) {
+            // Inicializar la aplicación
+            window.DataWebApp = new UnifiedAppManager();
+            window.DataWebApp.init().then(() => {
+                console.log('✅ DataWebApp inicializado completamente');
+            }).catch(error => {
+                console.error('❌ Error inicializando DataWebApp:', error);
+            });
+        } else {
+            attempts++;
+            setTimeout(waitForModules, 200);
+        }
+    };
+    
+    // Comenzar la verificación
+    setTimeout(waitForModules, 100);
 });
 [/file]
 [/template]
@@ -467,7 +687,7 @@ class UnifiedEntityManager {
             [for (entidad : Entidad | app.entidades) separator(',')]
             '[entidad.nombre.toLowerCase()/]': {
                 name: '[entidad.nombre/]',
-                tableName: '[entidad.tableName/]',
+                tableName: '[if (entidad.tableName.oclIsUndefined() = false)][entidad.tableName/][else][entidad.nombre.toUpperCase()/][/if]',
                 primaryKey: '[entidad.atributos->select(a | a.isPrimaryKey)->first().nombre/]',
                 fields: ['['/]
                     [for (atrib : Atributo | entidad.atributos) separator(',')]
@@ -548,7 +768,7 @@ class UnifiedEntityManager {
                     ).join('')}
                     <td>
                         <a href="detail.html?id=${item['['/]config.primaryKey]}" class="btn btn-info btn-sm">Ver</a>
-                        <a href="edit.html?id=${item['['/]['['/]config.primaryKey]}" class="btn btn-warning btn-sm">Editar</a>
+                        <a href="edit.html?id=${item['['/]config.primaryKey]}" class="btn btn-warning btn-sm">Editar</a>
                         <button class="btn btn-danger btn-sm delete-btn" 
                                 data-entity="${config.tableName}" 
                                 data-id="${item['['/]config.primaryKey]}"
@@ -588,7 +808,8 @@ class UnifiedEntityManager {
         }
 
         try {
-            const item = await this.db.execute('get', config.tableName, parseInt(id) || id);
+            const parsedId = this.parseIdValue(id, config.fields.find(f => f.isPrimaryKey).type);
+            const item = await this.db.execute('get', config.tableName, null, parsedId);
             
             if (!item) {
                 this.app.ui.showAlert('Elemento no encontrado', 'danger');
@@ -636,7 +857,8 @@ class UnifiedEntityManager {
         }
 
         try {
-            const item = await this.db.execute('get', config.tableName, parseInt(id) || id);
+            const parsedId = this.parseIdValue(id, config.fields.find(f => f.isPrimaryKey).type);
+            const item = await this.db.execute('get', config.tableName, null, parsedId);
             
             if (!item) {
                 this.app.ui.showAlert('Elemento no encontrado', 'danger');
@@ -706,7 +928,8 @@ class UnifiedEntityManager {
             } else if (formType === 'entity-update') {
                 const form = document.querySelector(`['['/]data-entity="${entityTableName}"]`);
                 const id = form.dataset.id;
-                data['['/]config.primaryKey] = parseInt(id) || id;
+                const parsedId = this.parseIdValue(id, config.fields.find(f => f.isPrimaryKey).type);
+                data['['/]config.primaryKey] = parsedId;
                 
                 result = await this.db.execute('update', config.tableName, data);
                 return {
@@ -731,7 +954,8 @@ class UnifiedEntityManager {
         }
 
         try {
-            await this.db.execute('delete', config.tableName, parseInt(itemId) || itemId);
+            const parsedId = this.parseIdValue(itemId, config.fields.find(f => f.isPrimaryKey).type);
+            await this.db.execute('delete', config.tableName, null, parsedId);
             return {
                 success: true,
                 message: `${config.name} eliminado correctamente`,
@@ -773,7 +997,23 @@ class UnifiedEntityManager {
                 return String(value);
         }
     }
+    
+    parseIdValue(value, type) {
+        switch (type) {
+            case 'INTEGER':
+                return parseInt(value);
+            case 'DECIMAL':
+                return parseFloat(value);
+            case 'BOOLEAN':
+                return value === 'true' || value === true;
+            default:
+                return String(value);
+        }
+    }
 }
+
+// Hacer disponible globalmente
+window.UnifiedEntityManager = UnifiedEntityManager;
 [/file]
 [/template]
 
@@ -1097,7 +1337,7 @@ class UnifiedSurveyQuizManager {
            `;
        }
    }
-
+   
    async handleForm(formType, formData) {
        try {
            const item = {
@@ -1108,7 +1348,9 @@ class UnifiedSurveyQuizManager {
            };
 
            if (formType === 'survey-create') {
-               item.tipo_representacion = formData.get('tipoRepresentacion');
+               item.tipo_representacion = formData.get('tipoRepresentacion') || 'texto';
+               item.activa = true;
+               item.fecha_creacion = new Date().toISOString();
                await this.db.execute('create', 'ENCUESTAS', item);
                return {
                    success: true,
@@ -1117,6 +1359,9 @@ class UnifiedSurveyQuizManager {
                };
            } else if (formType === 'quiz-create') {
                item.tiempoLimite = parseInt(formData.get('timeLimit')) || 30;
+               item.puntuacion_minima = 60;
+               item.activo = true;
+               item.fecha_creacion = new Date().toISOString();
                await this.db.execute('create', 'CUESTIONARIOS', item);
                return {
                    success: true,
@@ -1235,7 +1480,7 @@ class UnifiedSurveyQuizManager {
 </body>
 </html>`;
    }
-
+   
    async confirmGrade(responseId) {
        try {
            const responses = await this.db.execute('getAll', 'RESPUESTAS_CUESTIONARIO');
@@ -1262,6 +1507,9 @@ class UnifiedSurveyQuizManager {
        this.app.ui.showAlert(`Ver resultados de: ${itemName}`, 'info');
    }
 }
+
+// Hacer disponible globalmente
+window.UnifiedSurveyQuizManager = UnifiedSurveyQuizManager;
 [/file]
 [/template]
 
@@ -1386,7 +1634,7 @@ class UnifiedUIManager {
        return colors['['/]type] || colors.info;
    }
 
-   showModal(title, content, actions = ['['/]) {
+   showModal(title, content, actions = ['['/]]) {
        const modal = document.createElement('div');
        modal.className = 'modal';
        modal.style.cssText = `
@@ -1602,6 +1850,9 @@ class UnifiedUIManager {
    }
 }
 
+// Hacer disponible globalmente
+window.UnifiedUIManager = UnifiedUIManager;
+
 // Estilos CSS que se inyectan automáticamente
 const unifiedStyles = `
    @keyframes slideIn {
@@ -1652,7 +1903,7 @@ const unifiedStyles = `
    }
 `;
 
-// Inyectar estilos
+// Inyectar estilos solo una vez
 if (!document.getElementById('unified-styles')) {
    const styleElement = document.createElement('style');
    styleElement.id = 'unified-styles';

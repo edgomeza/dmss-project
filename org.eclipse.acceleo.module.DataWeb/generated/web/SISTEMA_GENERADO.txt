@@ -1,4 +1,4 @@
-SISTEMA Biblioteca Universitaria GENERADO EXITOSAMENTE
+SISTEMA Sistema Bancario Digital GENERADO EXITOSAMENTE
 ===========================================
 
 ✅ Sistema JavaScript Unificado
@@ -20,8 +20,8 @@ ARCHIVOS PRINCIPALES:
 - web/assets/js/dynamic-page-generator.js
 - web/assets/css/style.css
 
-ENTIDADES GENERADAS: 4
-ROLES CONFIGURADOS: 3
+ENTIDADES GENERADAS: 6
+ROLES CONFIGURADOS: 4
 ENCUESTAS: 1
 CUESTIONARIOS: 1
 

@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Sistema Bancario Digital - Editar Prestamo</title>
+   <meta name="description" content="Editar Prestamo en Sistema Bancario Digital">
+   <link rel="preconnect" href="https://fonts.googleapis.com">
+   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+   <link rel="stylesheet" href="../../../assets/css/style.css">
+   
+   <!-- Premium Edit Form Styles -->
+   <style>
+       :root {
+           --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+           --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+           --gradient-success: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+           --gradient-warning: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+           --gradient-danger: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+           --glassmorphism: rgba(255, 255, 255, 0.25);
+           --glassmorphism-border: rgba(255, 255, 255, 0.18);
+           --shadow-luxury: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+       }
+       
+       body {
+           font-family: 'Inter', sans-serif;
+           background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+           min-height: 100vh;
+           position: relative;
+           overflow-x: hidden;
+       }
+       
+       body::before {
+           content: '';
+           position: fixed;
+           top: 0;
+           left: 0;
+           width: 100%;
+           height: 100%;
+           background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.05)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.08)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+           pointer-events: none;
+           z-index: 1;
+       }
+       
+       .app-header {
+           background: var(--glassmorphism);
+           backdrop-filter: blur(20px);
+           -webkit-backdrop-filter: blur(20px);
+           border-bottom: 1px solid var(--glassmorphism-border);
+           padding: 2rem 0;
+           position: relative;
+           z-index: 10;
+       }
+       
+       .app-header h1 {
+           font-family: 'Poppins', sans-serif;
+           font-weight: 800;
+           font-size: 2.5rem;
+           background: linear-gradient(45deg, #fff, #e0e7ff);
+           -webkit-background-clip: text;
+           -webkit-text-fill-color: transparent;
+           background-clip: text;
+           margin-bottom: 0.5rem;
+           text-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+       }
+       
+       .main-nav {
+           background: rgba(255, 255, 255, 0.1);
+           backdrop-filter: blur(10px);
+           border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+           position: relative;
+           z-index: 9;
+       }
+       
+       .nav-link {
+           color: rgba(255, 255, 255, 0.8);
+           text-decoration: none;
+           transition: all 0.3s ease;
+           padding: 0.75rem 1rem;
+           border-radius: 8px;
+       }
+       
+       .nav-link:hover, .nav-link.active {
+           color: white;
+           background: rgba(255, 255, 255, 0.1);
+           text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+       }
+       
+       .main-content {
+           position: relative;
+           z-index: 5;
+           padding: 2rem 0;
+       }
+       
+       .card {
+           background: var(--glassmorphism);
+           backdrop-filter: blur(20px);
+           -webkit-backdrop-filter: blur(20px);
+           border: 1px solid var(--glassmorphism-border);
+           border-radius: 20px;
+           box-shadow: var(--shadow-luxury);
+           transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+           position: relative;
+           overflow: hidden;
+           margin-bottom: 2rem;
+       }
+       
+       .card-header {
+           padding: 1.5rem 2rem;
+           border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+       }
+       
+       .card-header h2 {
+           font-family: 'Poppins', sans-serif;
+           font-weight: 700;
+           color: black;
+           margin: 0;
+       }
+       
+       .card-body {
+           padding: 2rem;
+       }
+       
+       .loading {
+           text-align: center;
+           padding: 2rem;
+           color: rgba(255, 255, 255, 0.8);
+       }
+       
+       .loading-spinner {
+           width: 40px;
+           height: 40px;
+           border: 4px solid rgba(255, 255, 255, 0.3);
+           border-top: 4px solid white;
+           border-radius: 50%;
+           animation: spin 1s linear infinite;
+           margin: 0 auto 1rem;
+       }
+       
+       @keyframes spin {
+           0% { transform: rotate(0deg); }
+           100% { transform: rotate(360deg); }
+       }
+       
+       .form-group {
+           margin-bottom: 1.5rem;
+       }
+       
+       .form-label {
+           display: block;
+           margin-bottom: 0.5rem;
+           color: white;
+           font-weight: 600;
+       }
+       
+       .form-control {
+           width: 100%;
+           padding: 0.875rem 1rem;
+           background: rgba(255, 255, 255, 0.1);
+           border: 2px solid rgba(255, 255, 255, 0.2);
+           border-radius: 12px;
+           color: white;
+           font-size: 1rem;
+           transition: all 0.3s ease;
+           backdrop-filter: blur(10px);
+       }
+       
+       .form-control:focus {
+           outline: none;
+           border-color: rgba(255, 255, 255, 0.5);
+           background: rgba(255, 255, 255, 0.15);
+           box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+       }
+       
+       .form-control::placeholder {
+           color: rgba(255, 255, 255, 0.6);
+       }
+       
+       .form-actions {
+           display: flex;
+           gap: 1rem;
+           margin-top: 2rem;
+       }
+       
+       .btn {
+           font-weight: 600;
+           border-radius: 12px;
+           padding: 0.875rem 2rem;
+           transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+           position: relative;
+           overflow: hidden;
+           text-transform: none;
+           letter-spacing: 0.5px;
+           text-decoration: none;
+           display: inline-block;
+           border: none;
+           cursor: pointer;
+       }
+       
+       .btn::before {
+           content: '';
+           position: absolute;
+           top: 0;
+           left: -100%;
+           width: 100%;
+           height: 100%;
+           background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+           transition: left 0.5s ease;
+       }
+       
+       .btn:hover::before {
+           left: 100%;
+       }
+       
+       .btn-warning {
+           background: var(--gradient-warning);
+           color: white;
+           box-shadow: 0 8px 16px rgba(67, 233, 123, 0.3);
+       }
+       
+       .btn-warning:hover {
+           transform: translateY(-2px);
+           box-shadow: 0 12px 24px rgba(67, 233, 123, 0.4);
+           color: white;
+           text-decoration: none;
+       }
+       
+       .btn-secondary {
+           background: transparent;
+           border: 2px solid rgba(255, 255, 255, 0.3);
+           color: white;
+           backdrop-filter: blur(10px);
+       }
+       
+       .btn-secondary:hover {
+           background: rgba(255, 255, 255, 0.1);
+           border-color: white;
+           transform: translateY(-2px);
+           box-shadow: 0 8px 16px rgba(255, 255, 255, 0.2);
+           color: white;
+           text-decoration: none;
+       }
+       
+       /* Responsive */
+       @media (max-width: 768px) {
+           .app-header h1 {
+               font-size: 2rem;
+           }
+           
+           .card-header {
+               padding: 1rem 1.5rem;
+           }
+           
+           .card-body {
+               padding: 1.5rem;
+           }
+           
+           .form-actions {
+               flex-direction: column;
+           }
+       }
+   </style>
+</head>
+<body>
+   <header class="app-header">
+       <div class="container">
+           <h1>⚙️ Editar Prestamo</h1>
+           <p>Formulario premium de edición para AdministradorBanco en Sistema Bancario Digital</p>
+       </div>
+   </header>
+   
+   <nav class="main-nav">
+       <div class="container nav-container">
+           <ul class="nav-menu">
+               <li class="nav-item"><a href="../../dashboard.html" class="nav-link">🏠 Dashboard</a></li>
+               <li class="nav-item"><a href="index.html" class="nav-link">📊 Gestión Prestamo</a></li>
+               <li class="nav-item"><a href="list.html" class="nav-link">📋 Listar</a></li>
+               <li class="nav-item"><a href="#" class="nav-link active">⚙️ Editar</a></li>
+           </ul>
+       </div>
+   </nav>
+   
+   <main class="main-content">
+       <div class="container">
+           <div class="card">
+               <div class="card-header">
+                   <h2>🔧 Editar Prestamo</h2>
+               </div>
+               <div class="card-body">
+                   <div id="loadingForm" class="loading">
+                       <div class="loading-spinner"></div>
+                       <span>✨ Cargando información premium...</span>
+                   </div>
+                   
+                   <form id="editForm" style="display: none;">
+                       <input type="hidden" id="id_prestamo" name="id_prestamo">
+                       <div class="form-group">
+                           <label for="monto_solicitado" class="form-label">🔧 monto_solicitado *</label>
+                           <input type="text" id="monto_solicitado" name="monto_solicitado" class="form-control" required placeholder="Introduce el monto_solicitado...">
+                       </div>
+                       <div class="form-group">
+                           <label for="tasa_interes" class="form-label">🔧 tasa_interes *</label>
+                           <input type="text" id="tasa_interes" name="tasa_interes" class="form-control" required placeholder="Introduce el tasa_interes...">
+                       </div>
+                       <div class="form-group">
+                           <label for="plazo_meses" class="form-label">🔧 plazo_meses *</label>
+                           <input type="number" id="plazo_meses" name="plazo_meses" class="form-control" required placeholder="Introduce un número...">
+                       </div>
+                       <div class="form-group">
+                           <label for="estado_prestamo" class="form-label">🔧 estado_prestamo *</label>
+                           <input type="text" id="estado_prestamo" name="estado_prestamo" class="form-control" required placeholder="Introduce el estado_prestamo...">
+                       </div>
+                       <div class="form-group">
+                           <label for="fecha_solicitud" class="form-label">🔧 fecha_solicitud *</label>
+                           <input type="text" id="fecha_solicitud" name="fecha_solicitud" class="form-control" required placeholder="Introduce el fecha_solicitud...">
+                       </div>
+                       <div class="form-group">
+                           <label for="fecha_aprobacion" class="form-label">🔧 fecha_aprobacion *</label>
+                           <input type="text" id="fecha_aprobacion" name="fecha_aprobacion" class="form-control" required placeholder="Introduce el fecha_aprobacion...">
+                       </div>
+                       
+                       <div class="form-actions">
+                           <button type="submit" class="btn btn-warning">⚡ Actualizar</button>
+                           <a href="list.html" class="btn btn-secondary">🔙 Cancelar</a>
+                       </div>
+                   </form>
+               </div>
+           </div>
+       </div>
+   </main>
+   
+   <!-- Módulos del sistema -->
+   <script src="../../../assets/js/unified-database.js"></script>
+   <script src="../../../assets/js/unified-ui.js"></script>
+   <script src="../../../assets/js/unified-entities.js"></script>
+   <script src="../../../assets/js/unified-surveys.js"></script>
+   <script src="../../../assets/js/unified-app.js"></script>
+   
+   <!-- Gestores -->
+   <script src="../../../assets/js/data-manager.js"></script>
+   
+   <!-- Script principal -->
+   <script src="../../../assets/js/app.js"></script>
+   <script src="../../../assets/js/prestamo.js"></script>
+</body>
+</html>

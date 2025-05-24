@@ -19,24 +19,318 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>[app.nombre/] - [pagina.titulo/]</title>
+    <meta name="description" content="Página premium de contenido: [pagina.titulo/]">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../../assets/css/style.css">
+    
+    <!-- Premium Content Styles -->
+    <style>
+        :root {
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-success: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --gradient-warning: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            --gradient-danger: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            --glassmorphism: rgba(255, 255, 255, 0.25);
+            --glassmorphism-border: rgba(255, 255, 255, 0.18);
+            --shadow-luxury: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.05)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.08)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .app-header {
+            background: var(--glassmorphism);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glassmorphism-border);
+            padding: 2rem 0;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .app-header h1 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 800;
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, #fff, #e0e7ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+        }
+        
+        .app-header p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.1rem;
+            font-weight: 400;
+        }
+        
+        .main-nav {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            z-index: 9;
+        }
+        
+        .nav-brand .nav-logo {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            color: white;
+            text-decoration: none;
+            font-size: 1.5rem;
+        }
+        
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+        }
+        
+        .main-content {
+            position: relative;
+            z-index: 5;
+            padding: 2rem 0;
+        }
+        
+        .card {
+            background: var(--glassmorphism);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glassmorphism-border);
+            border-radius: 20px;
+            box-shadow: var(--shadow-luxury);
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .card:hover::before {
+            opacity: 1;
+        }
+        
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 32px 64px -12px rgba(0, 0, 0, 0.35);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .card-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .card-header h2 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            color: white;
+            margin: 0;
+        }
+        
+        .card-body {
+            padding: 2rem;
+        }
+        
+        .content {
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.8;
+            font-size: 1.1rem;
+        }
+        
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: white;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .content h1 {
+            background: linear-gradient(45deg, #fff, #e0e7ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .content p {
+            margin-bottom: 1.5rem;
+        }
+        
+        .content ul, .content ol {
+            margin-bottom: 1.5rem;
+            padding-left: 2rem;
+        }
+        
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .content a {
+            color: #4facfe;
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .content a:hover {
+            color: white;
+            border-bottom-color: white;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+        
+        .content blockquote {
+            background: rgba(255, 255, 255, 0.1);
+            border-left: 4px solid #4facfe;
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 12px 12px 0;
+            backdrop-filter: blur(10px);
+        }
+        
+        .content code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            color: #43e97b;
+        }
+        
+        .content pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1.5rem;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .content pre code {
+            background: none;
+            padding: 0;
+            color: #43e97b;
+        }
+        
+        .content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            margin: 1.5rem 0;
+        }
+        
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+        
+        .content th, .content td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .content th {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-weight: 600;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .app-header h1 {
+                font-size: 2rem;
+            }
+            
+            .card-header {
+                padding: 1rem 1.5rem;
+            }
+            
+            .card-body {
+                padding: 1.5rem;
+            }
+            
+            .content {
+                font-size: 1rem;
+            }
+        }
+    </style>
 </head>
 <body>
+    <!-- Floating Elements -->
+    <div class="floating-elements">
+        <div class="floating-element" style="top: 10%; left: 10%; animation-delay: 0s;"></div>
+        <div class="floating-element" style="top: 20%; right: 20%; animation-delay: 2s;"></div>
+        <div class="floating-element" style="bottom: 30%; left: 15%; animation-delay: 4s;"></div>
+        <div class="floating-element" style="bottom: 20%; right: 10%; animation-delay: 6s;"></div>
+    </div>
+
     <header class="app-header">
         <div class="container">
-            <h1>[pagina.titulo/]</h1>
-            <p>[if (pagina.descripcion.oclIsUndefined() = false)][pagina.descripcion/][/if]</p>
+            <h1>📄 [pagina.titulo/]</h1>
+            [if (pagina.descripcion.oclIsUndefined() = false)]
+            <p>✨ [pagina.descripcion/]</p>
+            [else]
+            <p>✨ Contenido premium personalizado para tu experiencia</p>
+            [/if]
         </div>
     </header>
     
     <nav class="main-nav">
         <div class="container nav-container">
             <div class="nav-brand">
-                <a href="../../../index.html" class="nav-logo">[app.nombre/]</a>
+                <a href="../../../index.html" class="nav-logo">🏠 [app.nombre/]</a>
             </div>
             <ul class="nav-menu">
-                <li class="nav-item"><a href="../../dashboard.html" class="nav-link">Dashboard</a></li>
-                <li class="nav-item"><a href="[pagina.nombre.toLowerCase()/].html" class="nav-link active">[pagina.titulo/]</a></li>
+                <li class="nav-item"><a href="../../dashboard.html" class="nav-link">📊 Dashboard</a></li>
+                <li class="nav-item"><a href="[pagina.nombre.toLowerCase()/].html" class="nav-link active">📄 [pagina.titulo/]</a></li>
             </ul>
         </div>
     </nav>
@@ -44,7 +338,9 @@
     <main class="main-content">
         <div class="container">
             <section class="card">
-                <div class="card-header"><h2>Contenido</h2></div>
+                <div class="card-header">
+                    <h2>🎨 Contenido Premium</h2>
+                </div>
                 <div class="card-body">
                     <div class="content">[pagina.oclAsType(PaginaContenido).contenido/]</div>
                 </div>
@@ -52,7 +348,52 @@
         </div>
     </main>
     
-    <script src="../../assets/js/app.js"></script>
+    <!-- Floating Elements CSS -->
+    <style>
+        .floating-elements {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .floating-element {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(45deg, rgba(255,255,255,0.1), rgba(255,255,255,0.3));
+            border-radius: 50%;
+            animation: floatUpDown 8s ease-in-out infinite;
+            box-shadow: 0 0 20px rgba(255,255,255,0.2);
+        }
+        
+        @keyframes floatUpDown {
+            0%, 100% { 
+                transform: translateY(0px) rotate(0deg);
+                opacity: 0.7;
+            }
+            50% { 
+                transform: translateY(-30px) rotate(180deg);
+                opacity: 1;
+            }
+        }
+    </style>
+    
+	<!-- Módulos del sistema -->
+	<script src="../../assets/js/unified-database.js"></script>
+	<script src="../../assets/js/unified-ui.js"></script>
+	<script src="../../assets/js/unified-entities.js"></script>
+	<script src="../../assets/js/unified-surveys.js"></script>
+	<script src="../../assets/js/unified-app.js"></script>
+	
+	<!-- Gestores -->
+	<script src="../../assets/js/data-manager.js"></script>
+	
+	<!-- Script principal -->
+	<script src="../../assets/js/app.js"></script>
 </body>
 </html>
 [/file]

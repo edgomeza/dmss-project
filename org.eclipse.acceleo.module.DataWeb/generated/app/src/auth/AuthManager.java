@@ -47,9 +47,10 @@ public class AuthManager {
     private void crearUsuarioAdmin() {
         Usuario admin = new Usuario("admin", "admin", "Administrador", "admin@example.com");
         admin.addRol("Administrador");
-        admin.addRol("Administrador");
-        admin.addRol("Bibliotecario");
-        admin.addRol("Estudiante");
+        admin.addRol("AdministradorBanco");
+        admin.addRol("GerenteOperaciones");
+        admin.addRol("EmpleadoBanco");
+        admin.addRol("Cliente");
         usuarios.put(admin.getUsername(), admin);
         guardarUsuarios();
         System.out.println("Usuario administrador creado con credenciales: admin/admin");

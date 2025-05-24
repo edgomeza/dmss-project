@@ -1,5 +1,5 @@
 /**
- * GESTOR UNIFICADO DE ENCUESTAS Y CUESTIONARIOS - Biblioteca Universitaria
+ * GESTOR UNIFICADO DE ENCUESTAS Y CUESTIONARIOS - Sistema Bancario Digital
  * Maneja creación, administración y ejecución
  */
 
@@ -316,7 +316,7 @@ class UnifiedSurveyQuizManager {
            `;
        }
    }
-
+   
    async handleForm(formType, formData) {
        try {
            const item = {
@@ -327,7 +327,9 @@ class UnifiedSurveyQuizManager {
            };
 
            if (formType === 'survey-create') {
-               item.tipo_representacion = formData.get('tipoRepresentacion');
+               item.tipo_representacion = formData.get('tipoRepresentacion') || 'texto';
+               item.activa = true;
+               item.fecha_creacion = new Date().toISOString();
                await this.db.execute('create', 'ENCUESTAS', item);
                return {
                    success: true,
@@ -336,6 +338,9 @@ class UnifiedSurveyQuizManager {
                };
            } else if (formType === 'quiz-create') {
                item.tiempoLimite = parseInt(formData.get('timeLimit')) || 30;
+               item.puntuacion_minima = 60;
+               item.activo = true;
+               item.fecha_creacion = new Date().toISOString();
                await this.db.execute('create', 'CUESTIONARIOS', item);
                return {
                    success: true,
@@ -454,7 +459,7 @@ class UnifiedSurveyQuizManager {
 </body>
 </html>`;
    }
-
+   
    async confirmGrade(responseId) {
        try {
            const responses = await this.db.execute('getAll', 'RESPUESTAS_CUESTIONARIO');
@@ -481,3 +486,6 @@ class UnifiedSurveyQuizManager {
        this.app.ui.showAlert(`Ver resultados de: ${itemName}`, 'info');
    }
 }
+
+// Hacer disponible globalmente
+window.UnifiedSurveyQuizManager = UnifiedSurveyQuizManager;

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project default="generate" name="org.eclipse.acceleo.module.DataWeb">
-    <property name="ECLIPSE_HOME" value="../../../../../../manah/Desktop/GIIIS/Tercero/Segundo Semestre/DMSS/Seminarios/eclipse202312R-DMSS/eclipse"/>
-    <property name="ECLIPSE_WORKSPACE" value="../../.."/>
+    <property name="ECLIPSE_HOME" value="../../../OneDrive/Desktop/Universidad/3º de Informática/DMSS/eclipse"/>
+    <property name="ECLIPSE_WORKSPACE" value="../.."/>
 
     <!-- The classpath with only the dependencies used by the project -->
     <path id="org.eclipse.acceleo.module.DataWeb.libraryclasspath">

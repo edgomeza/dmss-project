@@ -1,5 +1,5 @@
 /**
- * GESTOR DE DATOS SIMPLIFICADO - Biblioteca Universitaria
+ * GESTOR DE DATOS SIMPLIFICADO - Sistema Bancario Digital
  * Funciones auxiliares para compatibilidad con páginas existentes
  */
 
@@ -64,50 +64,65 @@ class DataManager {
     }
 
     // Funciones específicas para entidades
-    async getLibroAll() {
-        return await this.getAll('LIBROS');
+    async getClienteAll() {
+        return await this.getAll('CLIENTES');
     }
 
-    async createLibro(data) {
-        return await this.create('LIBROS', data);
+    async createCliente(data) {
+        return await this.create('CLIENTES', data);
     }
 
-    async updateLibro(data) {
-        return await this.update('LIBROS', data);
+    async updateCliente(data) {
+        return await this.update('CLIENTES', data);
     }
 
-    async deleteLibro(id) {
-        return await this.delete('LIBROS', id);
+    async deleteCliente(id) {
+        return await this.delete('CLIENTES', id);
     }
-    async getCategoriaAll() {
-        return await this.getAll('CATEGORIAS');
-    }
-
-    async createCategoria(data) {
-        return await this.create('CATEGORIAS', data);
+    async getCuentaAll() {
+        return await this.getAll('CUENTAS');
     }
 
-    async updateCategoria(data) {
-        return await this.update('CATEGORIAS', data);
+    async createCuenta(data) {
+        return await this.create('CUENTAS', data);
     }
 
-    async deleteCategoria(id) {
-        return await this.delete('CATEGORIAS', id);
-    }
-    async getUsuarioAll() {
-        return await this.getAll('USUARIOS');
+    async updateCuenta(data) {
+        return await this.update('CUENTAS', data);
     }
 
-    async createUsuario(data) {
-        return await this.create('USUARIOS', data);
+    async deleteCuenta(id) {
+        return await this.delete('CUENTAS', id);
+    }
+    async getTransaccionAll() {
+        return await this.getAll('TRANSACCIONES');
     }
 
-    async updateUsuario(data) {
-        return await this.update('USUARIOS', data);
+    async createTransaccion(data) {
+        return await this.create('TRANSACCIONES', data);
     }
 
-    async deleteUsuario(id) {
-        return await this.delete('USUARIOS', id);
+    async updateTransaccion(data) {
+        return await this.update('TRANSACCIONES', data);
+    }
+
+    async deleteTransaccion(id) {
+        return await this.delete('TRANSACCIONES', id);
+    }
+    async getEmpleadoAll() {
+        return await this.getAll('EMPLEADOS');
+    }
+
+    async createEmpleado(data) {
+        return await this.create('EMPLEADOS', data);
+    }
+
+    async updateEmpleado(data) {
+        return await this.update('EMPLEADOS', data);
+    }
+
+    async deleteEmpleado(id) {
+        return await this.delete('EMPLEADOS', id);
     }
     async getPrestamoAll() {
         return await this.getAll('PRESTAMOS');
@@ -123,6 +138,21 @@ class DataManager {
 
     async deletePrestamo(id) {
         return await this.delete('PRESTAMOS', id);
+    }
+    async getTarjetaCreditoAll() {
+        return await this.getAll('TARJETAS_CREDITO');
+    }
+
+    async createTarjetaCredito(data) {
+        return await this.create('TARJETAS_CREDITO', data);
+    }
+
+    async updateTarjetaCredito(data) {
+        return await this.update('TARJETAS_CREDITO', data);
+    }
+
+    async deleteTarjetaCredito(id) {
+        return await this.delete('TARJETAS_CREDITO', id);
     }
 
     // Funciones para encuestas y cuestionarios
