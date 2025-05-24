@@ -122,8 +122,8 @@ public class MenuPrincipal {
      */
     private boolean mostrarMenuInvitado() {
         ConsoleUtils.limpiarPantalla();
-        ConsoleUtils.mostrarTitulo("Sistema Bancario Digital");
-        System.out.println("Sistema integral de gestión bancaria para clientes y empleados\n");
+        ConsoleUtils.mostrarTitulo("Biblioteca Universitaria");
+        System.out.println("Sistema de gestión de biblioteca universitaria\n");
         ConsoleUtils.mostrarLinea();
         
         System.out.println("\nMenú de invitado:");
@@ -153,7 +153,7 @@ public class MenuPrincipal {
      */
     private void mostrarCabecera() {
         ConsoleUtils.limpiarPantalla();
-        ConsoleUtils.mostrarTitulo("Sistema Bancario Digital");
+        ConsoleUtils.mostrarTitulo("Biblioteca Universitaria");
         
         if (authManager.isAuthenticated()) {
             Usuario usuario = authManager.getUsuarioActual();
@@ -166,7 +166,7 @@ public class MenuPrincipal {
             }
         }
         
-        System.out.println("Sistema integral de gestión bancaria para clientes y empleados");
+        System.out.println("Sistema de gestión de biblioteca universitaria");
         ConsoleUtils.mostrarLinea();
     }
     
@@ -200,17 +200,14 @@ public class MenuPrincipal {
      * @return ID del rol, o -1 si no se encuentra
      */
     private int obtenerIdRol(String rolNombre) {
-        if ("AdministradorBanco".equals(rolNombre)) {
+        if ("Administrador".equals(rolNombre)) {
             return 1;
         }
-        if ("GerenteOperaciones".equals(rolNombre)) {
+        if ("Bibliotecario".equals(rolNombre)) {
             return 2;
         }
-        if ("EmpleadoBanco".equals(rolNombre)) {
+        if ("Estudiante".equals(rolNombre)) {
             return 3;
-        }
-        if ("Cliente".equals(rolNombre)) {
-            return 4;
         }
         return -1;
     }
@@ -259,16 +256,13 @@ public class MenuPrincipal {
      */
     private String obtenerNombreRol(int rolId) {
         if (1 == rolId) {
-            return "AdministradorBanco";
+            return "Administrador";
         }
         if (2 == rolId) {
-            return "GerenteOperaciones";
+            return "Bibliotecario";
         }
         if (3 == rolId) {
-            return "EmpleadoBanco";
-        }
-        if (4 == rolId) {
-            return "Cliente";
+            return "Estudiante";
         }
         return null;
     }
@@ -278,9 +272,9 @@ public class MenuPrincipal {
      */
     private void mostrarInformacionApp() {
         ConsoleUtils.limpiarPantalla();
-        ConsoleUtils.mostrarTitulo("Acerca de Sistema Bancario Digital");
+        ConsoleUtils.mostrarTitulo("Acerca de Biblioteca Universitaria");
         
-        System.out.println("Sistema integral de gestión bancaria para clientes y empleados");
+        System.out.println("Sistema de gestión de biblioteca universitaria");
         System.out.println("\nVersión: " + appConfig.getProperty("app.version", "1.0.0"));
         System.out.println("Desarrollado como parte del proyecto de generación de aplicaciones");
         
@@ -293,14 +287,14 @@ public class MenuPrincipal {
         System.out.println("- Estadísticas y reportes");
         
         System.out.println("\nRoles disponibles:");
-        System.out.println("- AdministradorBanco");
-        System.out.println("- GerenteOperaciones");
-        System.out.println("- EmpleadoBanco");
-        System.out.println("- Cliente");
+        System.out.println("- Administrador");
+        System.out.println("- Bibliotecario");
+        System.out.println("- Estudiante");
         
         System.out.println("\nRedes sociales:");
-        System.out.println("- TWITTER: @BancoDigital");
-        System.out.println("- FACEBOOK: @BancoDigital");
+        System.out.println("- TWITTER: @BibliotecaUniv");
+        System.out.println("- FACEBOOK: @BibliotecaUniversitaria");
+        System.out.println("- INSTAGRAM: @biblioteca_univ");
         
         ConsoleUtils.pausar(scanner);
     }
@@ -311,7 +305,7 @@ public class MenuPrincipal {
     private void mostrarMensajeDespedida() {
         ConsoleUtils.limpiarPantalla();
         ConsoleUtils.mostrarTitulo("¡Hasta pronto!");
-        System.out.println("Gracias por utilizar Sistema Bancario Digital");
+        System.out.println("Gracias por utilizar Biblioteca Universitaria");
         System.out.println("\nPresione Enter para finalizar...");
         scanner.nextLine();
     }

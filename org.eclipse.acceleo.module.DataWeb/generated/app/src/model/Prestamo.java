@@ -17,16 +17,12 @@ public class Prestamo implements Serializable, Cloneable {
     
     // Atributos
     private Integer id_prestamo;
-    private double monto_solicitado;
-    private double tasa_interes;
-    private Integer plazo_meses;
-    private String estado_prestamo;
-    private String fecha_solicitud;
-    private String fecha_aprobacion;
+    private String fechaPrestamo;
+    private String fechaDevolucion;
     
     // Referencias a otras entidades
-    private Cliente cliente_solicitante;
-    private Empleado empleado_aprobador;
+    private Usuario prestamo_usuario;
+    private Libro prestamo_libro;
     
     /**
      * Constructor por defecto
@@ -35,25 +31,17 @@ public class Prestamo implements Serializable, Cloneable {
     public Prestamo() {
         // Inicialización de valores por defecto
         this.id_prestamo = 0;
-        this.monto_solicitado = 0.0;
-        this.tasa_interes = 0.0;
-        this.plazo_meses = 0;
-        this.estado_prestamo = "";
-        this.fecha_solicitud = "";
-        this.fecha_aprobacion = "";
+        this.fechaPrestamo = "";
+        this.fechaDevolucion = "";
     }
     
     /**
      * Constructor con todos los atributos (sin referencias)
      */
-    public Prestamo(Integer id_prestamo, double monto_solicitado, double tasa_interes, Integer plazo_meses, String estado_prestamo, String fecha_solicitud, String fecha_aprobacion) {
+    public Prestamo(Integer id_prestamo, String fechaPrestamo, String fechaDevolucion) {
         this.id_prestamo = id_prestamo;
-        this.monto_solicitado = monto_solicitado;
-        this.tasa_interes = tasa_interes;
-        this.plazo_meses = plazo_meses;
-        this.estado_prestamo = estado_prestamo;
-        this.fecha_solicitud = fecha_solicitud;
-        this.fecha_aprobacion = fecha_aprobacion;
+        this.fechaPrestamo = fechaPrestamo;
+        this.fechaDevolucion = fechaDevolucion;
         
         // Validamos los datos
         validarDatos();
@@ -80,166 +68,85 @@ public class Prestamo implements Serializable, Cloneable {
     }
     
     /**
-     * Obtiene el valor de monto_solicitado
+     * Obtiene el valor de fechaPrestamo
      * 
-     * @return El valor de monto_solicitado
+     * @return El valor de fechaPrestamo
      */
-    public double getMonto_solicitado() {
-        return monto_solicitado;
+    public String getFechaPrestamo() {
+        return fechaPrestamo;
     }
     
     /**
-     * Establece el valor de monto_solicitado
+     * Establece el valor de fechaPrestamo
      * 
-     * @param monto_solicitado Nuevo valor
-     *      */
-    public void setMonto_solicitado(double monto_solicitado) {
-        
-        this.monto_solicitado = monto_solicitado;
-    }
-    
-    /**
-     * Obtiene el valor de tasa_interes
-     * 
-     * @return El valor de tasa_interes
-     */
-    public double getTasa_interes() {
-        return tasa_interes;
-    }
-    
-    /**
-     * Establece el valor de tasa_interes
-     * 
-     * @param tasa_interes Nuevo valor
-     *      */
-    public void setTasa_interes(double tasa_interes) {
-        
-        this.tasa_interes = tasa_interes;
-    }
-    
-    /**
-     * Obtiene el valor de plazo_meses
-     * 
-     * @return El valor de plazo_meses
-     */
-    public Integer getPlazo_meses() {
-        return plazo_meses;
-    }
-    
-    /**
-     * Establece el valor de plazo_meses
-     * 
-     * @param plazo_meses Nuevo valor
-     *      */
-    public void setPlazo_meses(Integer plazo_meses) {
-        
-        this.plazo_meses = plazo_meses;
-    }
-    
-    /**
-     * Obtiene el valor de estado_prestamo
-     * 
-     * @return El valor de estado_prestamo
-     */
-    public String getEstado_prestamo() {
-        return estado_prestamo;
-    }
-    
-    /**
-     * Establece el valor de estado_prestamo
-     * 
-     * @param estado_prestamo Nuevo valor
+     * @param fechaPrestamo Nuevo valor
      *      * @throws ValidacionException Si el valor es null
      */
-    public void setEstado_prestamo(String estado_prestamo) {
+    public void setFechaPrestamo(String fechaPrestamo) {
         // Validación básica para strings
-        if (estado_prestamo == null) {
-            throw new ValidacionException("El atributo estado_prestamo no puede ser null");
+        if (fechaPrestamo == null) {
+            throw new ValidacionException("El atributo fechaPrestamo no puede ser null");
         }
         
-        this.estado_prestamo = estado_prestamo;
+        this.fechaPrestamo = fechaPrestamo;
     }
     
     /**
-     * Obtiene el valor de fecha_solicitud
+     * Obtiene el valor de fechaDevolucion
      * 
-     * @return El valor de fecha_solicitud
+     * @return El valor de fechaDevolucion
      */
-    public String getFecha_solicitud() {
-        return fecha_solicitud;
+    public String getFechaDevolucion() {
+        return fechaDevolucion;
     }
     
     /**
-     * Establece el valor de fecha_solicitud
+     * Establece el valor de fechaDevolucion
      * 
-     * @param fecha_solicitud Nuevo valor
+     * @param fechaDevolucion Nuevo valor
      *      * @throws ValidacionException Si el valor es null
      */
-    public void setFecha_solicitud(String fecha_solicitud) {
+    public void setFechaDevolucion(String fechaDevolucion) {
         // Validación básica para strings
-        if (fecha_solicitud == null) {
-            throw new ValidacionException("El atributo fecha_solicitud no puede ser null");
+        if (fechaDevolucion == null) {
+            throw new ValidacionException("El atributo fechaDevolucion no puede ser null");
         }
         
-        this.fecha_solicitud = fecha_solicitud;
-    }
-    
-    /**
-     * Obtiene el valor de fecha_aprobacion
-     * 
-     * @return El valor de fecha_aprobacion
-     */
-    public String getFecha_aprobacion() {
-        return fecha_aprobacion;
-    }
-    
-    /**
-     * Establece el valor de fecha_aprobacion
-     * 
-     * @param fecha_aprobacion Nuevo valor
-     *      * @throws ValidacionException Si el valor es null
-     */
-    public void setFecha_aprobacion(String fecha_aprobacion) {
-        // Validación básica para strings
-        if (fecha_aprobacion == null) {
-            throw new ValidacionException("El atributo fecha_aprobacion no puede ser null");
-        }
-        
-        this.fecha_aprobacion = fecha_aprobacion;
+        this.fechaDevolucion = fechaDevolucion;
     }
     
     
     // Getters y setters para las referencias
     /**
-     * Obtiene la referencia a cliente_solicitante (Cliente)
-     * @return La entidad Cliente referenciada
+     * Obtiene la referencia a prestamo_usuario (Usuario)
+     * @return La entidad Usuario referenciada
      */
-    public Cliente getCliente_solicitante() {
-        return cliente_solicitante;
+    public Usuario getPrestamo_usuario() {
+        return prestamo_usuario;
     }
     
     /**
-     * Establece la referencia a cliente_solicitante (Cliente)
-     * @param cliente_solicitante Nueva entidad referenciada
+     * Establece la referencia a prestamo_usuario (Usuario)
+     * @param prestamo_usuario Nueva entidad referenciada
      */
-    public void setCliente_solicitante(Cliente cliente_solicitante) {
-        this.cliente_solicitante = cliente_solicitante;
+    public void setPrestamo_usuario(Usuario prestamo_usuario) {
+        this.prestamo_usuario = prestamo_usuario;
     }
     
     /**
-     * Obtiene la referencia a empleado_aprobador (Empleado)
-     * @return La entidad Empleado referenciada
+     * Obtiene la referencia a prestamo_libro (Libro)
+     * @return La entidad Libro referenciada
      */
-    public Empleado getEmpleado_aprobador() {
-        return empleado_aprobador;
+    public Libro getPrestamo_libro() {
+        return prestamo_libro;
     }
     
     /**
-     * Establece la referencia a empleado_aprobador (Empleado)
-     * @param empleado_aprobador Nueva entidad referenciada
+     * Establece la referencia a prestamo_libro (Libro)
+     * @param prestamo_libro Nueva entidad referenciada
      */
-    public void setEmpleado_aprobador(Empleado empleado_aprobador) {
-        this.empleado_aprobador = empleado_aprobador;
+    public void setPrestamo_libro(Libro prestamo_libro) {
+        this.prestamo_libro = prestamo_libro;
     }
     
     
@@ -252,36 +159,30 @@ public class Prestamo implements Serializable, Cloneable {
         if (id_prestamo <= 0) {
             throw new ValidacionException("El identificador id_prestamo debe ser mayor que cero");
         }
-        if (monto_solicitado < 0) {
-            throw new ValidacionException("El valor de monto_solicitado no puede ser negativo");
+        if (fechaPrestamo == null) {
+            throw new ValidacionException("El atributo fechaPrestamo no puede ser null");
         }
-        if (estado_prestamo == null) {
-            throw new ValidacionException("El atributo estado_prestamo no puede ser null");
-        }
-        if (fecha_solicitud == null) {
-            throw new ValidacionException("El atributo fecha_solicitud no puede ser null");
-        }
-        if (fecha_aprobacion == null) {
-            throw new ValidacionException("El atributo fecha_aprobacion no puede ser null");
+        if (fechaDevolucion == null) {
+            throw new ValidacionException("El atributo fechaDevolucion no puede ser null");
         }
         
         // Validaciones específicas de campos tipo fecha
-        if (!fecha_solicitud.isEmpty()) {
+        if (!fechaPrestamo.isEmpty()) {
             try {
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
                 dateFormat.setLenient(false);
-                dateFormat.parse(fecha_solicitud);
+                dateFormat.parse(fechaPrestamo);
             } catch (ParseException e) {
-                throw new ValidacionException("El formato de fecha_solicitud no es válido. Use formato yyyy-MM-dd");
+                throw new ValidacionException("El formato de fechaPrestamo no es válido. Use formato yyyy-MM-dd");
             }
         }
-        if (!fecha_aprobacion.isEmpty()) {
+        if (!fechaDevolucion.isEmpty()) {
             try {
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
                 dateFormat.setLenient(false);
-                dateFormat.parse(fecha_aprobacion);
+                dateFormat.parse(fechaDevolucion);
             } catch (ParseException e) {
-                throw new ValidacionException("El formato de fecha_aprobacion no es válido. Use formato yyyy-MM-dd");
+                throw new ValidacionException("El formato de fechaDevolucion no es válido. Use formato yyyy-MM-dd");
             }
         }
     }
@@ -324,22 +225,22 @@ public class Prestamo implements Serializable, Cloneable {
             // No es necesario clonar tipos primitivos o String (son inmutables)
             
             // Clonar referencias si es necesario
-            if (this.cliente_solicitante != null && this.cliente_solicitante instanceof Cloneable) {
+            if (this.prestamo_usuario != null && this.prestamo_usuario instanceof Cloneable) {
                 try {
                     // Intentamos clonar usando el método clone()
-                    clone.cliente_solicitante = (Cliente) this.cliente_solicitante.clone();
+                    clone.prestamo_usuario = (Usuario) this.prestamo_usuario.clone();
                 } catch (Exception e) {
                     // Si no se puede clonar, asignamos la referencia original
-                    clone.cliente_solicitante = this.cliente_solicitante;
+                    clone.prestamo_usuario = this.prestamo_usuario;
                 }
             }
-            if (this.empleado_aprobador != null && this.empleado_aprobador instanceof Cloneable) {
+            if (this.prestamo_libro != null && this.prestamo_libro instanceof Cloneable) {
                 try {
                     // Intentamos clonar usando el método clone()
-                    clone.empleado_aprobador = (Empleado) this.empleado_aprobador.clone();
+                    clone.prestamo_libro = (Libro) this.prestamo_libro.clone();
                 } catch (Exception e) {
                     // Si no se puede clonar, asignamos la referencia original
-                    clone.empleado_aprobador = this.empleado_aprobador;
+                    clone.prestamo_libro = this.prestamo_libro;
                 }
             }
             
@@ -361,28 +262,20 @@ public class Prestamo implements Serializable, Cloneable {
         // Incluimos todos los atributos
         sb.append(" id_prestamo=").append(id_prestamo);
         sb.append(",");
-        sb.append(" monto_solicitado=").append(monto_solicitado);
+        sb.append(" fechaPrestamo=").append(fechaPrestamo);
         sb.append(",");
-        sb.append(" tasa_interes=").append(tasa_interes);
-        sb.append(",");
-        sb.append(" plazo_meses=").append(plazo_meses);
-        sb.append(",");
-        sb.append(" estado_prestamo=").append(estado_prestamo);
-        sb.append(",");
-        sb.append(" fecha_solicitud=").append(fecha_solicitud);
-        sb.append(",");
-        sb.append(" fecha_aprobacion=").append(fecha_aprobacion);
+        sb.append(" fechaDevolucion=").append(fechaDevolucion);
         
         // Incluimos las referencias, solo mostrando sus IDs
-        sb.append(", cliente_solicitante=");
-        if (cliente_solicitante != null) {
-            sb.append(cliente_solicitante.getId_cliente());
+        sb.append(", prestamo_usuario=");
+        if (prestamo_usuario != null) {
+            sb.append(prestamo_usuario.getId_usuario());
         } else {
             sb.append("null");
         }
-        sb.append(", empleado_aprobador=");
-        if (empleado_aprobador != null) {
-            sb.append(empleado_aprobador.getId_empleado());
+        sb.append(", prestamo_libro=");
+        if (prestamo_libro != null) {
+            sb.append(prestamo_libro.getId_libro());
         } else {
             sb.append("null");
         }
@@ -403,11 +296,9 @@ public class Prestamo implements Serializable, Cloneable {
 	    
 	    // Añadimos 1-3 atributos representativos
 	    sb.append(": ");
-	    sb.append(getEstado_prestamo());
+	    sb.append(getFechaPrestamo());
 	    sb.append(" - ");
-	    sb.append(getFecha_solicitud());
-	    sb.append(" - ");
-	    sb.append(getFecha_aprobacion());
+	    sb.append(getFechaDevolucion());
 	    
 	    return sb.toString();
 	}

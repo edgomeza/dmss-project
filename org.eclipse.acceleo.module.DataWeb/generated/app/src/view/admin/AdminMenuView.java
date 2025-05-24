@@ -103,20 +103,18 @@ public class AdminMenuView {
         
         System.out.println("Seleccione una entidad:");
         
-        System.out.println("1. Cliente");
-        System.out.println("2. Cuenta");
-        System.out.println("3. Transaccion");
-        System.out.println("4. Empleado");
-        System.out.println("5. Prestamo");
-        System.out.println("6. TarjetaCredito");
+        System.out.println("1. Libro");
+        System.out.println("2. Categoria");
+        System.out.println("3. Usuario");
+        System.out.println("4. Prestamo");
         
         System.out.println("0. Volver");
         
-        int opcion = ConsoleUtils.leerOpcion(scanner, 0, 6);
+        int opcion = ConsoleUtils.leerOpcion(scanner, 0, 4);
         
         if (opcion == 0) {
             return;
-        } else if (opcion >= 1 && opcion <= 6) {
+        } else if (opcion >= 1 && opcion <= 4) {
             ConsoleUtils.mostrarInfo("Funcionalidad no implementada directamente. Utilice la navegación por roles.");
             ConsoleUtils.pausar(scanner);
         }

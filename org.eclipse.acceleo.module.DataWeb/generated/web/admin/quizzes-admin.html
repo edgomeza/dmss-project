@@ -4,721 +4,82 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Administración de Cuestionarios</title>
-    <meta name="description" content="Panel de administración de cuestionarios evaluables del sistema">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../assets/css/style.css">
-    <link rel="icon" type="image/x-icon" href="../assets/icons/favicon.ico">
 </head>
 <body>
     <header class="app-header">
         <div class="container">
             <h1>Administración de Cuestionarios</h1>
-            <p>Panel de control para la gestión y evaluación de cuestionarios</p>
         </div>
     </header>
     
     <nav class="main-nav">
         <div class="container nav-container">
-            <div class="nav-brand">
-                <a href="../index.html" class="nav-logo">Administración</a>
-            </div>
             <ul class="nav-menu">
-                <li class="nav-item">
-                    <a href="../index.html" class="nav-link">Inicio</a>
-                </li>
-                <li class="nav-item">
-                    <a href="surveys-admin.html" class="nav-link">Encuestas</a>
-                </li>
-                <li class="nav-item">
-                    <a href="quizzes-admin.html" class="nav-link active">Cuestionarios</a>
-                </li>
-                <li class="nav-item">
-                    <a href="create-quiz.html" class="nav-link">Crear Nuevo</a>
-                </li>
+                <li class="nav-item"><a href="../index.html" class="nav-link">Inicio</a></li>
+                <li class="nav-item"><a href="surveys-admin.html" class="nav-link">Encuestas</a></li>
+                <li class="nav-item"><a href="quizzes-admin.html" class="nav-link active">Cuestionarios</a></li>
+                <li class="nav-item"><a href="create-quiz.html" class="nav-link">Crear Nuevo</a></li>
             </ul>
-            <button class="nav-toggle" aria-label="Abrir menú">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
         </div>
     </nav>
     
     <main class="main-content">
         <div class="container">
-            <!-- Resumen general -->
             <section class="admin-overview mb-6">
                 <div class="card">
-                    <div class="card-header">
-                        <h2>Resumen de Cuestionarios</h2>
-                    </div>
+                    <div class="card-header"><h2>Resumen de Cuestionarios</h2></div>
                     <div class="card-body">
-                        <div class="stats-grid grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="stats-grid">
                             <div class="stat-card">
-                                <div class="stat-icon">📚</div>
-                                <div class="stat-content">
-                                    <div class="stat-number">1</div>
-                                    <div class="stat-label">Cuestionarios Activos</div>
-                                </div>
-                            </div>
-                            
-                            <div class="stat-card">
-                                <div class="stat-icon">📝</div>
-                                <div class="stat-content">
-                                    <div class="stat-number" id="total-quiz-responses">--</div>
-                                    <div class="stat-label">Evaluaciones Totales</div>
-                                </div>
-                            </div>
-                            
-                            <div class="stat-card">
-                                <div class="stat-icon">⏳</div>
-                                <div class="stat-content">
-                                    <div class="stat-number" id="pending-quiz-reviews">--</div>
-                                    <div class="stat-label">Pendientes de Revisión</div>
-                                </div>
-                            </div>
-                            
-                            <div class="stat-card">
-                                <div class="stat-icon">🎓</div>
-                                <div class="stat-content">
-                                    <div class="stat-number" id="quiz-average-score">--</div>
-                                    <div class="stat-label">Puntuación Media</div>
-                                </div>
+                                <div class="stat-number">1</div>
+                                <div class="stat-label">Cuestionarios Activos</div>
                             </div>
                         </div>
                     </div>
                 </div>
             </section>
             
-            <!-- Cuestionarios disponibles -->
             <section class="quizzes-section mb-6">
                 <div class="card">
                     <div class="card-header">
-                        <div class="flex justify-between items-center">
-                            <h2>Cuestionarios Disponibles</h2>
-                            <a href="create-quiz.html" class="btn btn-success">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <circle cx="12" cy="12" r="10"></circle>
-                                    <line x1="12" y1="8" x2="12" y2="16"></line>
-                                    <line x1="8" y1="12" x2="16" y2="12"></line>
-                                </svg>
-                                Crear Nuevo Cuestionario
-                            </a>
-                        </div>
+                        <h2>Cuestionarios Disponibles</h2>
+                        <a href="create-quiz.html" class="btn btn-success">Crear Nuevo Cuestionario</a>
                     </div>
                     <div class="card-body">
-                        <div class="quizzes-grid grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <div class="quiz-card" data-quiz="satisfaccionCliente">
-                                <div class="quiz-header">
-                                    <h3>Encuesta de Satisfacción Bancaria</h3>
-                                    <span class="quiz-badge">Activo</span>
-                                </div>
-                                <div class="quiz-details">
-                                    <p>Evalúa tu experiencia con nuestros servicios</p>
-                                    <div class="quiz-stats">
-                                        <div class="stat-item">
-                                            <span class="stat-label">Preguntas:</span>
-                                            <span class="stat-value">2</span>
-                                        </div>
-                                        <div class="stat-item">
-                                            <span class="stat-label">Pendientes:</span>
-                                            <span class="stat-value pending" id="pending-review-satisfaccionCliente">--</span>
-                                        </div>
-                                        <div class="stat-item">
-                                            <span class="stat-label">Nota Media:</span>
-                                            <span class="stat-value" id="avg-score-satisfaccionCliente">--</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="quiz-actions">
-                                    <button class="btn btn-info btn-sm" onclick="viewQuizResults('satisfaccionCliente')">
-                                        Ver Resultados
-                                    </button>
-                                    <a href="edit-quiz.html?id=${quiz.id_cuestionario}" class="btn btn-warning btn-sm">Editar</a>
-                                    <button class="btn btn-danger btn-sm" onclick="deleteQuiz('satisfaccionCliente')">
-                                        Eliminar
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+                        <div id="quizzes-list"></div>
                     </div>
                 </div>
             </section>
             
-            <!-- Evaluaciones pendientes de revisión -->
             <section class="pending-reviews mb-6">
                 <div class="card">
-                    <div class="card-header">
-                        <h2>Evaluaciones Pendientes de Revisión</h2>
-                    </div>
+                    <div class="card-header"><h2>Evaluaciones Pendientes</h2></div>
                     <div class="card-body">
-                        <div id="pendingReviewsTable">
-                            <div class="loading">
-                                <div class="loading-spinner"></div>
-                                <span>Cargando evaluaciones pendientes...</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-            
-            <!-- Asignación de cuestionarios a roles -->
-            <section class="role-assignments mb-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h2>Asignación de Cuestionarios a Roles</h2>
-                    </div>
-                    <div class="card-body">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Cuestionario</th>
-                                    <th>AdministradorBanco</th>
-                                    <th>GerenteOperaciones</th>
-                                    <th>EmpleadoBanco</th>
-                                    <th>Cliente</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Encuesta de Satisfacción Bancaria</td>
-                                    <td>
-                                        <div class="role-toggle">
-                                            <input type="checkbox" id="role_satisfaccionCliente_AdministradorBanco" 
-                                                   class="role-checkbox"
-                                                   data-quiz="satisfaccionCliente" 
-                                                   data-role="AdministradorBanco"
-                                                   >
-                                            <label for="role_satisfaccionCliente_AdministradorBanco" class="role-label"></label>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="role-toggle">
-                                            <input type="checkbox" id="role_satisfaccionCliente_GerenteOperaciones" 
-                                                   class="role-checkbox"
-                                                   data-quiz="satisfaccionCliente" 
-                                                   data-role="GerenteOperaciones"
-                                                   >
-                                            <label for="role_satisfaccionCliente_GerenteOperaciones" class="role-label"></label>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="role-toggle">
-                                            <input type="checkbox" id="role_satisfaccionCliente_EmpleadoBanco" 
-                                                   class="role-checkbox"
-                                                   data-quiz="satisfaccionCliente" 
-                                                   data-role="EmpleadoBanco"
-                                                   >
-                                            <label for="role_satisfaccionCliente_EmpleadoBanco" class="role-label"></label>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="role-toggle">
-                                            <input type="checkbox" id="role_satisfaccionCliente_Cliente" 
-                                                   class="role-checkbox"
-                                                   data-quiz="satisfaccionCliente" 
-                                                   data-role="Cliente"
-                                                   >
-                                            <label for="role_satisfaccionCliente_Cliente" class="role-label"></label>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <div class="mt-4">
-                            <button id="saveQuizRoleAssignments" class="btn btn-primary">Guardar Asignaciones</button>
-                        </div>
+                        <div id="pendingReviewsTable"></div>
                     </div>
                 </div>
             </section>
         </div>
     </main>
     
-    <!-- Modal para revisión de evaluaciones -->
+    <!-- Modal para revisión -->
     <div id="reviewModal" class="modal">
-        <div class="modal-content" style="max-width: 900px;">
+        <div class="modal-content">
             <div class="modal-header">
                 <h3>Revisión de Evaluación</h3>
-                <button class="modal-close" onclick="closeReviewModal()">×</button>
+                <button class="modal-close" onclick="closeModal()">×</button>
             </div>
-            <div class="modal-body" id="reviewModalBody">
-                <!-- El contenido se cargará dinámicamente -->
-            </div>
+            <div class="modal-body" id="reviewModalBody"></div>
             <div class="modal-footer">
-                <button class="btn btn-success" id="confirmGradeBtn" onclick="confirmGrade()">Confirmar Calificación</button>
-                <button class="btn btn-secondary" onclick="closeReviewModal()">Cerrar</button>
+                <button class="btn btn-success" onclick="confirmGrade()">Confirmar</button>
+                <button class="btn btn-secondary" onclick="closeModal()">Cerrar</button>
             </div>
         </div>
     </div>
-    
-    <!-- Modal para resultados generales -->
-    <div id="resultsModal" class="modal">
-        <div class="modal-content" style="max-width: 900px;">
-            <div class="modal-header">
-                <h3>Resultados del Cuestionario</h3>
-                <button class="modal-close" onclick="closeResultsModal()">×</button>
-            </div>
-            <div class="modal-body" id="resultsModalBody">
-                <!-- El contenido se cargará dinámicamente -->
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeResultsModal()">Cerrar</button>
-            </div>
-        </div>
-    </div>
-    
-    <footer class="app-footer">
-        <div class="container">
-            <div class="footer-bottom">
-                <p>&copy; 2025 Administración. Todos los derechos reservados.</p>
-            </div>
-        </div>
-    </footer>
     
     <script src="../assets/js/app.js"></script>
-    <script src="../assets/js/admin-quizzes.js"></script>
-	<script src="../assets/js/dynamic-page-generator.js"></script>
-    
-    <style>
-        .stats-grid {
-            margin-top: 1rem;
-        }
-        
-        .stat-card {
-            background: white;
-            border-radius: var(--radius);
-            padding: 1.5rem;
-            display: flex;
-            align-items: center;
-            border: 1px solid var(--gray-200);
-            box-shadow: var(--shadow-sm);
-        }
-        
-        .stat-icon {
-            font-size: 2rem;
-            margin-right: 1rem;
-        }
-        
-        .stat-number {
-            font-size: 1.75rem;
-            font-weight: 700;
-            color: var(--gray-900);
-            line-height: 1;
-        }
-        
-        .stat-label {
-            font-size: 0.875rem;
-            color: var(--gray-600);
-            margin-top: 0.25rem;
-        }
-        
-        .quiz-card {
-            background: white;
-            border-radius: var(--radius);
-            border: 1px solid var(--gray-200);
-            overflow: hidden;
-            box-shadow: var(--shadow-sm);
-            transition: var(--transition);
-        }
-        
-        .quiz-card:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-        }
-        
-        .quiz-header {
-            padding: 1.25rem;
-            background: var(--gray-50);
-            border-bottom: 1px solid var(--gray-200);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .quiz-header h3 {
-            margin: 0;
-            font-size: 1.125rem;
-            color: var(--gray-900);
-        }
-        
-        .quiz-badge {
-            background: var(--success-100);
-            color: var(--success-700);
-            padding: 0.25rem 0.5rem;
-            border-radius: var(--radius);
-            font-size: 0.75rem;
-            font-weight: 500;
-        }
-        
-        .quiz-details {
-            padding: 1.25rem;
-        }
-        
-        .quiz-details p {
-            margin: 0 0 1rem;
-            color: var(--gray-600);
-            font-size: 0.875rem;
-        }
-        
-        .quiz-stats {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-        
-        .stat-item {
-            display: flex;
-            flex-direction: column;
-            background: var(--gray-50);
-            padding: 0.75rem;
-            border-radius: var(--radius);
-            min-width: 80px;
-        }
-        
-        .stat-label {
-            font-size: 0.75rem;
-            color: var(--gray-600);
-        }
-        
-        .stat-value {
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--gray-900);
-        }
-        
-        .stat-value.pending {
-            color: var(--warning-600);
-        }
-        
-        .quiz-actions {
-            padding: 1.25rem;
-            background: var(--gray-50);
-            border-top: 1px solid var(--gray-200);
-            display: flex;
-            gap: 0.5rem;
-        }
-        
-        .role-toggle {
-            position: relative;
-            display: inline-block;
-        }
-        
-        .role-checkbox {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        
-        .role-label {
-            position: relative;
-            display: inline-block;
-            width: 40px;
-            height: 20px;
-            background-color: var(--gray-300);
-            border-radius: 20px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        
-        .role-label:before {
-            content: '';
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            width: 16px;
-            height: 16px;
-            background-color: white;
-            border-radius: 50%;
-            transition: transform 0.3s;
-        }
-        
-        .role-checkbox:checked + .role-label {
-            background-color: var(--primary-500);
-        }
-        
-        .role-checkbox:checked + .role-label:before {
-            transform: translateX(20px);
-        }
-        
-        .review-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem;
-            background: white;
-            border-radius: var(--radius);
-            border: 1px solid var(--gray-200);
-            margin-bottom: 0.75rem;
-        }
-        
-        .review-info {
-            flex: 1;
-        }
-        
-        .review-meta {
-            font-size: 0.75rem;
-            color: var(--gray-500);
-            margin-top: 0.25rem;
-        }
-        
-        .review-score {
-            background: var(--blue-100);
-            color: var(--blue-700);
-            padding: 0.25rem 0.5rem;
-            border-radius: var(--radius);
-            font-weight: 600;
-            margin-left: 0.5rem;
-        }
-        
-        .review-actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 2rem;
-            color: var(--gray-600);
-        }
-        
-        .loading-spinner {
-            display: inline-block;
-            width: 24px;
-            height: 24px;
-            border: 3px solid var(--gray-200);
-            border-radius: 50%;
-            border-top-color: var(--primary-500);
-            animation: spin 1s linear infinite;
-            margin-bottom: 1rem;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            animation: fadeIn 0.3s;
-        }
-        
-        .modal-content {
-            background: white;
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-xl);
-            width: 90%;
-            max-height: 90vh;
-            overflow: auto;
-            animation: slideIn 0.3s;
-            position: relative;
-        }
-        
-        .modal-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid var(--gray-200);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .modal-header h3 {
-            margin: 0;
-            color: var(--gray-900);
-        }
-        
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            color: var(--gray-600);
-            cursor: pointer;
-        }
-        
-        .modal-body {
-            padding: 1.5rem;
-            max-height: 60vh;
-            overflow-y: auto;
-        }
-        
-        .modal-footer {
-            padding: 1rem 1.5rem;
-            border-top: 1px solid var(--gray-200);
-            display: flex;
-            justify-content: flex-end;
-            gap: 0.75rem;
-        }
-        
-        .student-info {
-            margin-bottom: 1.5rem;
-            padding: 1rem;
-            background: var(--blue-50);
-            border-radius: var(--radius);
-            border: 1px solid var(--blue-200);
-        }
-        
-        .student-meta {
-            display: flex;
-            gap: 1.5rem;
-            font-size: 0.875rem;
-            margin-top: 0.5rem;
-            color: var(--gray-600);
-        }
-        
-        .quiz-score {
-            text-align: center;
-            margin: 1.5rem 0;
-        }
-        
-        .score-circle {
-            width: 100px;
-            height: 100px;
-            background: var(--primary-600);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 1rem;
-            color: white;
-            font-size: 2rem;
-            font-weight: 700;
-        }
-        
-        .questions-review {
-            margin-top: 2rem;
-        }
-        
-        .question-review-item {
-            margin-bottom: 1.5rem;
-            border: 1px solid var(--gray-200);
-            border-radius: var(--radius);
-            overflow: hidden;
-            background: white;
-        }
-        
-        .question-review-header {
-            padding: 1rem;
-            background: var(--gray-50);
-            border-bottom: 1px solid var(--gray-200);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .question-review-title {
-            font-weight: 600;
-            color: var(--gray-900);
-            margin: 0;
-        }
-        
-        .question-status {
-            padding: 0.25rem 0.75rem;
-            border-radius: var(--radius);
-            font-size: 0.875rem;
-            font-weight: 500;
-        }
-        
-        .status-correct {
-            background: var(--success-100);
-            color: var(--success-700);
-        }
-        
-        .status-incorrect {
-            background: var(--danger-100);
-            color: var(--danger-700);
-        }
-        
-        .question-review-body {
-            padding: 1rem;
-        }
-        
-        .answers-comparison {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-        
-        .student-answer, .correct-answer {
-            padding: 0.75rem;
-            border-radius: var(--radius);
-            background: var(--gray-50);
-            border: 1px solid var(--gray-200);
-        }
-        
-        .answer-label {
-            font-size: 0.875rem;
-            color: var(--gray-600);
-            margin-bottom: 0.5rem;
-        }
-        
-        .answer-value {
-            font-weight: 500;
-        }
-        
-        .correction-toggle {
-            display: flex;
-            gap: 1rem;
-            margin-top: 1rem;
-            padding: 0.75rem;
-            background: var(--gray-50);
-            border-radius: var(--radius);
-            border: 1px solid var(--gray-200);
-        }
-        
-        .toggle-label {
-            font-size: 0.875rem;
-            color: var(--gray-700);
-            font-weight: 500;
-        }
-        
-        .score-actions {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            margin-top: 2rem;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        @keyframes slideIn {
-            from { transform: translateY(-20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        
-        @media (max-width: 768px) {
-            .answers-comparison {
-                grid-template-columns: 1fr;
-            }
-            
-            .review-row {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
-            .review-actions {
-                margin-top: 1rem;
-                width: 100%;
-                justify-content: flex-end;
-            }
-            
-            .quiz-stats {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-        }
-    </style>
+    <script src="../assets/js/survey-quiz.js"></script>
+    <script>initAdmin('quizzes');</script>
 </body>
 </html>

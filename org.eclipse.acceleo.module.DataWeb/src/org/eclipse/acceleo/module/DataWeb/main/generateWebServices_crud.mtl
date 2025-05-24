@@ -1,7 +1,0 @@
-[comment encoding = UTF-8 /]
-[module generateWebServices_crud('http://www.unex.es/dmss/dataweb')]
-
-[template public generateCRUDManagerJS(app : Aplicacion)]
-[/template]
-[template public generateDataManagerJS(app : Aplicacion)]
-[/template]

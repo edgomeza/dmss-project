@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biblioteca Universitaria - Crear Prestamo</title>
+    <link rel="stylesheet" href="../../../assets/css/style.css">
+</head>
+<body>
+    <header class="app-header">
+        <div class="container">
+            <h1>Crear Prestamo</h1>
+        </div>
+    </header>
+    
+    <nav class="main-nav">
+        <div class="container nav-container">
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="../../dashboard.html" class="nav-link">Dashboard</a></li>
+                <li class="nav-item"><a href="index.html" class="nav-link">Gestión Prestamo</a></li>
+                <li class="nav-item"><a href="list.html" class="nav-link">Listar</a></li>
+                <li class="nav-item"><a href="create.html" class="nav-link active">Crear</a></li>
+            </ul>
+        </div>
+    </nav>
+    
+    <main class="main-content">
+        <div class="container">
+            <div class="card">
+                <div class="card-header"><h2>Nuevo Prestamo</h2></div>
+                <div class="card-body">
+                    <form id="createForm">
+                        <div class="form-group">
+                            <label for="fechaPrestamo" class="form-label">fechaPrestamo *</label>
+                            <input type="text" id="fechaPrestamo" name="fechaPrestamo" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="fechaDevolucion" class="form-label">fechaDevolucion *</label>
+                            <input type="text" id="fechaDevolucion" name="fechaDevolucion" class="form-control" required>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-success">Crear Prestamo</button>
+                            <a href="list.html" class="btn btn-secondary">Cancelar</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <script src="../../../assets/js/app.js"></script>
+    <script src="../../../assets/js/data-manager.js"></script>
+    <script src="../../../assets/js/prestamo.js"></script>
+</body>
+</html>

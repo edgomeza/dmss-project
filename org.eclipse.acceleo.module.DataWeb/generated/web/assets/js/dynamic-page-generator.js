@@ -1,798 +1,978 @@
 /**
- * Generador dinámico de páginas HTML para encuestas y cuestionarios
- * Lee de IndexedDB y crea archivos HTML reales
- */
+* GENERADOR DINÁMICO DE PÁGINAS - Biblioteca Universitaria
+* Genera páginas HTML en tiempo real para encuestas y cuestionarios
+*/
 
 class DynamicPageGenerator {
-    constructor() {
-        this.baseURL = window.location.origin;
-        this.surveysPath = '/web/surveys/';
-        this.quizzesPath = '/web/quizzes/';
-    }
+   constructor() {
+       this.templates = {
+           survey: this.getSurveyTemplate(),
+           quiz: this.getQuizTemplate()
+       };
+   }
 
-    async init() {
-	    try {
-	        console.log('Inicializando generador dinámico de páginas...');
-	        
-	        // Esperar a que la base de datos esté disponible con timeout
-	        const db = await Promise.race([
-	            this.waitForDatabase(),
-	            new Promise((_, reject) => 
-	                setTimeout(() => reject(new Error('Timeout esperando base de datos')), 10000)
-	            )
-	        ]);
-	        
-	        if (!db) {
-	            throw new Error('Base de datos no disponible después del timeout');
-	        }
-	        
-	        console.log('Base de datos lista, procediendo con la generación...');
-	        
-	        // Generar páginas para encuestas
-	        await this.generateSurveyPages();
-	        
-	        // Generar páginas para cuestionarios  
-	        await this.generateQuizPages();
-	        
-	        console.log('✅ Generación de páginas dinámicas completada exitosamente');
-	    } catch (error) {
-	        console.error('❌ Error en la inicialización del generador de páginas:', error);
-	        
-	        // No lanzar el error para no romper el resto de la aplicación
-	        // Solo registrar el problema
-	        localStorage.setItem('page_generator_error', JSON.stringify({
-	            error: error.message,
-	            timestamp: Date.now()
-	        }));
-	    }
-	}
+   async generateSurveyPage(surveyName) {
+       try {
+           if (!window.UnifiedDB) {
+               throw new Error('Base de datos no disponible');
+           }
+           
+           await window.UnifiedDB.init();
+           const surveys = await window.UnifiedDB.execute('getAll', 'ENCUESTAS');
+           const survey = surveys.find(s => s.nombre === surveyName);
+           
+           if (!survey) {
+               return this.getErrorPage('Encuesta no encontrada');
+           }
+           
+           return this.templates.survey
+               .replace(/\{\{TITLE\}\}/g, survey.titulo)
+               .replace(/\{\{DESCRIPTION\}\}/g, survey.descripcion || '')
+               .replace(/\{\{NAME\}\}/g, survey.nombre)
+               .replace(/\{\{TYPE\}\}/g, 'survey');
+               
+       } catch (error) {
+           console.error('Error generando página de encuesta:', error);
+           return this.getErrorPage('Error cargando encuesta');
+       }
+   }
 
-	getGenerationStatus() {
-    const surveyPages = JSON.parse(localStorage.getItem('generated_survey_pages') || '[]');
-    const quizPages = JSON.parse(localStorage.getItem('generated_quiz_pages') || '[]');
-    
-    return {
-        surveys: {
-            total: surveyPages.length,
-            pages: surveyPages
-        },
-        quizzes: {
-            total: quizPages.length,
-            pages: quizPages
-        }
-    };
-	}
+   async generateQuizPage(quizName) {
+       try {
+           if (!window.UnifiedDB) {
+               throw new Error('Base de datos no disponible');
+           }
+           
+           await window.UnifiedDB.init();
+           const quizzes = await window.UnifiedDB.execute('getAll', 'CUESTIONARIOS');
+           const quiz = quizzes.find(q => q.nombre === quizName);
+           
+           if (!quiz) {
+               return this.getErrorPage('Cuestionario no encontrado');
+           }
+           
+           return this.templates.quiz
+               .replace(/\{\{TITLE\}\}/g, quiz.titulo)
+               .replace(/\{\{DESCRIPTION\}\}/g, quiz.descripcion || '')
+               .replace(/\{\{NAME\}\}/g, quiz.nombre)
+               .replace(/\{\{TIME_LIMIT\}\}/g, quiz.tiempoLimite || 30)
+               .replace(/\{\{TYPE\}\}/g, 'quiz');
+               
+       } catch (error) {
+           console.error('Error generando página de cuestionario:', error);
+           return this.getErrorPage('Error cargando cuestionario');
+       }
+   }
 
-	// Función para forzar regeneración
-	async forceRegeneration() {
-	    console.log('🔄 Forzando regeneración de todas las páginas...');
-	    
-	    // Limpiar páginas existentes
-	    localStorage.removeItem('generated_survey_pages');
-	    localStorage.removeItem('generated_quiz_pages');
-	    
-	    // Regenerar todo
-	    await this.generateSurveyPages();
-	    await this.generateQuizPages();
-	    
-	    console.log('✅ Regeneración forzada completada');
-	    
-	    return this.getGenerationStatus();
-	}
-
-    async waitForDatabase() {
-	    let attempts = 0;
-	    const maxAttempts = 100;
-	    
-	    while (!window.localDB && attempts < maxAttempts) {
-	        await new Promise(resolve => setTimeout(resolve, 100));
-	        attempts++;
-	    }
-	    
-	    if (!window.localDB) {
-	        // Crear nuestra propia instancia de base de datos
-	        try {
-	            const request = indexedDB.open('DataWeb_DB', 2);
-	            const db = await new Promise((resolve, reject) => {
-	                request.onsuccess = () => {
-	                    const database = request.result;
-	                    const dbWrapper = {
-	                        db: database,
-	                        
-	                        async getAll(storeName) {
-	                            return new Promise((resolve, reject) => {
-	                                if (!database.objectStoreNames.contains(storeName)) {
-	                                    console.warn(`Store "${storeName}" does not exist`);
-	                                    resolve([]);
-	                                    return;
-	                                }
-	                                
-	                                try {
-	                                    const transaction = database.transaction([storeName], 'readonly');
-	                                    const store = transaction.objectStore(storeName);
-	                                    const request = store.getAll();
-	                                    
-	                                    request.onsuccess = () => {
-	                                        resolve(request.result || []);
-	                                    };
-	                                    
-	                                    request.onerror = () => {
-	                                        console.error(`Error reading from ${storeName}:`, request.error);
-	                                        resolve([]);
-	                                    };
-	                                } catch (error) {
-	                                    console.error(`Transaction error in ${storeName}:`, error);
-	                                    resolve([]);
-	                                }
-	                            });
-	                        },
-	                        
-	                        async query(storeName, condition = {}) {
-	                            return new Promise(async (resolve, reject) => {
-	                                try {
-	                                    // Obtener todos los registros primero
-	                                    const allRecords = await this.getAll(storeName);
-	                                    
-	                                    // Si no hay condición, devolver todos
-	                                    if (!condition || Object.keys(condition).length === 0) {
-	                                        resolve(allRecords);
-	                                        return;
-	                                    }
-	                                    
-	                                    // Filtrar por la condición
-	                                    const filteredRecords = allRecords.filter(record => {
-	                                        return Object.keys(condition).every(key => {
-	                                            // Comparación flexible (string vs number)
-	                                            return record[key] == condition[key];
-	                                        });
-	                                    });
-	                                    
-	                                    resolve(filteredRecords);
-	                                } catch (error) {
-	                                    console.error(`Error querying ${storeName}:`, error);
-	                                    resolve([]);
-	                                }
-	                            });
-	                        },
-	                        
-	                        async create(storeName, data) {
-	                            return new Promise((resolve, reject) => {
-	                                if (!database.objectStoreNames.contains(storeName)) {
-	                                    reject(new Error(`Store "${storeName}" does not exist`));
-	                                    return;
-	                                }
-	                                
-	                                try {
-	                                    const transaction = database.transaction([storeName], 'readwrite');
-	                                    const store = transaction.objectStore(storeName);
-	                                    const request = store.add(data);
-	                                    
-	                                    request.onsuccess = () => resolve(request.result);
-	                                    request.onerror = () => reject(request.error);
-	                                } catch (error) {
-	                                    reject(error);
-	                                }
-	                            });
-	                        },
-	                        
-	                        async update(storeName, data) {
-	                            return new Promise((resolve, reject) => {
-	                                if (!database.objectStoreNames.contains(storeName)) {
-	                                    reject(new Error(`Store "${storeName}" does not exist`));
-	                                    return;
-	                                }
-	                                
-	                                try {
-	                                    const transaction = database.transaction([storeName], 'readwrite');
-	                                    const store = transaction.objectStore(storeName);
-	                                    const request = store.put(data);
-	                                    
-	                                    request.onsuccess = () => resolve(request.result);
-	                                    request.onerror = () => reject(request.error);
-	                                } catch (error) {
-	                                    reject(error);
-	                                }
-	                            });
-	                        },
-	                        
-	                        async delete(storeName, id) {
-	                            return new Promise((resolve, reject) => {
-	                                if (!database.objectStoreNames.contains(storeName)) {
-	                                    reject(new Error(`Store "${storeName}" does not exist`));
-	                                    return;
-	                                }
-	                                
-	                                try {
-	                                    const transaction = database.transaction([storeName], 'readwrite');
-	                                    const store = transaction.objectStore(storeName);
-	                                    const request = store.delete(id);
-	                                    
-	                                    request.onsuccess = () => resolve(request.result);
-	                                    request.onerror = () => reject(request.error);
-	                                } catch (error) {
-	                                    reject(error);
-	                                }
-	                            });
-	                        }
-	                    };
-	                    
-	                    window.localDB = dbWrapper;
-	                    resolve(dbWrapper);
-	                };
-	                
-	                request.onerror = () => {
-	                    console.error('Error opening database:', request.error);
-	                    resolve(null);
-	                };
-	            });
-	            
-	            if (db) return db;
-	        } catch (error) {
-	            console.error('Error creating database wrapper:', error);
-	        }
-	    }
-	    
-	    return window.localDB;
-	}
-
-    async generateSurveyPages() {
-	    try {
-	        console.log('Generando páginas HTML para encuestas...');
-	        
-	        const surveys = await window.localDB.getAll('ENCUESTAS');
-	        console.log('Encuestas obtenidas:', surveys.length);
-	        
-	        for (const survey of surveys) {
-	            console.log(`Procesando encuesta: ${survey.nombre} (ID: ${survey.id_encuesta})`);
-	            
-	            // Obtener preguntas de la encuesta
-	            let questions = [];
-	            try {
-	                questions = await window.localDB.query('PREGUNTAS_ENCUESTA', { 
-	                    id_encuesta: survey.id_encuesta 
-	                });
-	                console.log(`Preguntas encontradas para ${survey.nombre}:`, questions.length);
-	            } catch (error) {
-	                console.warn(`Error obteniendo preguntas para ${survey.nombre}:`, error);
-	                questions = [];
-	            }
-	            
-	            // Obtener opciones para cada pregunta
-	            for (const question of questions) {
-	                try {
-	                    const options = await window.localDB.query('OPCIONES_PREGUNTA', { 
-	                        id_pregunta: question.id_pregunta 
-	                    });
-	                    question.opciones = options || [s];
-	                    console.log(`Opciones para pregunta ${question.id_pregunta}:`, options.length);
-	                } catch (error) {
-	                    console.warn(`Error obteniendo opciones para pregunta ${question.id_pregunta}:`, error);
-	                    question.opciones = [];
-	                }
-	            }
-	            
-	            // Generar HTML de la encuesta
-	            const surveyHTML = this.generateSurveyHTML(survey, questions);
-	            
-	            // Guardar la página generada
-	            this.saveSurveyPage(survey.nombre, surveyHTML);
-	            
-	            console.log(`✅ Página generada para encuesta: ${survey.nombre}`);
-	        }
-	        
-	        console.log(`✅ Generación completada para ${surveys.length} encuestas`);
-	    } catch (error) {
-	        console.error('Error generando páginas de encuestas:', error);
-	    }
-	}
-
-    async generateQuizPages() {
-	    try {
-	        console.log('Generando páginas HTML para cuestionarios...');
-	        
-	        const quizzes = await window.localDB.getAll('CUESTIONARIOS');
-	        console.log('Cuestionarios obtenidos:', quizzes.length);
-	        
-	        for (const quiz of quizzes) {
-	            console.log(`Procesando cuestionario: ${quiz.nombre} (ID: ${quiz.id_cuestionario})`);
-	            
-	            // Obtener preguntas del cuestionario
-	            let questions = [];
-	            try {
-	                questions = await window.localDB.query('PREGUNTAS_CUESTIONARIO', { 
-	                    id_cuestionario: quiz.id_cuestionario 
-	                });
-	                console.log(`Preguntas encontradas para ${quiz.nombre}:`, questions.length);
-	            } catch (error) {
-	                console.warn(`Error obteniendo preguntas para ${quiz.nombre}:`, error);
-	                questions = [];
-	            }
-	            
-	            // Obtener opciones para cada pregunta
-	            for (const question of questions) {
-	                try {
-	                    const options = await window.localDB.query('OPCIONES_CUESTIONARIO', { 
-	                        id_pregunta: question.id_pregunta 
-	                    });
-	                    question.opciones = options || [];
-	                    console.log(`Opciones para pregunta ${question.id_pregunta}:`, options.length);
-	                } catch (error) {
-	                    console.warn(`Error obteniendo opciones para pregunta ${question.id_pregunta}:`, error);
-	                    question.opciones = [];
-	                }
-	            }
-	            
-	            // Generar HTML del cuestionario
-	            const quizHTML = this.generateQuizHTML(quiz, questions);
-	            
-	            // Guardar la página generada
-	            this.saveQuizPage(quiz.nombre, quizHTML);
-	            
-	            console.log(`✅ Página generada para cuestionario: ${quiz.nombre}`);
-	        }
-	        
-	        console.log(`✅ Generación completada para ${quizzes.length} cuestionarios`);
-	    } catch (error) {
-	        console.error('Error generando páginas de cuestionarios:', error);
-	    }
-	}
-
-    generateSurveyHTML(survey, questions) {
-        return `<!DOCTYPE html>
+   getSurveyTemplate() {
+       return `<!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema Bancario Digital - ${survey.titulo}</title>
-    <meta name="description" content="${survey.descripcion || 'Participa en la encuesta ' + survey.titulo}">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../assets/css/style.css">
-    <link rel="icon" type="image/x-icon" href="../assets/icons/favicon.ico">
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>{{TITLE}} - Biblioteca Universitaria</title>
+   <link rel="stylesheet" href="../assets/css/style.css">
 </head>
 <body>
-    <header class="app-header">
-        <div class="container">
-            <h1>${survey.titulo}</h1>
-            <p>${survey.descripcion || 'Tu participación es importante para nosotros'}</p>
-        </div>
-    </header>
-    
-    <nav class="main-nav">
-        <div class="container nav-container">
-            <div class="nav-brand">
-                <a href="../index.html" class="nav-logo">Sistema Bancario Digital</a>
-            </div>
-            <ul class="nav-menu">
-                <li class="nav-item">
-                    <a href="../index.html" class="nav-link">Inicio</a>
-                </li>
-                <li class="nav-item">
-                    <a href="results_${survey.nombre}.html" class="nav-link">Ver Resultados</a>
-                </li>
-            </ul>
-            <button class="nav-toggle" aria-label="Abrir menú">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
-        </div>
-    </nav>
-    
-    <nav class="breadcrumb">
-        <div class="container">
-            <ul class="breadcrumb-list">
-                <li class="breadcrumb-item">
-                    <a href="../index.html" class="breadcrumb-link">Inicio</a>
-                </li>
-                <li class="breadcrumb-item">
-                    <span>Encuestas</span>
-                </li>
-                <li class="breadcrumb-item">
-                    <span>${survey.titulo}</span>
-                </li>
-            </ul>
-        </div>
-    </nav>
-    
-    <main class="main-content">
-        <div class="container">
-            <div class="survey-container">
-                <div class="survey-progress">
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
-                    </div>
-                    <div class="progress-text">
-                        <span id="current-question">1</span> de <span id="total-questions">${questions.length}</span> preguntas
-                    </div>
-                </div>
-                
-                <form id="survey-form" class="survey-form card" data-survey-id="${survey.nombre}">
-                    <div class="card-body">
-                        ${questions.map((question, index) => `
-                            <div class="question-container" data-question="${index + 1}" ${index > 0 ? 'style="display: none;"' : ''}>
-                                <div class="question-header">
-                                    <div class="question-number">Pregunta ${index + 1}</div>
-                                    <h3 class="question-text">${question.texto}</h3>
-                                </div>
-                                
-                                <div class="question-options">
-                                    ${this.generateSurveyQuestionOptions(question, index + 1)}
-                                </div>
-                                
-                                <div class="question-navigation">
-                                    ${index > 0 ? `
-                                        <button type="button" class="btn btn-secondary" onclick="previousQuestion(${index + 1})">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <polyline points="15,18 9,12 15,6"></polyline>
-                                            </svg>
-                                            Anterior
-                                        </button>
-                                    ` : ''}
-                                    
-                                    ${index < questions.length - 1 ? `
-                                        <button type="button" class="btn btn-primary ml-auto" onclick="nextQuestion(${index + 1})" disabled>
-                                            Siguiente
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <polyline points="9,18 15,12 9,6"></polyline>
-                                            </svg>
-                                        </button>
-                                    ` : `
-                                        <button type="button" class="btn btn-success ml-auto" onclick="showSubmitConfirmation()" disabled>
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <polyline points="9,11 12,14 22,4"></polyline>
-                                                <path d="m21 12 v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-                                            </svg>
-                                            Enviar Encuesta
-                                        </button>
-                                    `}
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </form>
-                
-                <!-- Modal de confirmación -->
-                <div id="submit-confirmation-modal" class="modal">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h4>¿Enviar encuesta?</h4>
-                        </div>
-                        <div class="modal-body">
-                            <p>¿Estás seguro de que quieres enviar tus respuestas? Una vez enviadas no podrás modificarlas.</p>
-                            <div id="submission-summary"></div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
-                            <button type="button" class="btn btn-success btn-submit-final" onclick="submitSurvey()">Sí, enviar</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
-    
-    <footer class="app-footer">
-        <div class="container">
-            <div class="footer-bottom">
-                <p>&copy; 2025 Sistema Bancario Digital. Todos los derechos reservados.</p>
-            </div>
-        </div>
-    </footer>
-    
-    <script src="../assets/js/app.js"></script>
-    <script src="../assets/js/survey.js"></script>
+   <header class="app-header">
+       <div class="container">
+           <h1>{{TITLE}}</h1>
+           <p>{{DESCRIPTION}}</p>
+       </div>
+   </header>
+   
+   <nav class="main-nav">
+       <div class="container nav-container">
+           <div class="nav-brand">
+               <a href="../index.html" class="nav-logo">Biblioteca Universitaria</a>
+           </div>
+           <ul class="nav-menu">
+               <li class="nav-item"><a href="../index.html" class="nav-link">Inicio</a></li>
+               <li class="nav-item"><a href="index.html" class="nav-link">Encuestas</a></li>
+           </ul>
+       </div>
+   </nav>
+   
+   <main class="main-content">
+       <div class="container">
+           <div class="card">
+               <div class="card-header">
+                   <h2>Participar en Encuesta</h2>
+               </div>
+               <div class="card-body">
+                   <div class="progress-bar mb-4">
+                       <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                   </div>
+                   
+                   <form id="survey-form" data-survey="{{NAME}}">
+                       <div id="questions-container">
+                           <!-- Pregunta de ejemplo -->
+                           <div class="question-item active" data-question="1">
+                               <h3>Pregunta de ejemplo</h3>
+                               <p class="question-description">Esta es una pregunta de demostración. En una implementación completa, las preguntas se cargarían desde la base de datos.</p>
+                               
+                               <div class="form-group">
+                                   <label class="form-label">¿Cómo calificarías tu experiencia?</label>
+                                   <div class="radio-group">
+                                       <label class="radio-label">
+                                           <input type="radio" name="question_1" value="excelente" required>
+                                           <span>Excelente</span>
+                                       </label>
+                                       <label class="radio-label">
+                                           <input type="radio" name="question_1" value="buena" required>
+                                           <span>Buena</span>
+                                       </label>
+                                       <label class="radio-label">
+                                           <input type="radio" name="question_1" value="regular" required>
+                                           <span>Regular</span>
+                                       </label>
+                                       <label class="radio-label">
+                                           <input type="radio" name="question_1" value="mala" required>
+                                           <span>Mala</span>
+                                       </label>
+                                   </div>
+                               </div>
+                           </div>
+                           
+                           <div class="question-item" data-question="2">
+                               <h3>Comentarios adicionales</h3>
+                               <div class="form-group">
+                                   <label class="form-label">¿Tienes algún comentario o sugerencia?</label>
+                                   <textarea name="question_2" class="form-control" rows="4" placeholder="Escribe tus comentarios aquí (opcional)"></textarea>
+                               </div>
+                           </div>
+                       </div>
+                       
+                       <div class="form-navigation">
+                           <button type="button" id="prev-btn" class="btn btn-secondary" disabled>Anterior</button>
+                           <button type="button" id="next-btn" class="btn btn-primary">Siguiente</button>
+                           <button type="submit" id="submit-btn" class="btn btn-success" style="display: none;">Enviar Encuesta</button>
+                       </div>
+                   </form>
+               </div>
+           </div>
+       </div>
+   </main>
+   
+   <script>
+       class SurveyHandler {
+           constructor() {
+               this.currentQuestion = 1;
+               this.totalQuestions = 2;
+               this.answers = {};
+               this.init();
+           }
+           
+           init() {
+               this.updateUI();
+               this.bindEvents();
+           }
+           
+           bindEvents() {
+               document.getElementById('next-btn').addEventListener('click', () => this.nextQuestion());
+               document.getElementById('prev-btn').addEventListener('click', () => this.prevQuestion());
+               document.getElementById('survey-form').addEventListener('submit', (e) => this.handleSubmit(e));
+               
+               // Actualizar progreso cuando cambian las respuestas
+               document.addEventListener('change', () => this.updateProgress());
+           }
+           
+           nextQuestion() {
+               if (this.currentQuestion < this.totalQuestions) {
+                   this.hideQuestion(this.currentQuestion);
+                   this.currentQuestion++;
+                   this.showQuestion(this.currentQuestion);
+                   this.updateUI();
+               }
+           }
+           
+           prevQuestion() {
+               if (this.currentQuestion > 1) {
+                   this.hideQuestion(this.currentQuestion);
+                   this.currentQuestion--;
+                   this.showQuestion(this.currentQuestion);
+                   this.updateUI();
+               }
+           }
+           
+           showQuestion(num) {
+               const question = document.querySelector(\`[data-question="\${num}"]\`);
+               if (question) {
+                   question.classList.add('active');
+                   question.style.display = 'block';
+               }
+           }
+           
+           hideQuestion(num) {
+               const question = document.querySelector(\`[data-question="\${num}"]\`);
+               if (question) {
+                   question.classList.remove('active');
+                   question.style.display = 'none';
+               }
+           }
+           
+           updateUI() {
+               const prevBtn = document.getElementById('prev-btn');
+               const nextBtn = document.getElementById('next-btn');
+               const submitBtn = document.getElementById('submit-btn');
+               
+               prevBtn.disabled = this.currentQuestion === 1;
+               
+               if (this.currentQuestion === this.totalQuestions) {
+                   nextBtn.style.display = 'none';
+                   submitBtn.style.display = 'inline-block';
+               } else {
+                   nextBtn.style.display = 'inline-block';
+                   submitBtn.style.display = 'none';
+               }
+               
+               this.updateProgress();
+           }
+           
+           updateProgress() {
+               const progress = (this.currentQuestion / this.totalQuestions) * 100;
+               const progressFill = document.getElementById('progress-fill');
+               if (progressFill) {
+                   progressFill.style.width = progress + '%';
+               }
+           }
+           
+           async handleSubmit(e) {
+               e.preventDefault();
+               
+               const formData = new FormData(e.target);
+               const surveyName = e.target.dataset.survey;
+               
+               const response = {
+                   id: 'resp_' + Date.now(),
+                   surveyName: surveyName,
+                   userId: 'usuario@example.com',
+                   timestamp: Date.now(),
+                   answers: Object.fromEntries(formData),
+                   approved: false
+               };
+               
+               try {
+                   // En una implementación real, esto se guardaría en la base de datos
+                   console.log('Respuesta de encuesta:', response);
+                   
+                   this.showSuccessMessage();
+               } catch (error) {
+                   console.error('Error enviando encuesta:', error);
+                   alert('Error al enviar la encuesta. Por favor, inténtalo de nuevo.');
+               }
+           }
+           
+           showSuccessMessage() {
+               document.querySelector('.main-content').innerHTML = \`
+                   <div class="container">
+                       <div class="card">
+                           <div class="card-body text-center">
+                               <div style="font-size: 4rem; color: var(--success-500); margin-bottom: 1rem;">✓</div>
+                               <h2>¡Encuesta enviada!</h2>
+                               <p>Gracias por tu participación. Tu respuesta ha sido registrada correctamente.</p>
+                               <div class="mt-4">
+                                   <button onclick="window.close()" class="btn btn-primary">Cerrar</button>
+                                   <a href="../surveys/index.html" class="btn btn-secondary">Ver más encuestas</a>
+                               </div>
+                           </div>
+                       </div>
+                   </div>
+               \`;
+           }
+       }
+       
+       // Inicializar cuando el DOM esté listo
+       document.addEventListener('DOMContentLoaded', () => {
+           new SurveyHandler();
+       });
+   </script>
+   
+   <style>
+       .question-item {
+           display: none;
+       }
+       
+       .question-item.active {
+           display: block;
+       }
+       
+       .question-item h3 {
+           margin-bottom: 1rem;
+           color: var(--gray-800);
+       }
+       
+       .question-description {
+           margin-bottom: 1.5rem;
+           color: var(--gray-600);
+       }
+       
+       .radio-group {
+           display: flex;
+           flex-direction: column;
+           gap: 0.75rem;
+       }
+       
+       .radio-label {
+           display: flex;
+           align-items: center;
+           gap: 0.5rem;
+           padding: 0.75rem;
+           border: 1px solid var(--gray-200);
+           border-radius: var(--radius);
+           cursor: pointer;
+           transition: var(--transition);
+       }
+       
+       .radio-label:hover {
+           background: var(--gray-50);
+           border-color: var(--primary-300);
+       }
+       
+       .radio-label input:checked + span {
+           color: var(--primary-600);
+           font-weight: 500;
+       }
+       
+       .progress-bar {
+           width: 100%;
+           height: 8px;
+           background: var(--gray-200);
+           border-radius: var(--radius);
+           overflow: hidden;
+       }
+       
+       .progress-fill {
+           height: 100%;
+           background: var(--primary-500);
+           transition: width 0.3s ease;
+       }
+       
+       .form-navigation {
+           display: flex;
+           justify-content: space-between;
+           margin-top: 2rem;
+           padding-top: 2rem;
+           border-top: 1px solid var(--gray-200);
+       }
+       
+       @media (max-width: 768px) {
+           .form-navigation {
+               flex-direction: column;
+               gap: 1rem;
+           }
+           
+           .radio-group {
+               gap: 0.5rem;
+           }
+       }
+   </style>
 </body>
 </html>`;
-    }
+   }
 
-    generateQuizHTML(quiz, questions) {
-        return `<!DOCTYPE html>
+   getQuizTemplate() {
+       return `<!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema Bancario Digital - ${quiz.titulo}</title>
-    <meta name="description" content="${quiz.descripcion || 'Evalúa tus conocimientos con el cuestionario ' + quiz.titulo}">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../assets/css/style.css">
-    <link rel="icon" type="image/x-icon" href="../assets/icons/favicon.ico">
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>{{TITLE}} - Biblioteca Universitaria</title>
+   <link rel="stylesheet" href="../assets/css/style.css">
 </head>
 <body>
-    <header class="app-header">
-        <div class="container">
-            <h1>${quiz.titulo}</h1>
-            <p>${quiz.descripcion || 'Pon a prueba tus conocimientos'}</p>
-        </div>
-    </header>
-    
-    <nav class="main-nav">
-        <div class="container nav-container">
-            <div class="nav-brand">
-                <a href="../index.html" class="nav-logo">Sistema Bancario Digital</a>
-            </div>
-            <ul class="nav-menu">
-                <li class="nav-item">
-                    <a href="../index.html" class="nav-link">Inicio</a>
-                </li>
-            </ul>
-            <button class="nav-toggle" aria-label="Abrir menú">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
-        </div>
-    </nav>
-    
-    <main class="main-content">
-        <div class="container">
-            <div class="quiz-container">
-                <div class="quiz-info card mb-6">
-                    <div class="card-body">
-                        <div class="quiz-overview grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div class="overview-item">
-                                <div class="overview-icon">📝</div>
-                                <div class="overview-content">
-                                    <div class="overview-number">${questions.length}</div>
-                                    <div class="overview-label">Preguntas</div>
-                                </div>
-                            </div>
-                            <div class="overview-item">
-                                <div class="overview-icon">⏱️</div>
-                                <div class="overview-content">
-                                    <div class="overview-number">${quiz.tiempoLimite || 30}</div>
-                                    <div class="overview-label">Minutos</div>
-                                </div>
-                            </div>
-                            <div class="overview-item">
-                                <div class="overview-icon">🎯</div>
-                                <div class="overview-content">
-                                    <div class="overview-number">100</div>
-                                    <div class="overview-label">Puntos Máximos</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="quiz-progress">
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
-                    </div>
-                    <div class="progress-info">
-                        <span class="progress-text">
-                            Pregunta <span id="current-question">1</span> de <span id="total-questions">${questions.length}</span>
-                        </span>
-                        <span class="timer" id="timer-display">${quiz.tiempoLimite || 30}:00</span>
-                    </div>
-                </div>
-                
-                <form id="quiz-form" class="quiz-form card" data-quiz-id="${quiz.nombre}" data-time-limit="${quiz.tiempoLimite || 30}">
-                    <div class="card-body">
-                        ${questions.map((question, index) => `
-                            <div class="question-container" data-question="${index + 1}" ${index > 0 ? 'style="display: none;"' : ''}>
-                                <div class="question-header">
-                                    <h3 class="question-text">${question.texto}</h3>
-                                </div>
-                                
-                                <div class="question-options">
-                                    ${this.generateQuizQuestionOptions(question, index + 1)}
-                                </div>
-                                
-                                <div class="question-navigation">
-                                    ${index > 0 ? `
-                                        <button type="button" class="btn btn-secondary" onclick="previousQuestion(${index + 1})">
-                                            Anterior
-                                        </button>
-                                    ` : ''}
-                                    
-                                    ${index < questions.length - 1 ? `
-                                        <button type="button" class="btn btn-primary ml-auto" onclick="nextQuestion(${index + 1})" disabled>
-                                            Siguiente
-                                        </button>
-                                    ` : `
-                                        <button type="button" class="btn btn-success ml-auto" onclick="showSubmitConfirmation()" disabled>
-                                            Finalizar Cuestionario
-                                        </button>
-                                    `}
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </form>
-
-                <!-- Modal de confirmación -->
-                <div id="submit-confirmation-modal" class="modal">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h4>¿Finalizar cuestionario?</h4>
-                        </div>
-                        <div class="modal-body">
-                            <p>¿Estás seguro de que quieres finalizar? Una vez enviadas tus respuestas no podrás modificarlas.</p>
-                            <div id="submission-summary"></div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
-                            <button type="button" class="btn btn-success btn-submit-final" onclick="submitSurvey()">Sí, finalizar</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
-    
-    <footer class="app-footer">
-        <div class="container">
-            <div class="footer-bottom">
-                <p>&copy; 2025 Sistema Bancario Digital. Todos los derechos reservados.</p>
-            </div>
-        </div>
-    </footer>
-    
-    <script src="../assets/js/app.js"></script>
-    <script src="../assets/js/survey.js"></script>
+   <header class="app-header">
+       <div class="container">
+           <h1>{{TITLE}}</h1>
+           <p>{{DESCRIPTION}}</p>
+       </div>
+   </header>
+   
+   <nav class="main-nav">
+       <div class="container nav-container">
+           <div class="nav-brand">
+               <a href="../index.html" class="nav-logo">Biblioteca Universitaria</a>
+           </div>
+           <ul class="nav-menu">
+               <li class="nav-item"><a href="../index.html" class="nav-link">Inicio</a></li>
+               <li class="nav-item"><a href="index.html" class="nav-link">Cuestionarios</a></li>
+           </ul>
+       </div>
+   </nav>
+   
+   <main class="main-content">
+       <div class="container">
+           <div class="quiz-info-bar">
+               <div class="card">
+                   <div class="card-body">
+                       <div class="quiz-meta">
+                           <div class="quiz-timer">
+                               <span class="timer-label">Tiempo restante:</span>
+                               <span class="timer-display" id="timer">{{TIME_LIMIT}}:00</span>
+                           </div>
+                           <div class="quiz-progress">
+                               <span class="progress-label">Progreso:</span>
+                               <div class="progress-bar">
+                                   <div class="progress-fill" id="progress-fill"></div>
+                               </div>
+                               <span class="progress-text" id="progress-text">0 / 3</span>
+                           </div>
+                       </div>
+                   </div>
+               </div>
+           </div>
+           
+           <div class="card">
+               <div class="card-body">
+                   <form id="quiz-form" data-quiz="{{NAME}}">
+                       <div id="questions-container">
+                           <!-- Pregunta 1 -->
+                           <div class="question-item active" data-question="1">
+                               <div class="question-header">
+                                   <span class="question-number">Pregunta 1 de 3</span>
+                                   <span class="question-type badge badge-primary">Opción Múltiple</span>
+                               </div>
+                               <h3>¿Cuál es la capital de España?</h3>
+                               
+                               <div class="form-group">
+                                   <div class="radio-group">
+                                       <label class="radio-label">
+                                           <input type="radio" name="question_1" value="madrid" required>
+                                           <span>Madrid</span>
+                                       </label>
+                                       <label class="radio-label">
+                                           <input type="radio" name="question_1" value="barcelona" required>
+                                           <span>Barcelona</span>
+                                       </label>
+                                       <label class="radio-label">
+                                           <input type="radio" name="question_1" value="sevilla" required>
+                                           <span>Sevilla</span>
+                                       </label>
+                                       <label class="radio-label">
+                                           <input type="radio" name="question_1" value="valencia" required>
+                                           <span>Valencia</span>
+                                       </label>
+                                   </div>
+                               </div>
+                           </div>
+                           
+                           <!-- Pregunta 2 -->
+                           <div class="question-item" data-question="2">
+                               <div class="question-header">
+                                   <span class="question-number">Pregunta 2 de 3</span>
+                                   <span class="question-type badge badge-primary">Verdadero/Falso</span>
+                               </div>
+                               <h3>El Sol es una estrella</h3>
+                               
+                               <div class="form-group">
+                                   <div class="radio-group">
+                                       <label class="radio-label">
+                                           <input type="radio" name="question_2" value="true" required>
+                                           <span>Verdadero</span>
+                                       </label>
+                                       <label class="radio-label">
+                                           <input type="radio" name="question_2" value="false" required>
+                                           <span>Falso</span>
+                                       </label>
+                                   </div>
+                               </div>
+                           </div>
+                           
+                           <!-- Pregunta 3 -->
+                           <div class="question-item" data-question="3">
+                               <div class="question-header">
+                                   <span class="question-number">Pregunta 3 de 3</span>
+                                   <span class="question-type badge badge-primary">Respuesta Corta</span>
+                               </div>
+                               <h3>¿En qué año se descubrió América?</h3>
+                               
+                               <div class="form-group">
+                                   <input type="text" name="question_3" class="form-control" placeholder="Ingresa tu respuesta" required>
+                               </div>
+                           </div>
+                       </div>
+                       
+                       <div class="form-navigation">
+                           <button type="button" id="prev-btn" class="btn btn-secondary" disabled>Anterior</button>
+                           <button type="button" id="next-btn" class="btn btn-primary">Siguiente</button>
+                           <button type="submit" id="submit-btn" class="btn btn-success" style="display: none;">Finalizar Cuestionario</button>
+                       </div>
+                   </form>
+               </div>
+           </div>
+       </div>
+   </main>
+   
+   <script>
+       class QuizHandler {
+           constructor() {
+               this.currentQuestion = 1;
+               this.totalQuestions = 3;
+               this.timeLimit = {{TIME_LIMIT}} * 60; // en segundos
+               this.timeLeft = this.timeLimit;
+               this.answers = {};
+               this.timer = null;
+               this.init();
+           }
+           
+           init() {
+               this.startTimer();
+               this.updateUI();
+               this.bindEvents();
+           }
+           
+           bindEvents() {
+               document.getElementById('next-btn').addEventListener('click', () => this.nextQuestion());
+               document.getElementById('prev-btn').addEventListener('click', () => this.prevQuestion());
+               document.getElementById('quiz-form').addEventListener('submit', (e) => this.handleSubmit(e));
+               
+               // Actualizar progreso cuando cambian las respuestas
+               document.addEventListener('change', () => this.updateProgress());
+           }
+           
+           startTimer() {
+               this.timer = setInterval(() => {
+                   this.timeLeft--;
+                   this.updateTimerDisplay();
+                   
+                   if (this.timeLeft <= 0) {
+                       this.timeUp();
+                   }
+               }, 1000);
+           }
+           
+           updateTimerDisplay() {
+               const minutes = Math.floor(this.timeLeft / 60);
+               const seconds = this.timeLeft % 60;
+               const display = \`\${minutes}:\${seconds.toString().padStart(2, '0')}\`;
+               
+               const timerElement = document.getElementById('timer');
+               if (timerElement) {
+                   timerElement.textContent = display;
+                   
+                   // Cambiar color cuando queda poco tiempo
+                   if (this.timeLeft <= 60) {
+                       timerElement.style.color = 'var(--danger-500)';
+                   } else if (this.timeLeft <= 300) {
+                       timerElement.style.color = 'var(--warning-500)';
+                   }
+               }
+           }
+           
+           timeUp() {
+               clearInterval(this.timer);
+               alert('¡Se acabó el tiempo! El cuestionario se enviará automáticamente.');
+               document.getElementById('quiz-form').dispatchEvent(new Event('submit'));
+           }
+           
+           nextQuestion() {
+               if (this.currentQuestion < this.totalQuestions) {
+                   this.hideQuestion(this.currentQuestion);
+                   this.currentQuestion++;
+                   this.showQuestion(this.currentQuestion);
+                   this.updateUI();
+               }
+           }
+           
+           prevQuestion() {
+               if (this.currentQuestion > 1) {
+                   this.hideQuestion(this.currentQuestion);
+                   this.currentQuestion--;
+                   this.showQuestion(this.currentQuestion);
+                   this.updateUI();
+               }
+           }
+           
+           showQuestion(num) {
+               const question = document.querySelector(\`[data-question="\${num}"]\`);
+               if (question) {
+                   question.classList.add('active');
+                   question.style.display = 'block';
+               }
+           }
+           
+           hideQuestion(num) {
+               const question = document.querySelector(\`[data-question="\${num}"]\`);
+               if (question) {
+                   question.classList.remove('active');
+                   question.style.display = 'none';
+               }
+           }
+           
+           updateUI() {
+               const prevBtn = document.getElementById('prev-btn');
+               const nextBtn = document.getElementById('next-btn');
+               const submitBtn = document.getElementById('submit-btn');
+               
+               prevBtn.disabled = this.currentQuestion === 1;
+               
+               if (this.currentQuestion === this.totalQuestions) {
+                   nextBtn.style.display = 'none';
+                   submitBtn.style.display = 'inline-block';
+               } else {
+                   nextBtn.style.display = 'inline-block';
+                   submitBtn.style.display = 'none';
+               }
+               
+               this.updateProgress();
+           }
+           
+           updateProgress() {
+               const progress = (this.currentQuestion / this.totalQuestions) * 100;
+               const progressFill = document.getElementById('progress-fill');
+               const progressText = document.getElementById('progress-text');
+               
+               if (progressFill) {
+                   progressFill.style.width = progress + '%';
+               }
+               
+               if (progressText) {
+                   progressText.textContent = \`\${this.currentQuestion} / \${this.totalQuestions}\`;
+               }
+           }
+           
+           async handleSubmit(e) {
+               e.preventDefault();
+               
+               clearInterval(this.timer);
+               
+               const formData = new FormData(e.target);
+               const quizName = e.target.dataset.quiz;
+               
+               // Calcular puntuación (simulada)
+               const correctAnswers = {
+                   'question_1': 'madrid',
+                   'question_2': 'true',
+                   'question_3': '1492'
+               };
+               
+               let score = 0;
+               let totalAnswered = 0;
+               
+               for (const [key, value] of formData.entries()) {
+                   totalAnswered++;
+                   if (correctAnswers[key] && correctAnswers[key].toLowerCase() === value.toLowerCase()) {
+                       score++;
+                   }
+               }
+               
+               const percentage = Math.round((score / this.totalQuestions) * 100);
+               
+               const response = {
+                   id: 'resp_' + Date.now(),
+                   quizName: quizName,
+                   userId: 'usuario@example.com',
+                   timestamp: Date.now(),
+                   timeUsed: this.timeLimit - this.timeLeft,
+                   answers: Object.fromEntries(formData),
+                   results: {
+                       totalPreguntas: this.totalQuestions,
+                       totalCorrectas: score,
+                       porcentaje: percentage,
+                       gradeConfirmed: false
+                   }
+               };
+               
+               try {
+                   // En una implementación real, esto se guardaría en la base de datos
+                   console.log('Respuesta de cuestionario:', response);
+                   
+                   this.showResults(response.results);
+               } catch (error) {
+                   console.error('Error enviando cuestionario:', error);
+                   alert('Error al enviar el cuestionario. Por favor, inténtalo de nuevo.');
+               }
+           }
+           
+           showResults(results) {
+               let resultClass = 'success';
+               let resultIcon = '✓';
+               let resultMessage = '¡Excelente trabajo!';
+               
+               if (results.porcentaje < 60) {
+                   resultClass = 'danger';
+                   resultIcon = '✗';
+                   resultMessage = 'Necesitas mejorar';
+               } else if (results.porcentaje < 80) {
+                   resultClass = 'warning';
+                   resultIcon = '⚠';
+                   resultMessage = '¡Buen trabajo!';
+               }
+               
+               document.querySelector('.main-content').innerHTML = \`
+                   <div class="container">
+                       <div class="card">
+                           <div class="card-body text-center">
+                               <div style="font-size: 4rem; color: var(--\${resultClass}-500); margin-bottom: 1rem;">\${resultIcon}</div>
+                               <h2>¡Cuestionario completado!</h2>
+                               <p class="mb-4">\${resultMessage}</p>
+                               
+                               <div class="results-summary">
+                                   <div class="result-item">
+                                       <div class="result-number" style="color: var(--\${resultClass}-500)">\${results.porcentaje}%</div>
+                                       <div class="result-label">Puntuación</div>
+                                   </div>
+                                   <div class="result-item">
+                                       <div class="result-number">\${results.totalCorrectas}</div>
+                                       <div class="result-label">Respuestas Correctas</div>
+                                   </div>
+                                   <div class="result-item">
+                                       <div class="result-number">\${results.totalPreguntas}</div>
+                                       <div class="result-label">Total de Preguntas</div>
+                                   </div>
+                               </div>
+                               
+                               <div class="mt-4">
+                                   <button onclick="window.close()" class="btn btn-primary">Cerrar</button>
+                                   <a href="../quizzes/index.html" class="btn btn-secondary">Ver más cuestionarios</a>
+                               </div>
+                           </div>
+                       </div>
+                   </div>
+               \`;
+           }
+       }
+       
+       // Inicializar cuando el DOM esté listo
+       document.addEventListener('DOMContentLoaded', () => {
+           new QuizHandler();
+       });
+   </script>
+   
+   <style>
+       .quiz-info-bar {
+           margin-bottom: 1.5rem;
+       }
+       
+       .quiz-meta {
+           display: flex;
+           justify-content: space-between;
+           align-items: center;
+           gap: 2rem;
+       }
+       
+       .quiz-timer,
+       .quiz-progress {
+           display: flex;
+           align-items: center;
+           gap: 0.5rem;
+       }
+       
+       .timer-display {
+           font-weight: bold;
+           font-size: 1.25rem;
+           color: var(--primary-600);
+           min-width: 60px;
+       }
+       
+       .progress-bar {
+           width: 120px;
+           height: 8px;
+           background: var(--gray-200);
+           border-radius: var(--radius);
+           overflow: hidden;
+       }
+       
+       .progress-fill {
+           height: 100%;
+           background: var(--primary-500);
+           transition: width 0.3s ease;
+       }
+       
+       .progress-text {
+			font-weight: 500;
+           min-width: 40px;
+       }
+       
+       .question-item {
+           display: none;
+       }
+       
+       .question-item.active {
+           display: block;
+       }
+       
+       .question-header {
+           display: flex;
+           justify-content: space-between;
+           align-items: center;
+           margin-bottom: 1rem;
+           padding-bottom: 0.5rem;
+           border-bottom: 1px solid var(--gray-200);
+       }
+       
+       .question-number {
+           font-size: 0.875rem;
+           color: var(--gray-600);
+           font-weight: 500;
+       }
+       
+       .question-item h3 {
+           margin-bottom: 1.5rem;
+           color: var(--gray-800);
+           font-size: 1.25rem;
+       }
+       
+       .radio-group {
+           display: flex;
+           flex-direction: column;
+           gap: 0.75rem;
+       }
+       
+       .radio-label {
+           display: flex;
+           align-items: center;
+           gap: 0.75rem;
+           padding: 1rem;
+           border: 2px solid var(--gray-200);
+           border-radius: var(--radius);
+           cursor: pointer;
+           transition: var(--transition);
+           background: white;
+       }
+       
+       .radio-label:hover {
+           background: var(--gray-50);
+           border-color: var(--primary-300);
+       }
+       
+       .radio-label input {
+           margin: 0;
+       }
+       
+       .radio-label input:checked + span {
+           color: var(--primary-600);
+           font-weight: 600;
+       }
+       
+       .radio-label:has(input:checked) {
+           border-color: var(--primary-500);
+           background: var(--primary-50);
+       }
+       
+       .form-navigation {
+           display: flex;
+           justify-content: space-between;
+           margin-top: 2rem;
+           padding-top: 2rem;
+           border-top: 1px solid var(--gray-200);
+       }
+       
+       .results-summary {
+           display: flex;
+           justify-content: center;
+           gap: 2rem;
+           margin: 2rem 0;
+       }
+       
+       .result-item {
+           text-align: center;
+       }
+       
+       .result-number {
+           font-size: 2rem;
+           font-weight: bold;
+           margin-bottom: 0.5rem;
+       }
+       
+       .result-label {
+           font-size: 0.875rem;
+           color: var(--gray-600);
+       }
+       
+       @media (max-width: 768px) {
+           .quiz-meta {
+               flex-direction: column;
+               gap: 1rem;
+           }
+           
+           .quiz-timer,
+           .quiz-progress {
+               width: 100%;
+               justify-content: space-between;
+           }
+           
+           .progress-bar {
+               flex: 1;
+               margin: 0 1rem;
+           }
+           
+           .form-navigation {
+               flex-direction: column;
+               gap: 1rem;
+           }
+           
+           .results-summary {
+               flex-direction: column;
+               gap: 1rem;
+           }
+           
+           .radio-group {
+               gap: 0.5rem;
+           }
+           
+           .radio-label {
+               padding: 0.75rem;
+           }
+       }
+   </style>
 </body>
 </html>`;
-    }
+   }
 
-    generateSurveyQuestionOptions(question, questionIndex) {
-        if (question.tipo === 'opcion_multiple') {
-            return question.opciones.map((option) => `
-                <div class="option-card">
-                    <input type="radio" id="q${questionIndex}_${option.valor}" name="question_${questionIndex}" value="${option.valor}" class="option-input" required>
-                    <label for="q${questionIndex}_${option.valor}" class="option-label">
-                        <div class="option-check"></div>
-                        <div class="option-content">
-                            <span class="option-text">${option.texto}</span>
-                        </div>
-                    </label>
-                </div>
-            `).join('');
-        } else if (question.tipo === 'verdadero_falso') {
-            return `
-                <div class="option-card">
-                    <input type="radio" id="q${questionIndex}_true" name="question_${questionIndex}" value="true" class="option-input" required>
-                    <label for="q${questionIndex}_true" class="option-label">
-                        <div class="option-check"></div>
-                        <div class="option-content">
-                            <span class="option-text">Verdadero</span>
-                        </div>
-                    </label>
-                </div>
-                <div class="option-card">
-                    <input type="radio" id="q${questionIndex}_false" name="question_${questionIndex}" value="false" class="option-input" required>
-                    <label for="q${questionIndex}_false" class="option-label">
-                        <div class="option-check"></div>
-                        <div class="option-content">
-                            <span class="option-text">Falso</span>
-                        </div>
-                    </label>
-                </div>
-            `;
-        } else if (question.tipo === 'respuesta_corta') {
-            return `
-                <div class="textarea-container">
-                    <textarea id="q${questionIndex}_text" name="question_${questionIndex}" rows="4" class="form-textarea" placeholder="Escribe tu respuesta aquí..." required maxlength="500"></textarea>
-                    <div class="textarea-counter">
-                        <span id="q${questionIndex}_counter">0</span>/500 caracteres
-                    </div>
-                </div>
-            `;
-        }
-        return '';
-    }
+   getErrorPage(message) {
+       return `<!DOCTYPE html>
+<html lang="es">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Error - Biblioteca Universitaria</title>
+   <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+   <header class="app-header">
+       <div class="container">
+           <h1>Error</h1>
+       </div>
+   </header>
+   
+   <main class="main-content">
+       <div class="container">
+           <div class="card">
+               <div class="card-body text-center">
+                   <div style="font-size: 4rem; color: var(--danger-500); margin-bottom: 1rem;">⚠</div>
+                   <h2>Oops! Algo salió mal</h2>
+                   <p>${message}</p>
+                   <div class="mt-4">
+                       <button onclick="window.close()" class="btn btn-primary">Cerrar</button>
+                       <a href="../index.html" class="btn btn-secondary">Volver al inicio</a>
+                   </div>
+               </div>
+           </div>
+       </div>
+   </main>
+</body>
+</html>`;
+   }
 
-    generateQuizQuestionOptions(question, questionIndex) {
-        if (question.tipo === 'opcion_multiple') {
-            return question.opciones.map((option, optIndex) => {
-                const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
-                const letter = letters[optIndex] || `${optIndex + 1}`;
-                return `
-                    <div class="option-card">
-                        <input type="radio" id="q${questionIndex}_${option.valor}" name="question_${questionIndex}" value="${option.valor}" class="option-input" required>
-                        <label for="q${questionIndex}_${option.valor}" class="option-label">
-                            <div class="option-indicator">
-                                <span class="option-letter">${letter}</span>
-                            </div>
-                            <div class="option-content">
-                                <span class="option-text">${option.texto}</span>
-                            </div>
-                        </label>
-                    </div>
-                `;
-            }).join('');
-        } else if (question.tipo === 'verdadero_falso') {
-            return `
-                <div class="option-card">
-                    <input type="radio" id="q${questionIndex}_true" name="question_${questionIndex}" value="true" class="option-input" required>
-                    <label for="q${questionIndex}_true" class="option-label">
-                        <div class="option-indicator">
-                            <span class="option-letter">V</span>
-                        </div>
-                        <div class="option-content">
-                            <span class="option-text">Verdadero</span>
-                        </div>
-                    </label>
-                </div>
-                <div class="option-card">
-                    <input type="radio" id="q${questionIndex}_false" name="question_${questionIndex}" value="false" class="option-input" required>
-                    <label for="q${questionIndex}_false" class="option-label">
-                        <div class="option-indicator">
-                            <span class="option-letter">F</span>
-                        </div>
-                        <div class="option-content">
-                            <span class="option-text">Falso</span>
-                        </div>
-                    </label>
-                </div>
-            `;
-        } else if (question.tipo === 'respuesta_corta') {
-            return `
-                <div class="textarea-container">
-                    <textarea id="q${questionIndex}_text" name="question_${questionIndex}" rows="4" class="form-textarea" placeholder="Escribe tu respuesta aquí..." required maxlength="500"></textarea>
-                    <div class="textarea-counter">
-                        <span id="q${questionIndex}_counter">0</span>/500 caracteres
-                    </div>
-                </div>
-            `;
-        }
-        return '';
-    }
+   // Método público para generar páginas
+   async getSurveyPage(surveyName) {
+       return await this.generateSurveyPage(surveyName);
+   }
 
-    saveSurveyPage(surveyName, html) {
-        // En un entorno real, esto guardaría el archivo físicamente
-        // Por ahora, usamos localStorage para simular
-        localStorage.setItem(`generated_survey_${surveyName}`, html);
-        
-        // También crear una lista de páginas generadas
-        const generatedPages = JSON.parse(localStorage.getItem('generated_survey_pages') || '[]');
-        if (!generatedPages.includes(surveyName)) {
-            generatedPages.push(surveyName);
-            localStorage.setItem('generated_survey_pages', JSON.stringify(generatedPages));
-        }
-    }
-
-    saveQuizPage(quizName, html) {
-        // En un entorno real, esto guardaría el archivo físicamente
-        // Por ahora, usamos localStorage para simular
-        localStorage.setItem(`generated_quiz_${quizName}`, html);
-        
-        // También crear una lista de páginas generadas
-        const generatedPages = JSON.parse(localStorage.getItem('generated_quiz_pages') || '[]');
-        if (!generatedPages.includes(quizName)) {
-            generatedPages.push(quizName);
-            localStorage.setItem('generated_quiz_pages', JSON.stringify(generatedPages));
-        }
-    }
-
-    // Método para obtener una página generada
-    getSurveyPage(surveyName) {
-        return localStorage.getItem(`generated_survey_${surveyName}`);
-    }
-
-    getQuizPage(quizName) {
-        return localStorage.getItem(`generated_quiz_${quizName}`);
-    }
+   async getQuizPage(quizName) {
+       return await this.generateQuizPage(quizName);
+   }
 }
 
-// Inicializar el generador cuando la página se carga
-document.addEventListener('DOMContentLoaded', async () => {
-    // Esperar un poco para que otros scripts se inicialicen
-    setTimeout(async () => {
-        try {
-            const generator = new DynamicPageGenerator();
-            await generator.init();
-            
-            // Hacer el generador disponible globalmente
-            window.pageGenerator = generator;
-        } catch (error) {
-            console.error('Error inicializando el generador de páginas:', error);
-        }
-    }, 2000);
-});
+// Hacer disponible globalmente
+window.pageGenerator = new DynamicPageGenerator();
 
-// Exportar para uso global
-window.DynamicPageGenerator = DynamicPageGenerator;
+// Funciones de compatibilidad
+window.generateSurveyPage = async function(surveyName) {
+   return await window.pageGenerator.getSurveyPage(surveyName);
+};
+
+window.generateQuizPage = async function(quizName) {
+   return await window.pageGenerator.getQuizPage(quizName);
+};

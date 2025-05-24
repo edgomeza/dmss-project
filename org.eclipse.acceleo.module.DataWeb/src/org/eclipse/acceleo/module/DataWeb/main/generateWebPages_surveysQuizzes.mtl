@@ -1,0 +1,468 @@
+[comment encoding = UTF-8 /]
+[module generateWebPages_surveysQuizzes('http://www.unex.es/dmss/dataweb')]
+
+[import org::eclipse::acceleo::module::DataWeb::main::generateWebPages_surveyQuizJS/]
+
+[template public generateSurveysQuizzes(app : Aplicacion)]
+[comment Generar páginas de índice /]
+[generateSurveysIndex(app)/]
+[generateQuizzesIndex(app)/]
+
+[comment Generar páginas de administración /]
+[generateAdminSurveys(app)/]
+[generateAdminQuizzes(app)/]
+
+[comment Generar páginas de creación /]
+[generateCreateSurvey(app)/]
+[generateCreateQuiz(app)/]
+
+[comment Generar JavaScript unificado /]
+[generateSurveyQuizJS(app)/]
+[/template]
+
+[template public generateSurveysIndex(app : Aplicacion)]
+[file ('web/surveys/index.html', false, 'UTF-8')]
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[app.nombre/] - Encuestas</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+    <header class="app-header">
+        <div class="container">
+            <h1>Encuestas Disponibles</h1>
+            <p>Participa en nuestras encuestas</p>
+        </div>
+    </header>
+    
+    <nav class="main-nav">
+        <div class="container nav-container">
+            <div class="nav-brand">
+                <a href="../index.html" class="nav-logo">[app.nombre/]</a>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="../index.html" class="nav-link">Inicio</a></li>
+                <li class="nav-item"><a href="index.html" class="nav-link active">Encuestas</a></li>
+                [if (not app.cuestionarios->isEmpty())]
+                <li class="nav-item"><a href="../quizzes/index.html" class="nav-link">Cuestionarios</a></li>
+                [/if]
+            </ul>
+        </div>
+    </nav>
+    
+    <main class="main-content">
+        <div class="container">
+            <div id="surveys-container">
+                <div class="loading">Cargando encuestas...</div>
+            </div>
+        </div>
+    </main>
+    
+    <script src="../assets/js/app.js"></script>
+    <script src="../assets/js/survey-quiz.js"></script>
+    <script>loadContent('surveys');</script>
+</body>
+</html>
+[/file]
+[/template]
+
+[template public generateQuizzesIndex(app : Aplicacion)]
+[file ('web/quizzes/index.html', false, 'UTF-8')]
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[app.nombre/] - Cuestionarios</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+    <header class="app-header">
+        <div class="container">
+            <h1>Cuestionarios de Evaluación</h1>
+            <p>Pon a prueba tus conocimientos</p>
+        </div>
+    </header>
+    
+    <nav class="main-nav">
+        <div class="container nav-container">
+            <div class="nav-brand">
+                <a href="../index.html" class="nav-logo">[app.nombre/]</a>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="../index.html" class="nav-link">Inicio</a></li>
+                [if (not app.encuestas->isEmpty())]
+                <li class="nav-item"><a href="../surveys/index.html" class="nav-link">Encuestas</a></li>
+                [/if]
+                <li class="nav-item"><a href="index.html" class="nav-link active">Cuestionarios</a></li>
+            </ul>
+        </div>
+    </nav>
+    
+    <main class="main-content">
+        <div class="container">
+            <div id="quizzes-container">
+                <div class="loading">Cargando cuestionarios...</div>
+            </div>
+            
+            <section id="quiz-results-section" style="display:none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Tus Resultados</h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="quiz-results-container"></div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+    
+    <script src="../assets/js/app.js"></script>
+    <script src="../assets/js/survey-quiz.js"></script>
+    <script>loadContent('quizzes');</script>
+</body>
+</html>
+[/file]
+[/template]
+
+[template public generateAdminSurveys(app : Aplicacion)]
+[file ('web/admin/surveys-admin.html', false, 'UTF-8')]
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administración de Encuestas</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+    <header class="app-header">
+        <div class="container">
+            <h1>Administración de Encuestas</h1>
+        </div>
+    </header>
+    
+    <nav class="main-nav">
+        <div class="container nav-container">
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="../index.html" class="nav-link">Inicio</a></li>
+                <li class="nav-item"><a href="surveys-admin.html" class="nav-link active">Encuestas</a></li>
+                <li class="nav-item"><a href="quizzes-admin.html" class="nav-link">Cuestionarios</a></li>
+                <li class="nav-item"><a href="create-survey.html" class="nav-link">Crear Nueva</a></li>
+            </ul>
+        </div>
+    </nav>
+    
+    <main class="main-content">
+        <div class="container">
+            <section class="admin-overview mb-6">
+                <div class="card">
+                    <div class="card-header"><h2>Resumen de Encuestas</h2></div>
+                    <div class="card-body">
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-number">[app.encuestas->size()/]</div>
+                                <div class="stat-label">Encuestas Activas</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="surveys-section mb-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Encuestas Disponibles</h2>
+                        <a href="create-survey.html" class="btn btn-success">Crear Nueva Encuesta</a>
+                    </div>
+                    <div class="card-body">
+                        <div id="surveys-list"></div>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="role-assignments mb-6">
+                <div class="card">
+                    <div class="card-header"><h2>Asignación a Roles</h2></div>
+                    <div class="card-body">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Encuesta</th>
+                                    [for (rol : Rol | app.roles)]
+                                    <th>[rol.nombre/]</th>
+                                    [/for]
+                                </tr>
+                            </thead>
+                            <tbody id="role-assignments-table"></tbody>
+                        </table>
+                        <button id="saveRoleAssignments" class="btn btn-primary">Guardar Asignaciones</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+    
+    <script src="../assets/js/app.js"></script>
+    <script src="../assets/js/survey-quiz.js"></script>
+    <script>initAdmin('surveys');</script>
+</body>
+</html>
+[/file]
+[/template]
+
+[template public generateAdminQuizzes(app : Aplicacion)]
+[file ('web/admin/quizzes-admin.html', false, 'UTF-8')]
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administración de Cuestionarios</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+    <header class="app-header">
+        <div class="container">
+            <h1>Administración de Cuestionarios</h1>
+        </div>
+    </header>
+    
+    <nav class="main-nav">
+        <div class="container nav-container">
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="../index.html" class="nav-link">Inicio</a></li>
+                <li class="nav-item"><a href="surveys-admin.html" class="nav-link">Encuestas</a></li>
+                <li class="nav-item"><a href="quizzes-admin.html" class="nav-link active">Cuestionarios</a></li>
+                <li class="nav-item"><a href="create-quiz.html" class="nav-link">Crear Nuevo</a></li>
+            </ul>
+        </div>
+    </nav>
+    
+    <main class="main-content">
+        <div class="container">
+            <section class="admin-overview mb-6">
+                <div class="card">
+                    <div class="card-header"><h2>Resumen de Cuestionarios</h2></div>
+                    <div class="card-body">
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-number">[app.cuestionarios->size()/]</div>
+                                <div class="stat-label">Cuestionarios Activos</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="quizzes-section mb-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Cuestionarios Disponibles</h2>
+                        <a href="create-quiz.html" class="btn btn-success">Crear Nuevo Cuestionario</a>
+                    </div>
+                    <div class="card-body">
+                        <div id="quizzes-list"></div>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="pending-reviews mb-6">
+                <div class="card">
+                    <div class="card-header"><h2>Evaluaciones Pendientes</h2></div>
+                    <div class="card-body">
+                        <div id="pendingReviewsTable"></div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+    
+    <!-- Modal para revisión -->
+    <div id="reviewModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Revisión de Evaluación</h3>
+                <button class="modal-close" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body" id="reviewModalBody"></div>
+            <div class="modal-footer">
+                <button class="btn btn-success" onclick="confirmGrade()">Confirmar</button>
+                <button class="btn btn-secondary" onclick="closeModal()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="../assets/js/app.js"></script>
+    <script src="../assets/js/survey-quiz.js"></script>
+    <script>initAdmin('quizzes');</script>
+</body>
+</html>
+[/file]
+[/template]
+
+[template public generateCreateSurvey(app : Aplicacion)]
+[file ('web/admin/create-survey.html', false, 'UTF-8')]
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Nueva Encuesta</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+    <header class="app-header">
+        <div class="container">
+            <h1>Crear Nueva Encuesta</h1>
+        </div>
+    </header>
+    
+    <nav class="main-nav">
+        <div class="container nav-container">
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="../index.html" class="nav-link">Inicio</a></li>
+                <li class="nav-item"><a href="surveys-admin.html" class="nav-link">Encuestas</a></li>
+                <li class="nav-item"><a href="create-survey.html" class="nav-link active">Crear Encuesta</a></li>
+            </ul>
+        </div>
+    </nav>
+    
+    <main class="main-content">
+        <div class="container">
+            <div class="card">
+                <div class="card-header"><h2>Nueva Encuesta</h2></div>
+                <div class="card-body">
+                    <form id="createSurveyForm">
+                        <div class="form-group">
+                            <label class="form-label">Nombre Interno <span class="required">*</span></label>
+                            <input type="text" name="nombre" class="form-control" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Título <span class="required">*</span></label>
+                            <input type="text" name="titulo" class="form-control" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Descripción</label>
+                            <textarea name="descripcion" class="form-control" rows="4"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Tipo de Representación <span class="required">*</span></label>
+                            <select name="tipoRepresentacion" class="form-control" required>
+                                <option value="">Seleccionar...</option>
+                                <option value="Estadistica">Estadística</option>
+                                <option value="Grafica">Gráfica</option>
+                                <option value="Lista">Lista</option>
+                                <option value="Tabla">Tabla</option>
+                            </select>
+                        </div>
+                        
+                        <h3>Preguntas</h3>
+                        <div id="preguntasContainer"></div>
+                        
+                        <button type="button" class="btn btn-outline-primary" onclick="addQuestion()">
+                            Agregar Pregunta
+                        </button>
+                        
+                        <div class="form-actions mt-4">
+                            <button type="submit" class="btn btn-success">Crear Encuesta</button>
+                            <a href="surveys-admin.html" class="btn btn-secondary">Cancelar</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <script src="../assets/js/app.js"></script>
+    <script src="../assets/js/survey-quiz.js"></script>
+    <script>initCreator('survey');</script>
+</body>
+</html>
+[/file]
+[/template]
+
+[template public generateCreateQuiz(app : Aplicacion)]
+[file ('web/admin/create-quiz.html', false, 'UTF-8')]
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Nuevo Cuestionario</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+    <header class="app-header">
+        <div class="container">
+            <h1>Crear Nuevo Cuestionario</h1>
+        </div>
+    </header>
+    
+    <nav class="main-nav">
+        <div class="container nav-container">
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="../index.html" class="nav-link">Inicio</a></li>
+                <li class="nav-item"><a href="quizzes-admin.html" class="nav-link">Cuestionarios</a></li>
+                <li class="nav-item"><a href="create-quiz.html" class="nav-link active">Crear Cuestionario</a></li>
+            </ul>
+        </div>
+    </nav>
+    
+    <main class="main-content">
+        <div class="container">
+            <div class="card">
+                <div class="card-header"><h2>Nuevo Cuestionario</h2></div>
+                <div class="card-body">
+                    <form id="createQuizForm">
+                        <div class="form-group">
+                            <label class="form-label">Nombre Interno <span class="required">*</span></label>
+                            <input type="text" name="nombre" class="form-control" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Título <span class="required">*</span></label>
+                            <input type="text" name="titulo" class="form-control" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Descripción</label>
+                            <textarea name="descripcion" class="form-control" rows="4"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Tiempo Límite (minutos) <span class="required">*</span></label>
+                            <input type="number" name="timeLimit" class="form-control" min="5" max="180" value="30" required>
+                        </div>
+                        
+                        <h3>Preguntas</h3>
+                        <div id="preguntasContainer"></div>
+                        
+                        <button type="button" class="btn btn-outline-primary" onclick="addQuestion()">
+                            Agregar Pregunta
+                        </button>
+                        
+                        <div class="form-actions mt-4">
+                            <button type="submit" class="btn btn-success">Crear Cuestionario</button>
+                            <a href="quizzes-admin.html" class="btn btn-secondary">Cancelar</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <script src="../assets/js/app.js"></script>
+    <script src="../assets/js/survey-quiz.js"></script>
+    <script>initCreator('quiz');</script>
+</body>
+</html>
+[/file]
+[/template]

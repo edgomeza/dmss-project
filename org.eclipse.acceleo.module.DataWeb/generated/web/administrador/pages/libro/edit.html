@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biblioteca Universitaria - Editar Libro</title>
+    <link rel="stylesheet" href="../../../assets/css/style.css">
+</head>
+<body>
+    <header class="app-header">
+        <div class="container">
+            <h1>Editar Libro</h1>
+        </div>
+    </header>
+    
+    <nav class="main-nav">
+        <div class="container nav-container">
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="../../dashboard.html" class="nav-link">Dashboard</a></li>
+                <li class="nav-item"><a href="index.html" class="nav-link">Gestión Libro</a></li>
+                <li class="nav-item"><a href="list.html" class="nav-link">Listar</a></li>
+                <li class="nav-item"><a href="#" class="nav-link active">Editar</a></li>
+            </ul>
+        </div>
+    </nav>
+    
+    <main class="main-content">
+        <div class="container">
+            <div class="card">
+                <div class="card-header"><h2>Editar Libro</h2></div>
+                <div class="card-body">
+                    <div id="loadingForm" class="loading">Cargando...</div>
+                    
+                    <form id="editForm" style="display: none;">
+                        <input type="hidden" id="id_libro" name="id_libro">
+                        <div class="form-group">
+                            <label for="titulo" class="form-label">titulo *</label>
+                            <input type="text" id="titulo" name="titulo" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="autor" class="form-label">autor *</label>
+                            <input type="text" id="autor" name="autor" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="añoPublicacion" class="form-label">añoPublicacion *</label>
+                            <input type="number" id="añoPublicacion" name="añoPublicacion" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="disponible" class="form-label">disponible *</label>
+                            <select id="disponible" name="disponible" class="form-control" required>
+                                <option value="">Seleccionar...</option>
+                                <option value="true">Sí</option>
+                                <option value="false">No</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-warning">Actualizar</button>
+                            <a href="list.html" class="btn btn-secondary">Cancelar</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <script src="../../../assets/js/app.js"></script>
+    <script src="../../../assets/js/data-manager.js"></script>
+    <script src="../../../assets/js/libro.js"></script>
+</body>
+</html>

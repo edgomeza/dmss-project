@@ -1,0 +1,1663 @@
+[comment encoding = UTF-8 /]
+[module generateWebUnified('http://www.unex.es/dmss/dataweb')]
+
+[template public generateWebUnified(app : Aplicacion)]
+[generateUnifiedDatabaseManager(app)/]
+[generateUnifiedAppManager(app)/]
+[generateUnifiedEntityManager(app)/]
+[generateUnifiedSurveyQuizManager(app)/]
+[generateUnifiedUIManager(app)/]
+[/template]
+
+[template public generateUnifiedDatabaseManager(app : Aplicacion)]
+[file ('web/assets/js/unified-database.js', false, 'UTF-8')]
+/**
+ * GESTOR DE BASE DE DATOS UNIFICADO - [app.nombre/]
+ * Centraliza toda la gestión de IndexedDB
+ */
+
+class UnifiedDatabaseManager {
+    constructor() {
+        this.dbName = '[app.nombre.replace(' ', '_')/]_DB';
+        this.version = 2;
+        this.db = null;
+        this.initialized = false;
+    }
+
+    async init() {
+        if (this.initialized && this.db) return this.db;
+        
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open(this.dbName, this.version);
+            
+            request.onerror = () => reject(request.error);
+            
+            request.onsuccess = () => {
+                this.db = request.result;
+                this.initialized = true;
+                resolve(this.db);
+            };
+            
+            request.onupgradeneeded = (event) => {
+                const db = event.target.result;
+                
+                // Stores de entidades
+                const entityStores = {
+                    [for (entidad : Entidad | app.entidades) separator(',')]
+                    '[entidad.tableName/]': '[entidad.atributos->select(a | a.isPrimaryKey)->first().nombre/]'
+                    [/for]
+                };
+                
+                // Stores del sistema
+                const systemStores = {
+                    'ENCUESTAS': 'id_encuesta',
+                    'CUESTIONARIOS': 'id_cuestionario',
+                    'PREGUNTAS_ENCUESTA': 'id_pregunta',
+                    'PREGUNTAS_CUESTIONARIO': 'id_pregunta',
+                    'OPCIONES_PREGUNTA': 'id_opcion',
+                    'OPCIONES_CUESTIONARIO': 'id_opcion',
+                    'RESPUESTAS_ENCUESTA': 'id',
+                    'RESPUESTAS_CUESTIONARIO': 'id'
+                };
+                
+                const allStores = { ...entityStores, ...systemStores };
+                
+                Object.entries(allStores).forEach((['['/]storeName, keyPath]) => {
+                    if (!db.objectStoreNames.contains(storeName)) {
+                        db.createObjectStore(storeName, { keyPath, autoIncrement: true });
+                    }
+                });
+                
+                this.seedInitialData(db);
+            };
+        });
+    }
+
+    seedInitialData(db) {
+        // Datos iniciales para entidades
+        [for (entidad : Entidad | app.entidades)]
+        if (db.objectStoreNames.contains('[entidad.tableName/]')) {
+            const [entidad.nombre.toLowerCase()/]Store = db.transaction(['['/]['['/]entidad.tableName/]'], 'readwrite').objectStore('[entidad.tableName/]');
+            for (let i = 1; i <= 3; i++) {
+                [entidad.nombre.toLowerCase()/]Store.add({
+                    [for (atrib : Atributo | entidad.atributos->select(a | not a.isPrimaryKey)) separator(',')]
+                    [atrib.nombre/]: [if (atrib.tipo = TipoAtributo::BOOLEAN)](Math.random() > 0.5)[elseif (atrib.tipo = TipoAtributo::INTEGER)](Math.floor(Math.random() * 100))[elseif (atrib.tipo = TipoAtributo::DECIMAL)](Math.round(Math.random() * 100 * 100) / 100)[else]`[entidad.nombre/] ${i}`[/if]
+                    [/for]
+                });
+            }
+        }
+        [/for]
+        
+        // Datos iniciales para encuestas y cuestionarios
+        [for (encuesta : Encuesta | app.encuestas)]
+        if (db.objectStoreNames.contains('ENCUESTAS')) {
+            const encuestasStore = db.transaction(['['/]'ENCUESTAS'], 'readwrite').objectStore('ENCUESTAS');
+            encuestasStore.add({
+                nombre: '[encuesta.nombre/]',
+                titulo: '[encuesta.titulo/]',
+                descripcion: '[if (encuesta.descripcion.oclIsUndefined() = false)][encuesta.descripcion/][else]Encuesta [encuesta.nombre/][/if]',
+                tipo_representacion: '[encuesta.tipoRepresentacion/]'
+            });
+        }
+        [/for]
+        
+        [for (cuestionario : Cuestionario | app.cuestionarios)]
+        if (db.objectStoreNames.contains('CUESTIONARIOS')) {
+            const cuestionariosStore = db.transaction(['['/]'CUESTIONARIOS'], 'readwrite').objectStore('CUESTIONARIOS');
+            cuestionariosStore.add({
+                nombre: '[cuestionario.nombre/]',
+                titulo: '[cuestionario.titulo/]',
+                descripcion: '[if (cuestionario.descripcion.oclIsUndefined() = false)][cuestionario.descripcion/][else]Cuestionario [cuestionario.nombre/][/if]',
+                tiempoLimite: 30
+            });
+        }
+        [/for]
+    }
+
+    async execute(operation, storeName, data = null, id = null) {
+        await this.init();
+        
+        return new Promise((resolve, reject) => {
+            if (!this.db.objectStoreNames.contains(storeName)) {
+                console.warn(`Store ${storeName} no existe`);
+                resolve(operation === 'getAll' ? ['['/]] : null);
+                return;
+            }
+            
+            const mode = operation === 'get' || operation === 'getAll' ? 'readonly' : 'readwrite';
+            const transaction = this.db.transaction(['['/]storeName], mode);
+            const store = transaction.objectStore(storeName);
+            
+            let request;
+            switch(operation) {
+                case 'create': request = store.add(data); break;
+                case 'getAll': request = store.getAll(); break;
+                case 'get': request = store.get(id); break;
+                case 'update': request = store.put(data); break;
+                case 'delete': request = store.delete(id); break;
+                default: reject(new Error(`Operación ${operation} no válida`)); return;
+            }
+            
+            request.onsuccess = () => resolve(request.result || (operation === 'getAll' ? ['['/]] : null));
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    async query(storeName, filters = {}) {
+        const all = await this.execute('getAll', storeName);
+        if (!Object.keys(filters).length) return all;
+        
+        return all.filter(item => 
+            Object.entries(filters).every((['['/]key, value]) => 
+                item['['/]key] == value
+            )
+        );
+    }
+}
+
+// Singleton global
+window.UnifiedDB = new UnifiedDatabaseManager();
+[/file]
+[/template]
+
+[template public generateUnifiedAppManager(app : Aplicacion)]
+[file ('web/assets/js/unified-app.js', false, 'UTF-8')]
+/**
+ * GESTOR PRINCIPAL DE LA APLICACIÓN - [app.nombre/]
+ * Coordina todos los módulos del sistema
+ */
+
+class UnifiedAppManager {
+    constructor() {
+        this.config = {
+            appName: '[app.nombre/]',
+            debug: true,
+            roles: ['['/]
+                [for (rol : Rol | app.roles) separator (', ')]
+                '[rol.nombre/]'
+                [/for]
+            ],
+            currentRole: localStorage.getItem('current_role') || null
+        };
+        
+        this.db = window.UnifiedDB;
+        this.ui = null;
+        this.entities = null;
+        this.surveys = null;
+        
+        this.init();
+    }
+
+    async init() {
+        try {
+            await this.db.init();
+            
+            this.ui = new UnifiedUIManager(this);
+            this.entities = new UnifiedEntityManager(this);
+            this.surveys = new UnifiedSurveyQuizManager(this);
+            
+            this.setupGlobalEvents();
+            this.initCurrentPage();
+            
+            if (this.config.debug) {
+                console.log(`✅ ${this.config.appName} inicializado correctamente`);
+            }
+        } catch (error) {
+            console.error('❌ Error inicializando aplicación:', error);
+        }
+    }
+
+    setupGlobalEvents() {
+        // Manejo global de formularios
+        document.addEventListener('submit', (e) => {
+            const form = e.target;
+            if (form.classList.contains('ajax-form') || form.classList.contains('unified-form')) {
+                e.preventDefault();
+                this.handleFormSubmit(form);
+            }
+        });
+
+        // Manejo global de clics
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('.btn');
+            if (!btn) return;
+
+            if (btn.classList.contains('delete-btn')) {
+                e.preventDefault();
+                this.handleDelete(btn);
+            } else if (btn.classList.contains('role-btn')) {
+                e.preventDefault();
+                this.setRole(btn.dataset.role);
+            }
+        });
+
+        // Auto-dismiss alerts
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                document.querySelectorAll('.alert['['/]data-auto-dismiss="true"]').forEach(alert => {
+                    alert.style.opacity = '0';
+                    setTimeout(() => alert.remove(), 500);
+                });
+            }, 5000);
+        });
+    }
+
+    async handleFormSubmit(form) {
+        const formType = form.dataset.type || 'generic';
+        const entityType = form.dataset.entity;
+        
+        try {
+            const formData = new FormData(form);
+            let result;
+
+            switch (formType) {
+                case 'entity-create':
+                case 'entity-update':
+                    result = await this.entities.handleForm(formType, entityType, formData);
+                    break;
+                case 'survey-create':
+                case 'quiz-create':
+                    result = await this.surveys.handleForm(formType, formData);
+                    break;
+                default:
+                    result = await this.handleGenericForm(form, formData);
+            }
+
+            if (result.success) {
+                this.ui.showAlert(result.message || 'Operación exitosa', 'success');
+                if (result.redirect) {
+                    setTimeout(() => window.location.href = result.redirect, 1500);
+                }
+            } else {
+                this.ui.showAlert(result.message || 'Error en la operación', 'danger');
+            }
+        } catch (error) {
+            console.error('Error en formulario:', error);
+            this.ui.showAlert('Error procesando formulario', 'danger');
+        }
+    }
+
+    async handleDelete(btn) {
+        const entityType = btn.dataset.entity;
+        const itemId = btn.dataset.id;
+        const confirmMsg = btn.dataset.confirm || '¿Seguro que deseas eliminar este elemento?';
+
+        if (!confirm(confirmMsg)) return;
+
+        try {
+            let result;
+            if (entityType) {
+                result = await this.entities.deleteItem(entityType, itemId);
+            } else {
+                result = await this.handleGenericDelete(itemId);
+            }
+
+            if (result.success) {
+                this.ui.showAlert('Elemento eliminado correctamente', 'success');
+                if (result.reload) {
+                    setTimeout(() => location.reload(), 1000);
+                }
+            } else {
+                this.ui.showAlert(result.message || 'Error al eliminar', 'danger');
+            }
+        } catch (error) {
+            console.error('Error eliminando:', error);
+            this.ui.showAlert('Error al eliminar elemento', 'danger');
+        }
+    }
+
+    setRole(roleName) {
+        this.config.currentRole = roleName;
+        localStorage.setItem('current_role', roleName);
+        
+        if (this.config.debug) {
+            console.log(`✅ Rol establecido: ${roleName}`);
+        }
+
+        // Redirigir al dashboard del rol
+        window.location.href = `${roleName.toLowerCase()}/dashboard.html`;
+    }
+
+    getCurrentRole() {
+        return this.config.currentRole;
+    }
+
+    isAdmin() {
+        const adminRoles = ['['/]
+            [for (rol : Rol | app.roles)]
+            [let maxPages : Integer = app.roles->collect(r | r.paginasAccesibles->size())->max()]
+            [let maxEntidades : Integer = app.roles->collect(r | r.numeroEntidadesAccesibles)->max()]
+            [let isAdminRole : Boolean = rol.paginasAccesibles->size() = maxPages or (rol.paginasAccesibles->size() < maxPages and rol.numeroEntidadesAccesibles = maxEntidades)]
+            [if (isAdminRole)]'[rol.nombre/]'[if (rol <> app.roles->last())], [/if][/if]
+            [/let]
+            [/let]
+            [/let]
+            [/for]
+        ];
+        return adminRoles.includes(this.config.currentRole);
+    }
+
+    initCurrentPage() {
+        const path = window.location.pathname;
+        
+        // Dashboard pages
+        if (path.includes('dashboard.html')) {
+            this.initDashboard();
+        }
+        // Entity pages
+        else if (path.includes('/pages/')) {
+            const pathParts = path.split('/');
+            const roleName = pathParts['['/]pathParts.indexOf('web') + 1];
+            const entityName = pathParts['['/]pathParts.length - 2];
+            const pageName = pathParts['['/]pathParts.length - 1].replace('.html', '');
+            
+            this.entities.initPage(entityName, pageName, roleName);
+        }
+        // Survey/Quiz pages
+        else if (path.includes('surveys') || path.includes('quizzes')) {
+            this.surveys.initPage(path);
+        }
+        // Admin pages
+        else if (path.includes('admin')) {
+            this.initAdminPage();
+        }
+    }
+
+    async initDashboard() {
+        const currentRole = this.getCurrentRole();
+        if (!currentRole) return;
+
+        try {
+            // Cargar encuestas y cuestionarios para el rol actual
+            await this.surveys.loadForRole(currentRole);
+            
+            // Actualizar estadísticas si existen contenedores
+            this.updateDashboardStats();
+            
+        } catch (error) {
+            console.error('Error inicializando dashboard:', error);
+        }
+    }
+
+    updateDashboardStats() {
+        // Actualizar hora actual
+        const updateTime = () => {
+            const timeElement = document.getElementById('current-time');
+            if (timeElement) {
+                const now = new Date();
+                timeElement.textContent = now.toLocaleTimeString('es-ES', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+            }
+        };
+        
+        updateTime();
+        setInterval(updateTime, 60000);
+    }
+
+    async initAdminPage() {
+        if (!this.isAdmin()) {
+            this.ui.showAlert('Acceso denegado: Se requieren permisos de administrador', 'danger');
+            setTimeout(() => window.location.href = '../index.html', 2000);
+            return;
+        }
+
+        const path = window.location.pathname;
+        if (path.includes('surveys-admin')) {
+            await this.surveys.initAdmin('surveys');
+        } else if (path.includes('quizzes-admin')) {
+            await this.surveys.initAdmin('quizzes');
+        }
+    }
+
+    async handleGenericForm(form, formData) {
+        // Manejo genérico de formularios no específicos
+        return { success: true, message: 'Formulario procesado' };
+    }
+
+    async handleGenericDelete(itemId) {
+        // Manejo genérico de eliminación
+        return { success: true, reload: true };
+    }
+}
+
+// Funciones globales para compatibilidad
+window.selectRole = function(roleName) {
+    if (window.DataWebApp) {
+        window.DataWebApp.setRole(roleName);
+    }
+    return false;
+};
+
+window.openSurveyPage = function(surveyName) {
+    if (window.DataWebApp && window.DataWebApp.surveys) {
+        window.DataWebApp.surveys.openItem(surveyName, 'survey');
+    }
+};
+
+window.openQuizPage = function(quizName) {
+    if (window.DataWebApp && window.DataWebApp.surveys) {
+        window.DataWebApp.surveys.openItem(quizName, 'quiz');
+    }
+};
+
+// Inicialización global
+document.addEventListener('DOMContentLoaded', () => {
+    window.DataWebApp = new UnifiedAppManager();
+});
+[/file]
+[/template]
+
+[template public generateUnifiedEntityManager(app : Aplicacion)]
+[file ('web/assets/js/unified-entities.js', false, 'UTF-8')]
+/**
+ * GESTOR UNIFICADO DE ENTIDADES - [app.nombre/]
+ * Maneja CRUD para todas las entidades del sistema
+ */
+
+class UnifiedEntityManager {
+    constructor(app) {
+        this.app = app;
+        this.db = app.db;
+        this.currentEntity = null;
+        this.currentPage = null;
+        
+        this.entityConfig = {
+            [for (entidad : Entidad | app.entidades) separator(',')]
+            '[entidad.nombre.toLowerCase()/]': {
+                name: '[entidad.nombre/]',
+                tableName: '[entidad.tableName/]',
+                primaryKey: '[entidad.atributos->select(a | a.isPrimaryKey)->first().nombre/]',
+                fields: ['['/]
+                    [for (atrib : Atributo | entidad.atributos) separator(',')]
+                    {
+                        name: '[atrib.nombre/]',
+                        type: '[atrib.tipo/]',
+                        isPrimaryKey: [atrib.isPrimaryKey/],
+                        required: true
+                    }
+                    [/for]
+                ]
+            }
+            [/for]
+        };
+    }
+
+    initPage(entityName, pageName, roleName) {
+        this.currentEntity = entityName;
+        this.currentPage = pageName;
+        
+        const config = this.entityConfig['['/]entityName];
+        if (!config) {
+            console.error(`Entidad ${entityName} no encontrada`);
+            return;
+        }
+
+        switch (pageName) {
+            case 'index':
+                this.initIndexPage(config);
+                break;
+            case 'list':
+                this.initListPage(config);
+                break;
+            case 'create':
+                this.initCreatePage(config);
+                break;
+            case 'edit':
+                this.initEditPage(config);
+                break;
+            case 'detail':
+                this.initDetailPage(config);
+                break;
+        }
+    }
+
+    async initIndexPage(config) {
+        // Actualizar estadísticas si hay contenedores
+        const statsContainer = document.querySelector('.stats-grid');
+        if (statsContainer) {
+            try {
+                const data = await this.db.execute('getAll', config.tableName);
+                const countElement = document.querySelector('.stat-number');
+                if (countElement) {
+                    countElement.textContent = data.length;
+                }
+            } catch (error) {
+                console.error('Error cargando estadísticas:', error);
+            }
+        }
+    }
+
+    async initListPage(config) {
+        const tableBody = document.getElementById('tableBody');
+        if (!tableBody) return;
+
+        try {
+            const data = await this.db.execute('getAll', config.tableName);
+            
+            if (data.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="100%" class="text-center">No hay datos disponibles</td></tr>';
+                return;
+            }
+
+            tableBody.innerHTML = data.map(item => `
+                <tr>
+                    ${config.fields.map(field => 
+                        `<td>${this.formatFieldValue(item['['/]field.name], field.type)}</td>`
+                    ).join('')}
+                    <td>
+                        <a href="detail.html?id=${item['['/]config.primaryKey]}" class="btn btn-info btn-sm">Ver</a>
+                        <a href="edit.html?id=${item['['/]['['/]config.primaryKey]}" class="btn btn-warning btn-sm">Editar</a>
+                        <button class="btn btn-danger btn-sm delete-btn" 
+                                data-entity="${config.tableName}" 
+                                data-id="${item['['/]config.primaryKey]}"
+                                data-confirm="¿Seguro que deseas eliminar este ${config.name}?">
+                            Eliminar
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        } catch (error) {
+            console.error('Error cargando lista:', error);
+            tableBody.innerHTML = '<tr><td colspan="100%" class="text-center error">Error cargando datos</td></tr>';
+        }
+    }
+
+    initCreatePage(config) {
+        const form = document.getElementById('createForm');
+        if (!form) return;
+
+        form.classList.add('unified-form');
+        form.dataset.type = 'entity-create';
+        form.dataset.entity = config.tableName;
+    }
+
+    async initEditPage(config) {
+        const form = document.getElementById('editForm');
+        const loadingElement = document.getElementById('loadingForm');
+        
+        if (!form) return;
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const id = urlParams.get('id');
+        
+        if (!id) {
+            this.app.ui.showAlert('ID no proporcionado', 'danger');
+            return;
+        }
+
+        try {
+            const item = await this.db.execute('get', config.tableName, parseInt(id) || id);
+            
+            if (!item) {
+                this.app.ui.showAlert('Elemento no encontrado', 'danger');
+                return;
+            }
+
+            // Rellenar formulario
+            config.fields.forEach(field => {
+                const input = form.querySelector(`['['/]name="${field.name}"]`);
+                if (input && item['['/]field.name] !== undefined) {
+                    if (input.type === 'checkbox') {
+                        input.checked = Boolean(item['['/]field.name]);
+                    } else {
+                        input.value = item['['/]field.name];
+                    }
+                }
+            });
+
+            form.classList.add('unified-form');
+            form.dataset.type = 'entity-update';
+            form.dataset.entity = config.tableName;
+            form.dataset.id = id;
+
+            if (loadingElement) loadingElement.style.display = 'none';
+            form.style.display = 'block';
+
+        } catch (error) {
+            console.error('Error cargando datos para edición:', error);
+            this.app.ui.showAlert('Error cargando datos', 'danger');
+        }
+    }
+
+    async initDetailPage(config) {
+        const detailContent = document.getElementById('detailContent');
+        const loadingElement = document.getElementById('loadingDetails');
+        
+        if (!detailContent) return;
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const id = urlParams.get('id');
+        
+        if (!id) {
+            this.app.ui.showAlert('ID no proporcionado', 'danger');
+            return;
+        }
+
+        try {
+            const item = await this.db.execute('get', config.tableName, parseInt(id) || id);
+            
+            if (!item) {
+                this.app.ui.showAlert('Elemento no encontrado', 'danger');
+                return;
+            }
+
+            // Rellenar campos de detalle
+            config.fields.forEach(field => {
+                const element = document.getElementById(`field_${field.name}`);
+                if (element) {
+                    element.textContent = this.formatFieldValue(item['['/]field.name], field.type);
+                }
+            });
+
+            // Actualizar enlaces
+            const editLink = document.getElementById('editLink');
+            if (editLink) {
+                editLink.href = `edit.html?id=${id}`;
+            }
+
+            // Configurar botón de eliminar
+            const deleteBtn = document.getElementById('confirmDeleteBtn');
+            if (deleteBtn) {
+                deleteBtn.classList.add('delete-btn');
+                deleteBtn.dataset.entity = config.tableName;
+                deleteBtn.dataset.id = id;
+                deleteBtn.dataset.confirm = `¿Seguro que deseas eliminar este ${config.name}?`;
+            }
+
+            if (loadingElement) loadingElement.style.display = 'none';
+            detailContent.style.display = 'block';
+
+        } catch (error) {
+            console.error('Error cargando detalles:', error);
+            this.app.ui.showAlert('Error cargando detalles', 'danger');
+        }
+    }
+
+    async handleForm(formType, entityTableName, formData) {
+        const config = Object.values(this.entityConfig).find(c => c.tableName === entityTableName);
+        if (!config) {
+            throw new Error(`Configuración no encontrada para ${entityTableName}`);
+        }
+
+        const data = {};
+        
+        // Extraer datos del formulario
+        config.fields.forEach(field => {
+            if (!field.isPrimaryKey || formType === 'entity-update') {
+                const value = formData.get(field.name);
+                if (value !== null) {
+                    data['['/]field.name] = this.parseFieldValue(value, field.type);
+                }
+            }
+        });
+
+        try {
+            let result;
+            
+            if (formType === 'entity-create') {
+                result = await this.db.execute('create', config.tableName, data);
+                return {
+                    success: true,
+                    message: `${config.name} creado correctamente`,
+                    redirect: 'list.html'
+                };
+            } else if (formType === 'entity-update') {
+                const form = document.querySelector(`['['/]data-entity="${entityTableName}"]`);
+                const id = form.dataset.id;
+                data['['/]config.primaryKey] = parseInt(id) || id;
+                
+                result = await this.db.execute('update', config.tableName, data);
+                return {
+                    success: true,
+                    message: `${config.name} actualizado correctamente`,
+                    redirect: 'list.html'
+                };
+            }
+        } catch (error) {
+            console.error('Error en operación de entidad:', error);
+            return {
+                success: false,
+                message: `Error al ${formType === 'entity-create' ? 'crear' : 'actualizar'} ${config.name}`
+            };
+        }
+    }
+
+    async deleteItem(entityTableName, itemId) {
+        const config = Object.values(this.entityConfig).find(c => c.tableName === entityTableName);
+        if (!config) {
+            throw new Error(`Configuración no encontrada para ${entityTableName}`);
+        }
+
+        try {
+            await this.db.execute('delete', config.tableName, parseInt(itemId) || itemId);
+            return {
+                success: true,
+                message: `${config.name} eliminado correctamente`,
+                reload: true
+            };
+        } catch (error) {
+            console.error('Error eliminando entidad:', error);
+            return {
+                success: false,
+                message: `Error al eliminar ${config.name}`
+            };
+        }
+    }
+
+    formatFieldValue(value, type) {
+        if (value === null || value === undefined) return '-';
+        
+        switch (type) {
+            case 'BOOLEAN':
+                return value ? 'Sí' : 'No';
+            case 'DECIMAL':
+                return parseFloat(value).toFixed(2);
+            case 'INTEGER':
+                return parseInt(value).toLocaleString();
+            default:
+                return String(value);
+        }
+    }
+
+    parseFieldValue(value, type) {
+        switch (type) {
+            case 'BOOLEAN':
+                return value === 'true' || value === true;
+            case 'INTEGER':
+                return parseInt(value) || 0;
+            case 'DECIMAL':
+                return parseFloat(value) || 0.0;
+            default:
+                return String(value);
+        }
+    }
+}
+[/file]
+[/template]
+
+[template public generateUnifiedSurveyQuizManager(app : Aplicacion)]
+[file ('web/assets/js/unified-surveys.js', false, 'UTF-8')]
+/**
+ * GESTOR UNIFICADO DE ENCUESTAS Y CUESTIONARIOS - [app.nombre/]
+ * Maneja creación, administración y ejecución
+ */
+
+class UnifiedSurveyQuizManager {
+    constructor(app) {
+        this.app = app;
+        this.db = app.db;
+        this.questionCounter = 0;
+        this.currentTimer = null;
+        this.userAnswers = new Map();
+    }
+
+    async loadForRole(roleName) {
+        try {
+            // Cargar encuestas y cuestionarios disponibles para el rol
+            const ['['/]surveys, quizzes] = await Promise.all(['['/]
+                this.db.execute('getAll', 'ENCUESTAS'),
+                this.db.execute('getAll', 'CUESTIONARIOS')
+            ]);
+
+            // Obtener asignaciones de roles
+            const surveyAssignments = JSON.parse(localStorage.getItem('survey_role_assignments') || '{}');
+            const quizAssignments = JSON.parse(localStorage.getItem('quiz_role_assignments') || '{}');
+
+            // Filtrar por rol
+            const availableSurveys = surveys.filter(survey => {
+                if (surveyAssignments['['/]survey.nombre]) {
+                    return surveyAssignments['['/]survey.nombre].includes(roleName);
+                }
+                return true; // Si no hay asignación específica, mostrar para todos
+            });
+
+            const availableQuizzes = quizzes.filter(quiz => {
+                if (quizAssignments['['/]quiz.nombre]) {
+                    return quizAssignments['['/]quiz.nombre].includes(roleName);
+                }
+                return true;
+            });
+
+            // Actualizar contenedores en dashboard
+            this.updateRoleContent('roleSurveys', availableSurveys, 'survey');
+            this.updateRoleContent('roleQuizzes', availableQuizzes, 'quiz');
+
+        } catch (error) {
+            console.error('Error cargando contenido para rol:', error);
+        }
+    }
+
+    updateRoleContent(containerId, items, type) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        if (items.length === 0) {
+            container.innerHTML = `<p class="empty-message">No hay ${type === 'survey' ? 'encuestas' : 'cuestionarios'} asignados a tu rol.</p>`;
+           return;
+       }
+
+       container.innerHTML = items.map(item => `
+           <div class="assessment-item">
+               <div class="assessment-info">
+                   <h5>${item.titulo || item.nombre}</h5>
+                   <p>${item.descripcion || `${type === 'survey' ? 'Encuesta' : 'Cuestionario'} disponible`}</p>
+                   <span class="assessment-badge">
+                       ${type === 'survey' ? item.tipo_representacion || 'Encuesta' : `Evaluativo (${item.tiempoLimite || 30} min)`}
+                   </span>
+               </div>
+               <button class="btn btn-primary btn-sm" onclick="DataWebApp.surveys.openItem('${item.nombre}', '${type}')">
+                   ${type === 'survey' ? 'Participar' : 'Realizar'}
+               </button>
+           </div>
+       `).join('');
+   }
+
+   initPage(path) {
+       if (path.includes('surveys/index.html')) {
+           this.loadContent('surveys', 'surveys-container');
+       } else if (path.includes('quizzes/index.html')) {
+           this.loadContent('quizzes', 'quizzes-container');
+       } else if (path.includes('create-survey.html')) {
+           this.initCreator('survey');
+       } else if (path.includes('create-quiz.html')) {
+           this.initCreator('quiz');
+       }
+   }
+
+   async loadContent(type, containerId) {
+       const container = document.getElementById(containerId);
+       if (!container) return;
+
+       const loadingHtml = '<div class="loading">Cargando...</div>';
+       container.innerHTML = loadingHtml;
+
+       try {
+           const storeName = type === 'surveys' ? 'ENCUESTAS' : 'CUESTIONARIOS';
+           const items = await this.db.execute('getAll', storeName);
+           
+           if (items.length === 0) {
+               container.innerHTML = `
+                   <div class="empty-state">
+                       <h3>No hay ${type === 'surveys' ? 'encuestas' : 'cuestionarios'} disponibles</h3>
+                       <a href="../index.html" class="btn btn-primary">Volver al inicio</a>
+                   </div>
+               `;
+               return;
+           }
+
+           container.innerHTML = this.generateItemsGrid(items, type);
+       } catch (error) {
+           console.error(`Error cargando ${type}:`, error);
+           container.innerHTML = `<div class="error-message">Error cargando contenido</div>`;
+       }
+   }
+
+   generateItemsGrid(items, type) {
+       const isQuiz = type === 'quizzes';
+       
+       return `
+           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+               ${items.map(item => `
+                   <div class="card">
+                       <div class="card-header">
+                           <h3>${item.titulo || item.nombre}</h3>
+                       </div>
+                       <div class="card-body">
+                           <p>${item.descripcion || 'Sin descripción'}</p>
+                           ${isQuiz ? `<span class="badge">⏱️ ${item.tiempoLimite || 30} min</span>` : ''}
+                       </div>
+                       <div class="card-footer">
+                           <button class="btn btn-primary btn-block" onclick="DataWebApp.surveys.openItem('${item.nombre}', '${isQuiz ? 'quiz' : 'survey'}')">
+                               ${isQuiz ? 'Realizar Cuestionario' : 'Participar en Encuesta'}
+                           </button>
+                       </div>
+                   </div>
+               `).join('')}
+           </div>
+       `;
+   }
+
+   async initAdmin(type) {
+       const listContainer = document.getElementById(`${type}-list`);
+       if (listContainer) {
+           await this.loadAdminItems(type, listContainer);
+       }
+
+       if (type === 'quizzes') {
+           await this.loadPendingReviews();
+       }
+
+       this.setupAdminEvents(type);
+   }
+
+   async loadAdminItems(type, container) {
+       try {
+           const storeName = type === 'surveys' ? 'ENCUESTAS' : 'CUESTIONARIOS';
+           const items = await this.db.execute('getAll', storeName);
+
+           if (items.length === 0) {
+               container.innerHTML = `
+                   <div class="text-center p-4">
+                       <h4>No hay ${type === 'surveys' ? 'encuestas' : 'cuestionarios'} disponibles</h4>
+                       <a href="create-${type.slice(0, -1)}.html" class="btn btn-primary">Crear Nuevo</a>
+                   </div>
+               `;
+               return;
+           }
+
+           container.innerHTML = items.map(item => `
+               <div class="admin-item card mb-3">
+                   <div class="card-body">
+                       <h5>${item.titulo}</h5>
+                       <p>${item.descripcion || 'Sin descripción'}</p>
+                       <div class="admin-actions">
+                           <button class="btn btn-info btn-sm" onclick="DataWebApp.surveys.viewResults('${item.nombre}')">Ver Resultados</button>
+                           <button class="btn btn-danger btn-sm delete-btn" 
+                                   data-entity="${storeName}" 
+                                   data-id="${item['['/]type === 'surveys' ? 'id_encuesta' : 'id_cuestionario']}"
+                                   data-confirm="¿Seguro que deseas eliminar este ${type.slice(0, -1)}?">
+                               Eliminar
+                           </button>
+                       </div>
+                   </div>
+               </div>
+           `).join('');
+       } catch (error) {
+           console.error(`Error cargando ${type} para admin:`, error);
+           container.innerHTML = '<div class="error-message">Error cargando contenido</div>';
+       }
+   }
+
+   async loadPendingReviews() {
+       const container = document.getElementById('pendingReviewsTable');
+       if (!container) return;
+
+       try {
+           const responses = await this.db.execute('getAll', 'RESPUESTAS_CUESTIONARIO');
+           const pending = responses.filter(r => r.results && !r.results.gradeConfirmed);
+
+           if (pending.length === 0) {
+               container.innerHTML = '<div class="text-center p-4"><p>No hay evaluaciones pendientes</p></div>';
+               return;
+           }
+
+           container.innerHTML = pending.map(response => `
+               <div class="response-row">
+                   <div class="response-info">
+                       <strong>${response.quizName || 'Cuestionario'}</strong>
+                       <div>Usuario: ${response.userId || 'Anónimo'} | Fecha: ${new Date(response.timestamp).toLocaleDateString()}</div>
+                       <div>Puntuación: ${response.results.porcentaje}%</div>
+                   </div>
+                   <div class="response-actions">
+                       <button class="btn btn-success btn-sm" onclick="DataWebApp.surveys.confirmGrade('${response.id}')">Confirmar</button>
+                   </div>
+               </div>
+           `).join('');
+       } catch (error) {
+           console.error('Error cargando revisiones pendientes:', error);
+       }
+   }
+
+   setupAdminEvents(type) {
+       // Eventos específicos de administración si es necesario
+       const saveBtn = document.getElementById('saveRoleAssignments');
+       if (saveBtn) {
+           saveBtn.addEventListener('click', () => this.saveRoleAssignments(type));
+       }
+   }
+
+   initCreator(type) {
+       this.questionCounter = 0;
+       this.addQuestion();
+
+       const form = document.getElementById(`create${type.charAt(0).toUpperCase() + type.slice(1)}Form`);
+       if (form) {
+           form.classList.add('unified-form');
+           form.dataset.type = `${type}-create`;
+       }
+   }
+
+   addQuestion() {
+       this.questionCounter++;
+       const container = document.getElementById('preguntasContainer');
+       if (!container) return;
+
+       const questionDiv = document.createElement('div');
+       questionDiv.className = 'question-item card mb-4';
+       questionDiv.dataset.question = this.questionCounter;
+       
+       questionDiv.innerHTML = `
+           <div class="card-header">
+               <h4>Pregunta ${this.questionCounter}</h4>
+               ${this.questionCounter > 1 ? `<button type="button" onclick="DataWebApp.surveys.removeQuestion(this)" class="btn btn-danger btn-sm">×</button>` : ''}
+           </div>
+           <div class="card-body">
+               <div class="form-group">
+                   <label class="form-label">Texto de la Pregunta <span class="required">*</span></label>
+                   <input type="text" name="pregunta_${this.questionCounter}_texto" class="form-control" required>
+               </div>
+               
+               <div class="form-group">
+                   <label class="form-label">Tipo de Pregunta <span class="required">*</span></label>
+                   <select name="pregunta_${this.questionCounter}_tipo" class="form-control question-type" 
+                           data-question="${this.questionCounter}" onchange="DataWebApp.surveys.updateQuestionType(this)" required>
+                       <option value="">Seleccionar...</option>
+                       <option value="opcion_multiple">Opción Múltiple</option>
+                       <option value="verdadero_falso">Verdadero/Falso</option>
+                       <option value="respuesta_corta">Respuesta Corta</option>
+                   </select>
+               </div>
+               
+               <div class="options-container" id="opciones_${this.questionCounter}" style="display: none;"></div>
+           </div>
+       `;
+       
+       container.appendChild(questionDiv);
+   }
+
+   removeQuestion(button) {
+       button.closest('.question-item').remove();
+   }
+
+   updateQuestionType(select) {
+       const questionNum = select.dataset.question;
+       const container = document.getElementById(`opciones_${questionNum}`);
+       
+       if (!container) return;
+
+       container.innerHTML = '';
+       container.style.display = select.value ? 'block' : 'none';
+
+       if (select.value === 'opcion_multiple') {
+           container.innerHTML = `
+               <div class="form-group">
+                   <label class="form-label">Opciones (una por línea)</label>
+                   <textarea name="pregunta_${questionNum}_opciones" class="form-control" rows="4" 
+                           placeholder="Opción A&#10;Opción B&#10;Opción C"></textarea>
+               </div>
+           `;
+       } else if (select.value === 'verdadero_falso') {
+           container.innerHTML = `
+               <div class="form-group">
+                   <label class="form-label">Opciones:</label>
+                   <div class="options-preview">
+                       <span class="badge badge-secondary">Verdadero</span>
+                       <span class="badge badge-secondary">Falso</span>
+                   </div>
+               </div>
+           `;
+       } else if (select.value === 'respuesta_corta') {
+           container.innerHTML = `
+               <div class="form-group">
+                   <label class="form-label">Vista previa:</label>
+                   <textarea class="form-control" rows="3" placeholder="El usuario ingresará su respuesta aquí" disabled></textarea>
+               </div>
+           `;
+       }
+   }
+
+   async handleForm(formType, formData) {
+       try {
+           const item = {
+               nombre: formData.get('nombre'),
+               titulo: formData.get('titulo'),
+               descripcion: formData.get('descripcion') || '',
+               timestamp: Date.now()
+           };
+
+           if (formType === 'survey-create') {
+               item.tipo_representacion = formData.get('tipoRepresentacion');
+               await this.db.execute('create', 'ENCUESTAS', item);
+               return {
+                   success: true,
+                   message: 'Encuesta creada correctamente',
+                   redirect: '../admin/surveys-admin.html'
+               };
+           } else if (formType === 'quiz-create') {
+               item.tiempoLimite = parseInt(formData.get('timeLimit')) || 30;
+               await this.db.execute('create', 'CUESTIONARIOS', item);
+               return {
+                   success: true,
+                   message: 'Cuestionario creado correctamente',
+                   redirect: '../admin/quizzes-admin.html'
+               };
+           }
+       } catch (error) {
+           console.error('Error creando item:', error);
+           return {
+               success: false,
+               message: 'Error al crear el elemento'
+           };
+       }
+   }
+
+   async openItem(name, type) {
+       try {
+           const storeName = type === 'survey' ? 'ENCUESTAS' : 'CUESTIONARIOS';
+           const items = await this.db.execute('getAll', storeName);
+           const item = items.find(i => i.nombre === name);
+           
+           if (!item) {
+               this.app.ui.showAlert('Elemento no encontrado', 'danger');
+               return;
+           }
+
+           const html = await this.generateDynamicPage(item, type);
+           const newWindow = window.open('', '_blank');
+           newWindow.document.write(html);
+           newWindow.document.close();
+       } catch (error) {
+           console.error('Error abriendo elemento:', error);
+           this.app.ui.showAlert('Error abriendo elemento', 'danger');
+       }
+   }
+
+   async generateDynamicPage(item, type) {
+       const isQuiz = type === 'quiz';
+       
+       return `
+<!DOCTYPE html>
+<html lang="es">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>${item.titulo}</title>
+   <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+   <header class="app-header">
+       <div class="container">
+           <h1>${item.titulo}</h1>
+           <p>${item.descripcion || ''}</p>
+       </div>
+   </header>
+   
+   <main class="main-content">
+       <div class="container">
+           ${isQuiz ? `
+           <div class="quiz-info mb-4">
+               <div class="timer text-center" id="timer">${item.tiempoLimite || 30}:00</div>
+           </div>
+           ` : ''}
+           
+           <div class="card">
+               <div class="card-body">
+                   <form id="item-form">
+                       <div class="form-group">
+                           <label class="form-label">Ejemplo de pregunta:</label>
+                           <div class="question-example">
+                               <p>Esta es una pregunta de ejemplo. En una implementación completa, aquí se cargarían las preguntas reales desde la base de datos.</p>
+                               <div class="form-group">
+                                   <label><input type="radio" name="ejemplo" value="A" required> Opción A</label><br>
+                                   <label><input type="radio" name="ejemplo" value="B" required> Opción B</label><br>
+                                   <label><input type="radio" name="ejemplo" value="C" required> Opción C</label>
+                               </div>
+                           </div>
+                       </div>
+                       
+                       <div class="form-actions">
+                           <button type="button" onclick="submitDemo()" class="btn btn-primary">
+                               ${isQuiz ? 'Enviar Respuestas' : 'Enviar Encuesta'}
+                           </button>
+                           <button type="button" onclick="window.close()" class="btn btn-secondary">Cerrar</button>
+                       </div>
+                   </form>
+               </div>
+           </div>
+       </div>
+   </main>
+   
+   <script>
+       ${isQuiz ? `
+       let timeLeft = ${(item.tiempoLimite || 30) * 60};
+       const timer = document.getElementById('timer');
+       
+       const countdown = setInterval(() => {
+           const minutes = Math.floor(timeLeft / 60);
+           const seconds = timeLeft % 60;
+           timer.textContent = minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+           
+           if (timeLeft <= 0) {
+               clearInterval(countdown);
+               submitDemo();
+           }
+           timeLeft--;
+       }, 1000);
+       ` : ''}
+       
+       function submitDemo() {
+           alert('${isQuiz ? 'Cuestionario' : 'Encuesta'} enviado correctamente. Esta es una versión de demostración.');
+           window.close();
+       }
+   </script>
+</body>
+</html>`;
+   }
+
+   async confirmGrade(responseId) {
+       try {
+           const responses = await this.db.execute('getAll', 'RESPUESTAS_CUESTIONARIO');
+           const response = responses.find(r => r.id === responseId);
+           
+           if (response && response.results) {
+               response.results.gradeConfirmed = true;
+               await this.db.execute('update', 'RESPUESTAS_CUESTIONARIO', response);
+               await this.loadPendingReviews();
+               this.app.ui.showAlert('Calificación confirmada', 'success');
+           }
+       } catch (error) {
+           console.error('Error confirmando calificación:', error);
+           this.app.ui.showAlert('Error confirmando calificación', 'danger');
+       }
+   }
+
+   saveRoleAssignments(type) {
+       // Implementación simplificada - en una versión completa se manejarían checkboxes reales
+       this.app.ui.showAlert('Asignaciones guardadas correctamente', 'success');
+   }
+
+   viewResults(itemName) {
+       this.app.ui.showAlert(`Ver resultados de: ${itemName}`, 'info');
+   }
+}
+[/file]
+[/template]
+
+[template public generateUnifiedUIManager(app : Aplicacion)]
+[file ('web/assets/js/unified-ui.js', false, 'UTF-8')]
+/**
+* GESTOR UNIFICADO DE INTERFAZ - [app.nombre/]
+* Maneja alertas, modales y elementos de UI
+*/
+
+class UnifiedUIManager {
+   constructor(app) {
+       this.app = app;
+       this.alertContainer = null;
+       this.initUI();
+   }
+
+   initUI() {
+       this.createAlertContainer();
+       this.setupGlobalUIEvents();
+   }
+
+   createAlertContainer() {
+       if (document.getElementById('unified-alerts')) return;
+       
+       const container = document.createElement('div');
+       container.id = 'unified-alerts';
+       container.className = 'alerts-container';
+       container.style.cssText = `
+           position: fixed;
+           top: 20px;
+           right: 20px;
+           z-index: 9999;
+           max-width: 400px;
+       `;
+       
+       document.body.appendChild(container);
+       this.alertContainer = container;
+   }
+
+   setupGlobalUIEvents() {
+       // Manejo de navegación móvil
+       document.addEventListener('click', (e) => {
+           if (e.target.classList.contains('nav-toggle')) {
+               e.preventDefault();
+               this.toggleMobileNav();
+           }
+       });
+
+       // Manejo de modales
+       document.addEventListener('click', (e) => {
+           if (e.target.classList.contains('modal') || e.target.classList.contains('modal-close')) {
+               this.closeModal(e.target.closest('.modal') || e.target);
+           }
+       });
+
+       // Auto-hide alerts
+       document.addEventListener('click', (e) => {
+           if (e.target.classList.contains('alert-close')) {
+               e.target.closest('.alert').remove();
+           }
+       });
+   }
+
+   showAlert(message, type = 'info', duration = 5000) {
+       const alert = document.createElement('div');
+       alert.className = `alert alert-${type} alert-dismissible`;
+       alert.innerHTML = `
+           <div class="alert-content">
+               <strong>${this.getAlertIcon(type)}</strong>
+               <span>${message}</span>
+           </div>
+           <button type="button" class="alert-close" aria-label="Cerrar">×</button>
+       `;
+       
+       // Estilos inline para asegurar que funcione
+       alert.style.cssText = `
+           display: flex;
+           align-items: center;
+           justify-content: space-between;
+           padding: 12px 16px;
+           margin-bottom: 10px;
+           border-radius: 4px;
+           box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+           animation: slideIn 0.3s ease;
+           background: ${this.getAlertColor(type)};
+           color: white;
+       `;
+       
+       this.alertContainer.appendChild(alert);
+       
+       // Auto-remove después del tiempo especificado
+       if (duration > 0) {
+           setTimeout(() => {
+               if (alert.parentNode) {
+                   alert.style.animation = 'slideOut 0.3s ease';
+                   setTimeout(() => alert.remove(), 300);
+               }
+           }, duration);
+       }
+       
+       return alert;
+   }
+
+   getAlertIcon(type) {
+       const icons = {
+           success: '✓',
+           danger: '✗',
+           warning: '⚠',
+           info: 'ℹ'
+       };
+       return icons['['/]type] || icons.info;
+   }
+
+   getAlertColor(type) {
+       const colors = {
+           success: '#16a34a',
+           danger: '#dc2626',
+           warning: '#d97706',
+           info: '#2563eb'
+       };
+       return colors['['/]type] || colors.info;
+   }
+
+   showModal(title, content, actions = ['['/]) {
+       const modal = document.createElement('div');
+       modal.className = 'modal';
+       modal.style.cssText = `
+           position: fixed;
+           top: 0;
+           left: 0;
+           width: 100%;
+           height: 100%;
+           background: rgba(0,0,0,0.5);
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           z-index: 10000;
+       `;
+       
+       modal.innerHTML = `
+           <div class="modal-content" style="
+               background: white;
+               border-radius: 8px;
+               max-width: 500px;
+               width: 90%;
+               max-height: 80vh;
+               overflow-y: auto;
+           ">
+               <div class="modal-header" style="
+                   display: flex;
+                   justify-content: space-between;
+                   align-items: center;
+                   padding: 16px 20px;
+                   border-bottom: 1px solid #e5e7eb;
+               ">
+                   <h3 style="margin: 0;">${title}</h3>
+                   <button class="modal-close" style="
+                       background: none;
+                       border: none;
+                       font-size: 24px;
+                       cursor: pointer;
+                       color: #6b7280;
+                   ">×</button>
+               </div>
+               <div class="modal-body" style="padding: 20px;">
+                   ${content}
+               </div>
+               ${actions.length > 0 ? `
+               <div class="modal-footer" style="
+                   display: flex;
+                   gap: 10px;
+                   padding: 16px 20px;
+                   border-top: 1px solid #e5e7eb;
+                   justify-content: flex-end;
+               ">
+                   ${actions.join('')}
+               </div>
+               ` : ''}
+           </div>
+       `;
+       
+       document.body.appendChild(modal);
+       return modal;
+   }
+
+   closeModal(modal) {
+       if (modal && modal.parentNode) {
+           modal.remove();
+       }
+   }
+
+   toggleMobileNav() {
+       const navMenu = document.querySelector('.nav-menu');
+       const navToggle = document.querySelector('.nav-toggle');
+       
+       if (navMenu && navToggle) {
+           navMenu.classList.toggle('active');
+           navToggle.classList.toggle('active');
+       }
+   }
+
+   showLoading(container, message = 'Cargando...') {
+       if (typeof container === 'string') {
+           container = document.getElementById(container);
+       }
+       
+       if (container) {
+           container.innerHTML = `
+               <div class="loading-spinner" style="
+                   display: flex;
+                   flex-direction: column;
+                   align-items: center;
+                   justify-content: center;
+                   padding: 40px;
+                   color: #6b7280;
+               ">
+                   <div class="spinner" style="
+                       width: 32px;
+                       height: 32px;
+                       border: 3px solid #e5e7eb;
+                       border-top: 3px solid #2563eb;
+                       border-radius: 50%;
+                       animation: spin 1s linear infinite;
+                       margin-bottom: 16px;
+                   "></div>
+                   <p>${message}</p>
+               </div>
+           `;
+       }
+   }
+
+   hideLoading(container) {
+       if (typeof container === 'string') {
+           container = document.getElementById(container);
+       }
+       
+       if (container) {
+           const spinner = container.querySelector('.loading-spinner');
+           if (spinner) {
+               spinner.remove();
+           }
+       }
+   }
+
+   confirmAction(message, callback) {
+       const modal = this.showModal(
+           'Confirmar Acción',
+           `<p>${message}</p>`,
+           ['['/]
+               '<button class="btn btn-secondary" onclick="this.closest(\'.modal\').remove()">Cancelar</button>',
+               '<button class="btn btn-danger" id="confirm-action">Confirmar</button>'
+           ]
+       );
+       
+       modal.querySelector('#confirm-action').addEventListener('click', () => {
+           this.closeModal(modal);
+           if (callback) callback();
+       });
+   }
+
+   updateProgress(percentage, container) {
+       if (typeof container === 'string') {
+           container = document.getElementById(container);
+       }
+       
+       if (container) {
+           let progressBar = container.querySelector('.progress-bar');
+           if (!progressBar) {
+               progressBar = document.createElement('div');
+               progressBar.className = 'progress-bar';
+               progressBar.innerHTML = '<div class="progress-fill"></div>';
+               progressBar.style.cssText = `
+                   width: 100%;
+                   height: 8px;
+                   background: #e5e7eb;
+                   border-radius: 4px;
+                   overflow: hidden;
+                   margin: 10px 0;
+               `;
+               
+               const fill = progressBar.querySelector('.progress-fill');
+               fill.style.cssText = `
+                   height: 100%;
+                   background: #2563eb;
+                   transition: width 0.3s ease;
+                   width: 0%;
+               `;
+               
+               container.appendChild(progressBar);
+           }
+           
+           const fill = progressBar.querySelector('.progress-fill');
+           fill.style.width = `${Math.min(100, Math.max(0, percentage))}%`;
+       }
+   }
+
+   formatDate(date, options = {}) {
+       if (!date) return '-';
+       
+       const defaultOptions = {
+           year: 'numeric',
+           month: 'short',
+           day: 'numeric',
+           hour: '2-digit',
+           minute: '2-digit'
+       };
+       
+       return new Date(date).toLocaleDateString('es-ES', { ...defaultOptions, ...options });
+   }
+
+   formatNumber(number, decimals = 0) {
+       if (typeof number !== 'number') return '-';
+       return number.toLocaleString('es-ES', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+   }
+
+   debounce(func, wait) {
+       let timeout;
+       return function executedFunction(...args) {
+           const later = () => {
+               clearTimeout(timeout);
+               func(...args);
+           };
+           clearTimeout(timeout);
+           timeout = setTimeout(later, wait);
+       };
+   }
+
+   throttle(func, limit) {
+       let inThrottle;
+       return function(...args) {
+           if (!inThrottle) {
+               func.apply(this, args);
+               inThrottle = true;
+               setTimeout(() => inThrottle = false, limit);
+           }
+       };
+   }
+}
+
+// Estilos CSS que se inyectan automáticamente
+const unifiedStyles = `
+   @keyframes slideIn {
+       from { transform: translateX(100%); opacity: 0; }
+       to { transform: translateX(0); opacity: 1; }
+   }
+   
+   @keyframes slideOut {
+       from { transform: translateX(0); opacity: 1; }
+       to { transform: translateX(100%); opacity: 0; }
+   }
+   
+   @keyframes spin {
+       0% { transform: rotate(0deg); }
+       100% { transform: rotate(360deg); }
+   }
+   
+   .nav-menu.active {
+       display: block !important;
+   }
+   
+   .nav-toggle.active span:nth-child(1) {
+       transform: rotate(-45deg) translate(-5px, 6px);
+   }
+   
+   .nav-toggle.active span:nth-child(2) {
+       opacity: 0;
+   }
+   
+   .nav-toggle.active span:nth-child(3) {
+       transform: rotate(45deg) translate(-5px, -6px);
+   }
+   
+   @media (max-width: 768px) {
+       .nav-menu {
+           display: none;
+           position: absolute;
+           top: 100%;
+           left: 0;
+           width: 100%;
+           background: white;
+           box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+       }
+       
+       .nav-menu.active {
+           display: block;
+       }
+   }
+`;
+
+// Inyectar estilos
+if (!document.getElementById('unified-styles')) {
+   const styleElement = document.createElement('style');
+   styleElement.id = 'unified-styles';
+   styleElement.textContent = unifiedStyles;
+   document.head.appendChild(styleElement);
+}
+[/file]
+[/template]

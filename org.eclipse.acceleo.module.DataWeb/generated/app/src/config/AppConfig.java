@@ -46,7 +46,7 @@ public class AppConfig {
      */
     private void initDefaultConfiguration() {
         // Configuración general
-        properties.setProperty("app.name", "Sistema Bancario Digital");
+        properties.setProperty("app.name", "Biblioteca Universitaria");
         properties.setProperty("app.version", "1.0.0");
         properties.setProperty("app.theme", "light");
         properties.setProperty("app.language", "es");
@@ -62,7 +62,7 @@ public class AppConfig {
      */
     public void saveConfiguration() {
         try {
-            properties.store(new FileOutputStream(CONFIG_FILE), "Configuración de Sistema Bancario Digital");
+            properties.store(new FileOutputStream(CONFIG_FILE), "Configuración de Biblioteca Universitaria");
         } catch (IOException e) {
             System.err.println("Error al guardar la configuración: " + e.getMessage());
         }

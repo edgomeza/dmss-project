@@ -3,145 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema Bancario Digital - Crear Nueva Encuesta</title>
-    <meta name="description" content="Crear una nueva encuesta en el sistema">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Crear Nueva Encuesta</title>
     <link rel="stylesheet" href="../assets/css/style.css">
-    <link rel="icon" type="image/x-icon" href="../assets/icons/favicon.ico">
 </head>
 <body>
     <header class="app-header">
         <div class="container">
             <h1>Crear Nueva Encuesta</h1>
-            <p>Diseñe y configure una nueva encuesta para el sistema</p>
         </div>
     </header>
     
     <nav class="main-nav">
         <div class="container nav-container">
-            <div class="nav-brand">
-                <a href="../index.html" class="nav-logo">Administración</a>
-            </div>
             <ul class="nav-menu">
-                <li class="nav-item">
-                    <a href="../index.html" class="nav-link">Inicio</a>
-                </li>
-                <li class="nav-item">
-                    <a href="surveys-admin.html" class="nav-link">Encuestas</a>
-                </li>
-                <li class="nav-item">
-                    <a href="quizzes-admin.html" class="nav-link">Cuestionarios</a>
-                </li>
-                <li class="nav-item">
-                    <a href="create-survey.html" class="nav-link active">Crear Encuesta</a>
-                </li>
+                <li class="nav-item"><a href="../index.html" class="nav-link">Inicio</a></li>
+                <li class="nav-item"><a href="surveys-admin.html" class="nav-link">Encuestas</a></li>
+                <li class="nav-item"><a href="create-survey.html" class="nav-link active">Crear Encuesta</a></li>
             </ul>
-            <button class="nav-toggle" aria-label="Abrir menú">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
         </div>
     </nav>
     
     <main class="main-content">
         <div class="container">
-            <div class="card mb-6">
-                <div class="card-header">
-                    <h2>Nueva Encuesta</h2>
-                    <p>Complete el formulario para crear una nueva encuesta</p>
-                </div>
+            <div class="card">
+                <div class="card-header"><h2>Nueva Encuesta</h2></div>
                 <div class="card-body">
-                    <form id="createSurveyForm" class="survey-form">
+                    <form id="createSurveyForm">
                         <div class="form-group">
-                            <label for="nombre" class="form-label">Nombre Interno <span class="required">*</span></label>
-                            <input type="text" id="nombre" name="nombre" class="form-control" required>
-                            <div class="field-help">Identificador interno de la encuesta (sin espacios)</div>
+                            <label class="form-label">Nombre Interno <span class="required">*</span></label>
+                            <input type="text" name="nombre" class="form-control" required>
                         </div>
                         
                         <div class="form-group">
-                            <label for="titulo" class="form-label">Título <span class="required">*</span></label>
-                            <input type="text" id="titulo" name="titulo" class="form-control" required>
-                            <div class="field-help">Título visible de la encuesta</div>
+                            <label class="form-label">Título <span class="required">*</span></label>
+                            <input type="text" name="titulo" class="form-control" required>
                         </div>
                         
                         <div class="form-group">
-                            <label for="descripcion" class="form-label">Descripción</label>
-                            <textarea id="descripcion" name="descripcion" class="form-control" rows="4"></textarea>
-                            <div class="field-help">Breve descripción del propósito de la encuesta</div>
+                            <label class="form-label">Descripción</label>
+                            <textarea name="descripcion" class="form-control" rows="4"></textarea>
                         </div>
                         
                         <div class="form-group">
-                            <label for="tipoRepresentacion" class="form-label">Tipo de Representación <span class="required">*</span></label>
-                            <select id="tipoRepresentacion" name="tipoRepresentacion" class="form-control" required>
+                            <label class="form-label">Tipo de Representación <span class="required">*</span></label>
+                            <select name="tipoRepresentacion" class="form-control" required>
                                 <option value="">Seleccionar...</option>
                                 <option value="Estadistica">Estadística</option>
                                 <option value="Grafica">Gráfica</option>
                                 <option value="Lista">Lista</option>
                                 <option value="Tabla">Tabla</option>
                             </select>
-                            <div class="field-help">Formato principal para mostrar los resultados</div>
                         </div>
                         
-                        <h3 class="mt-6 mb-4">Preguntas de la Encuesta</h3>
+                        <h3>Preguntas</h3>
+                        <div id="preguntasContainer"></div>
                         
-                        <div id="preguntasContainer">
-                            <!-- Las preguntas se agregarán dinámicamente aquí -->
-                            <div class="question-item card mb-4">
-                                <div class="card-header">
-                                    <h4>Pregunta 1</h4>
-                                </div>
-                                <div class="card-body">
-                                    <div class="form-group">
-                                        <label class="form-label">Texto de la Pregunta <span class="required">*</span></label>
-                                        <input type="text" name="pregunta_1_texto" class="form-control" required>
-                                    </div>
-                                    
-                                    <div class="form-group">
-                                        <label class="form-label">Tipo de Pregunta <span class="required">*</span></label>
-                                        <select name="pregunta_1_tipo" class="form-control question-type" data-question="1" required>
-                                            <option value="">Seleccionar...</option>
-                                            <option value="opcion_multiple">Opción Múltiple</option>
-                                            <option value="verdadero_falso">Verdadero/Falso</option>
-                                            <option value="respuesta_corta">Respuesta Corta</option>
-                                        </select>
-                                    </div>
-                                    
-                                    <div class="options-container" id="opciones_1" style="display: none;">
-                                        <!-- Las opciones se agregarán dinámicamente aquí -->
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <button type="button" class="btn btn-outline-primary" onclick="addQuestion()">
+                            Agregar Pregunta
+                        </button>
                         
-                        <div class="form-actions">
-                            <button type="button" class="btn btn-outline-primary" id="addQuestionBtn">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <circle cx="12" cy="12" r="10"></circle>
-                                    <line x1="12" y1="8" x2="12" y2="16"></line>
-                                    <line x1="8" y1="12" x2="16" y2="12"></line>
-                                </svg>
-                                Agregar Pregunta
-                            </button>
-                        </div>
-                        
-                        <div class="form-actions mt-6 border-top pt-4">
-                            <button type="submit" class="btn btn-success" id="submitBtn">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M9 11l3 3L22 4"></path>
-                                    <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"></path>
-                                </svg>
-                                Crear Encuesta
-                            </button>
-                            <a href="surveys-admin.html" class="btn btn-secondary">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M19 12H5"></path>
-                                    <path d="M12 19l-7-7 7-7"></path>
-                                </svg>
-                                Cancelar
-                            </a>
+                        <div class="form-actions mt-4">
+                            <button type="submit" class="btn btn-success">Crear Encuesta</button>
+                            <a href="surveys-admin.html" class="btn btn-secondary">Cancelar</a>
                         </div>
                     </form>
                 </div>
@@ -149,116 +72,8 @@
         </div>
     </main>
     
-    <footer class="app-footer">
-        <div class="container">
-            <div class="footer-bottom">
-                <p>&copy; 2025 Sistema Bancario Digital. Todos los derechos reservados.</p>
-            </div>
-        </div>
-    </footer>
-    
     <script src="../assets/js/app.js"></script>
-    <script src="../assets/js/survey-creator.js"></script>
-    
-    <style>
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-        
-        .form-label {
-            font-weight: 500;
-            display: block;
-            margin-bottom: 0.5rem;
-        }
-        
-        .required {
-            color: var(--danger-600);
-        }
-        
-        .field-help {
-            font-size: 0.875rem;
-            color: var(--gray-600);
-            margin-top: 0.25rem;
-        }
-        
-        .question-item {
-            border: 1px solid var(--gray-200);
-            margin-bottom: 1.5rem;
-            position: relative;
-        }
-        
-        .question-delete {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: var(--danger-100);
-            border: none;
-            color: var(--danger-700);
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-        
-        .question-delete:hover {
-            background: var(--danger-200);
-            transform: scale(1.1);
-        }
-        
-        .option-row {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .option-value {
-            flex: 0 0 80px;
-        }
-        
-        .option-text {
-            flex: 1;
-        }
-        
-        .option-delete {
-            flex: 0 0 30px;
-            background: var(--gray-100);
-            border: none;
-            color: var(--gray-700);
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-        
-        .option-delete:hover {
-            background: var(--danger-100);
-            color: var(--danger-700);
-        }
-        
-        .form-actions {
-            display: flex;
-            gap: 1rem;
-        }
-        
-        @media (max-width: 768px) {
-            .form-actions {
-                flex-direction: column;
-            }
-            
-            .form-actions button,
-            .form-actions a {
-                width: 100%;
-            }
-        }
-    </style>
+    <script src="../assets/js/survey-quiz.js"></script>
+    <script>initCreator('survey');</script>
 </body>
 </html>

@@ -2,229 +2,242 @@
  * Gestor específico para la entidad Prestamo
  */
 
-class PrestamoManager extends CRUDManager {
+class PrestamoManager {
     constructor() {
-        super('prestamo');
+        this.entityName = 'prestamo';
+        this.init();
     }
 
-    /**
-     * Obtiene la configuración de campos de la entidad
-     */
-    getEntityFields() {
-        return [
-            {
-                name: 'id_prestamo',
-                label: 'Id_prestamo',
-                type: 'number',
-                isPrimary: true,
-                required: false,
-                sortable: true,
-                showInTable: true
-            }
-,            {
-                name: 'monto_solicitado',
-                label: 'Monto_solicitado',
-                type: 'decimal',
-                isPrimary: false,
-                required: true,
-                sortable: true,
-                showInTable: true
-            }
-,            {
-                name: 'tasa_interes',
-                label: 'Tasa_interes',
-                type: 'decimal',
-                isPrimary: false,
-                required: true,
-                sortable: true,
-                showInTable: true
-            }
-,            {
-                name: 'plazo_meses',
-                label: 'Plazo_meses',
-                type: 'number',
-                isPrimary: false,
-                required: true,
-                sortable: true,
-                showInTable: true
-            }
-,            {
-                name: 'estado_prestamo',
-                label: 'Estado_prestamo',
-                type: 'text',
-                isPrimary: false,
-                required: true,
-                sortable: true,
-                showInTable: true
-            }
-,            {
-                name: 'fecha_solicitud',
-                label: 'Fecha_solicitud',
-                type: 'date',
-                isPrimary: false,
-                required: true,
-                sortable: true,
-                showInTable: true
-            }
-,            {
-                name: 'fecha_aprobacion',
-                label: 'Fecha_aprobacion',
-                type: 'date',
-                isPrimary: false,
-                required: true,
-                sortable: true,
-                showInTable: true
-            }
-,
-            {
-                name: 'cliente_solicitante_ID',
-                label: 'Cliente_solicitante',
-                type: 'reference',
-                isPrimary: false,
-                required: true,
-                sortable: true,
-                showInTable: true,
-                referenceEntity: 'cliente'
-            }
-,            {
-                name: 'empleado_aprobador_ID',
-                label: 'Empleado_aprobador',
-                type: 'reference',
-                isPrimary: false,
-                required: true,
-                sortable: true,
-                showInTable: true,
-                referenceEntity: 'empleado'
-            }
-        ];
+    async init() {
+        this.db = await this.initDB();
+        this.setupEventHandlers();
     }
 
-    /**
-     * Formatea valores específicos para Prestamo
-     */
-    formatFieldValue(value, field) {
-        // Formateo específico para esta entidad
+    async initDB() {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open('DataWeb_DB', 2);
+            
+            request.onsuccess = () => {
+                const db = request.result;
+                resolve({
+                    db: db,
+                    async create(data) {
+                        const transaction = db.transaction([[entidad.nombre.toUpperCase()]], 'readwrite');
+                        const store = transaction.objectStore('PRESTAMO');
+                        return store.add(data);
+                    },
+                    async getAll() {
+                        const transaction = db.transaction([[entidad.nombre.toUpperCase()]], 'readonly');
+                        const store = transaction.objectStore('PRESTAMO');
+                        return store.getAll();
+                    },
+                    async update(data) {
+                        const transaction = db.transaction([[entidad.nombre.toUpperCase()]], 'readwrite');
+                        const store = transaction.objectStore('PRESTAMO');
+                        return store.put(data);
+                    },
+                    async delete(id) {
+                        const transaction = db.transaction([[entidad.nombre.toUpperCase()]], 'readwrite');
+                        const store = transaction.objectStore('PRESTAMO');
+                        return store.delete(id);
+                    }
+                });
+            };
+            
+            request.onerror = () => reject(request.error);
+            
+            request.onupgradeneeded = (event) => {
+                const db = event.target.result;
+                if (!db.objectStoreNames.contains('PRESTAMO')) {
+                    db.createObjectStore('PRESTAMO', { 
+                        keyPath: 'id_prestamo', 
+                        autoIncrement: true 
+                    });
+                }
+            };
+        });
+    }
+
+    setupEventHandlers() {
+        // Formulario de creación
+        const createForm = document.getElementById('createForm');
+        if (createForm) {
+            createForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.createEntity();
+            });
+        }
+
+        // Formulario de edición
+        const editForm = document.getElementById('editForm');
+        if (editForm) {
+            editForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.updateEntity();
+            });
+            this.loadEntityForEdit();
+        }
+
+        // Tabla de listado
+        const table = document.getElementById('prestamoTable');
+        if (table) {
+            this.loadTableData();
+        }
+
+        // Página de detalles
+        const detailContent = document.getElementById('detailContent');
+        if (detailContent) {
+            this.loadEntityDetails();
+        }
+    }
+
+    async createEntity() {
+        const form = document.getElementById('createForm');
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData);
         
-        // Si es una referencia, mostrar con badge
-        if (field.type === 'reference' && value) {
-            return `<span class="badge badge-info">${value}</span>`;
+        try {
+            await this.db.create(data);
+            alert('Prestamo creado correctamente');
+            window.location.href = 'list.html';
+        } catch (error) {
+            console.error('Error creating entity:', error);
+            alert('Error al crear Prestamo');
         }
+    }
+
+    async updateEntity() {
+        const form = document.getElementById('editForm');
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData);
         
-        // Usar el formateo del padre por defecto
-        return super.formatFieldValue(value, field);
+        try {
+            await this.db.update(data);
+            alert('Prestamo actualizado correctamente');
+            window.location.href = 'list.html';
+        } catch (error) {
+            console.error('Error updating entity:', error);
+            alert('Error al actualizar Prestamo');
+        }
     }
 
-    /**
-     * Validaciones específicas para Prestamo
-     */
-    validateField(fieldName, value) {
-        if (fieldName === 'id_prestamo') {
-            const numValue = parseInt(value);
-            if (isNaN(numValue) || numValue < 0) {
-                return {
-                    isValid: false,
-                    message: 'Debe ser un número entero positivo'
-                };
-            }
+    async loadTableData() {
+        try {
+            const entities = await this.db.getAll();
+            const tbody = document.getElementById('tableBody');
+            
+            tbody.innerHTML = entities.map(entity => `
+                <tr>
+                    <td>${entity[id_prestamo'] || '-'}</td>
+                    <td>${entity[fechaPrestamo'] || '-'}</td>
+                    <td>${entity[fechaDevolucion'] || '-'}</td>
+                    <td>
+                        <a href="detail.html?id=${entity[id_prestamo']}" class="btn btn-info btn-sm">Ver</a>
+                        <a href="edit.html?id=${entity[id_prestamo']}" class="btn btn-warning btn-sm">Editar</a>
+                        <button onclick="deleteEntity(${entity[id_prestamo']})" class="btn btn-danger btn-sm">Eliminar</button>
+                    </td>
+                </tr>
+            `).join('');
+        } catch (error) {
+            console.error('Error loading table data:', error);
         }
-        if (fieldName === 'monto_solicitado') {
-            const numValue = parseFloat(value);
-            if (isNaN(numValue) || numValue < 0) {
-                return {
-                    isValid: false,
-                    message: 'Debe ser un número positivo'
-                };
-            }
-        }
-        if (fieldName === 'tasa_interes') {
-            const numValue = parseFloat(value);
-            if (isNaN(numValue) || numValue < 0) {
-                return {
-                    isValid: false,
-                    message: 'Debe ser un número positivo'
-                };
-            }
-        }
-        if (fieldName === 'plazo_meses') {
-            const numValue = parseInt(value);
-            if (isNaN(numValue) || numValue < 0) {
-                return {
-                    isValid: false,
-                    message: 'Debe ser un número entero positivo'
-                };
-            }
-        }
+    }
+
+    async loadEntityForEdit() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const id = urlParams.get('id');
         
-        return { isValid: true };
-    }
-
-    /**
-     * Acciones adicionales después de cargar datos
-     */
-    onDataLoaded(entities) {
-        // Acciones específicas para Prestamo después de cargar datos
-        console.log(`Cargados ${entities.length} registros de Prestamo`);
-    }
-
-    /**
-     * Preparar datos antes de enviar al servidor
-     */
-    prepareDataForSave(data) {
-        // Transformaciones específicas para Prestamo antes de guardar
-        if (data.hasOwnProperty('id_prestamo')) {
-            data['id_prestamo'] = parseInt(data['id_prestamo']) || 0;
-        }
-        if (data.hasOwnProperty('monto_solicitado')) {
-            data['monto_solicitado'] = parseFloat(data['monto_solicitado']) || 0;
-        }
-        if (data.hasOwnProperty('tasa_interes')) {
-            data['tasa_interes'] = parseFloat(data['tasa_interes']) || 0;
-        }
-        if (data.hasOwnProperty('plazo_meses')) {
-            data['plazo_meses'] = parseInt(data['plazo_meses']) || 0;
-        }
+        if (!id) return;
         
-        return data;
+        try {
+            const entities = await this.db.getAll();
+            const entity = entities.find(e => e[id_prestamo'] == id);
+            
+            if (entity) {
+                const field_id_prestamo = document.getElementById('id_prestamo');
+                if (field_id_prestamo) {
+                    field_id_prestamo.value = entity[id_prestamo'] || '';
+                }
+                const field_fechaPrestamo = document.getElementById('fechaPrestamo');
+                if (field_fechaPrestamo) {
+                    field_fechaPrestamo.value = entity[fechaPrestamo'] || '';
+                }
+                const field_fechaDevolucion = document.getElementById('fechaDevolucion');
+                if (field_fechaDevolucion) {
+                    field_fechaDevolucion.value = entity[fechaDevolucion'] || '';
+                }
+                
+                document.getElementById('loadingForm').style.display = 'none';
+                document.getElementById('editForm').style.display = 'block';
+            }
+        } catch (error) {
+            console.error('Error loading entity for edit:', error);
+        }
     }
 
-    /**
-     * Obtiene filtros personalizados específicos para Prestamo
-     */
-    getCustomFilters() {
-        return {
-            // Filtros específicos para Prestamo
-        };
+    async loadEntityDetails() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const id = urlParams.get('id');
+        
+        if (!id) return;
+        
+        try {
+            const entities = await this.db.getAll();
+            const entity = entities.find(e => e[id_prestamo'] == id);
+            
+            if (entity) {
+                const field_id_prestamo = document.getElementById('field_id_prestamo');
+                if (field_id_prestamo) {
+                    field_id_prestamo.textContent = entity[id_prestamo'] || '-';
+                }
+                const field_fechaPrestamo = document.getElementById('field_fechaPrestamo');
+                if (field_fechaPrestamo) {
+                    field_fechaPrestamo.textContent = entity[fechaPrestamo'] || '-';
+                }
+                const field_fechaDevolucion = document.getElementById('field_fechaDevolucion');
+                if (field_fechaDevolucion) {
+                    field_fechaDevolucion.textContent = entity[fechaDevolucion'] || '-';
+                }
+                
+                document.getElementById('editLink').href = `edit.html?id=${id}`;
+                document.getElementById('loadingDetails').style.display = 'none';
+                document.getElementById('detailContent').style.display = 'block';
+            }
+        } catch (error) {
+            console.error('Error loading entity details:', error);
+        }
     }
 
-    /**
-     * Configuración de exportación para Prestamo
-     */
-    getExportConfig() {
-        return {
-            filename: 'prestamo_export',
-            columns: this.getEntityFields().filter(f => f.showInTable).map(f => ({
-                key: f.name,
-                header: f.label
-            }))
-        };
+    async deleteEntity(id) {
+        if (!confirm('¿Seguro que deseas eliminar este registro?')) return;
+        
+        try {
+            await this.db.delete(parseInt(id));
+            alert('Prestamo eliminado correctamente');
+            this.loadTableData();
+        } catch (error) {
+            console.error('Error deleting entity:', error);
+            alert('Error al eliminar Prestamo');
+        }
     }
 }
 
-// Configuración global para esta entidad
-window.entityManager = null;
+// Funciones globales
+window.deleteEntity = function(id) {
+    if (window.entityManager) {
+        window.entityManager.deleteEntity(id);
+    }
+};
+
+window.confirmDelete = function() {
+    document.getElementById('deleteModal').style.display = 'block';
+};
+
+window.closeDeleteModal = function() {
+    document.getElementById('deleteModal').style.display = 'none';
+};
 
 // Inicializar cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', function() {
-    // Solo inicializar si estamos en una página de Prestamo
-    const entityElement = document.querySelector('[data-entity="prestamo"]');
-    if (entityElement) {
-        window.entityManager = new PrestamoManager();
-        window.crudManager = window.entityManager; // Alias para funciones globales
-        window.entityManager.init();
-    }
+    window.entityManager = new PrestamoManager();
 });
-
-// Exportar la clase para uso en otros módulos
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = PrestamoManager;
-}

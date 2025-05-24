@@ -1,0 +1,2008 @@
+[comment encoding = UTF-8 /]
+[module generateWebAssets('http://www.unex.es/dmss/dataweb')]
+
+[template public generateWebAssets(app : Aplicacion)]
+[generateUnifiedCSS(app)/]
+[generateMainAppJS(app)/]
+[generateDynamicPageGenerator(app)/]
+[/template]
+
+[template public generateUnifiedCSS(app : Aplicacion)]
+[file ('web/assets/css/style.css', false, 'UTF-8')]
+/* Sistema CSS Unificado para [app.nombre/] */
+
+/* ===== VARIABLES CSS ===== */
+:root {
+   /* Colores principales */
+   --primary-50: #eff6ff;
+   --primary-100: #dbeafe;
+   --primary-200: #bfdbfe;
+   --primary-300: #93c5fd;
+   --primary-500: #3b82f6;
+   --primary-600: #2563eb;
+   --primary-700: #1d4ed8;
+   
+   /* Colores de estado */
+   --success-50: #f0fdf4;
+   --success-500: #22c55e;
+   --success-600: #16a34a;
+   --warning-500: #eab308;
+   --warning-600: #d97706;
+   --danger-500: #ef4444;
+   --danger-600: #dc2626;
+   --info-500: #3b82f6;
+   --info-600: #2563eb;
+   
+   /* Colores neutros */
+   --gray-50: #f9fafb;
+   --gray-100: #f3f4f6;
+   --gray-200: #e5e7eb;
+   --gray-300: #d1d5db;
+   --gray-400: #9ca3af;
+   --gray-500: #6b7280;
+   --gray-600: #4b5563;
+   --gray-700: #374151;
+   --gray-800: #1f2937;
+   --gray-900: #111827;
+   
+   /* Espaciado */
+   --spacing-1: 0.25rem;
+   --spacing-2: 0.5rem;
+   --spacing-3: 0.75rem;
+   --spacing-4: 1rem;
+   --spacing-6: 1.5rem;
+   --spacing-8: 2rem;
+   
+   /* Bordes */
+   --radius: 0.375rem;
+   --radius-lg: 0.5rem;
+   --radius-xl: 0.75rem;
+   
+   /* Sombras */
+   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+   --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+   
+   /* Transiciones */
+   --transition: all 0.2s ease-in-out;
+   
+   /* Z-index */
+   --z-dropdown: 50;
+   --z-modal: 100;
+   --z-alert: 200;
+}
+
+/* ===== RESET BÁSICO ===== */
+* {
+   box-sizing: border-box;
+   margin: 0;
+   padding: 0;
+}
+
+html {
+   height: 100%;
+   scroll-behavior: smooth;
+}
+
+body {
+   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+   line-height: 1.6;
+   color: var(--gray-900);
+   background-color: var(--gray-50);
+   min-height: 100vh;
+   display: flex;
+   flex-direction: column;
+}
+
+/* ===== LAYOUT PRINCIPAL ===== */
+.container {
+   max-width: 1200px;
+   margin: 0 auto;
+   padding: 0 var(--spacing-4);
+}
+
+.main-content {
+   flex: 1;
+   padding: var(--spacing-8) 0;
+}
+
+/* ===== HEADER ===== */
+.app-header {
+   background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-700) 100%);
+   color: white;
+   padding: var(--spacing-8) 0;
+   text-align: center;
+}
+
+.app-header h1 {
+   font-size: 2.5rem;
+   font-weight: 700;
+   margin-bottom: var(--spacing-2);
+}
+
+.app-header p {
+   font-size: 1.125rem;
+   opacity: 0.9;
+}
+
+/* ===== NAVEGACIÓN ===== */
+.main-nav {
+   background: white;
+   border-bottom: 1px solid var(--gray-200);
+   box-shadow: var(--shadow-sm);
+}
+
+.nav-container {
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+   padding: var(--spacing-4) var(--spacing-4);
+}
+
+.nav-brand {
+   font-weight: 600;
+   font-size: 1.25rem;
+}
+
+.nav-logo {
+   color: var(--primary-600);
+   text-decoration: none;
+}
+
+.nav-menu {
+   display: flex;
+   list-style: none;
+   gap: var(--spacing-6);
+   align-items: center;
+}
+
+.nav-link {
+   color: var(--gray-600);
+   text-decoration: none;
+   padding: var(--spacing-2) var(--spacing-3);
+   border-radius: var(--radius);
+   transition: var(--transition);
+   font-weight: 500;
+}
+
+.nav-link:hover {
+   color: var(--primary-600);
+   background-color: var(--primary-50);
+}
+
+.nav-link.active {
+   color: var(--primary-600);
+   background-color: var(--primary-100);
+}
+
+.nav-toggle {
+   display: none;
+   flex-direction: column;
+   background: none;
+   border: none;
+   cursor: pointer;
+   padding: var(--spacing-2);
+}
+
+.nav-toggle span {
+   width: 24px;
+   height: 3px;
+   background: var(--gray-600);
+   margin: 2px 0;
+   transition: var(--transition);
+}
+
+/* ===== BREADCRUMB ===== */
+.breadcrumb {
+   background: var(--gray-100);
+   padding: var(--spacing-3) 0;
+}
+
+.breadcrumb-list {
+   display: flex;
+   list-style: none;
+   gap: var(--spacing-2);
+   align-items: center;
+}
+
+.breadcrumb-item:not(:last-child)::after {
+   content: '/';
+   margin-left: var(--spacing-2);
+   color: var(--gray-400);
+}
+
+.breadcrumb-link {
+   color: var(--primary-600);
+   text-decoration: none;
+}
+
+/* ===== GRID SYSTEM ===== */
+.grid {
+   display: grid;
+   gap: var(--spacing-6);
+}
+
+.grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+.grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+@media (min-width: 768px) {
+   .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+   .md\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+   .md\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+@media (min-width: 1024px) {
+   .lg\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+   .lg\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+   .lg\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+/* ===== CARDS ===== */
+.card {
+   background: white;
+   border-radius: var(--radius-lg);
+   box-shadow: var(--shadow);
+   border: 1px solid var(--gray-200);
+   overflow: hidden;
+   transition: var(--transition);
+}
+
+.card:hover {
+   box-shadow: var(--shadow-md);
+}
+
+.card-header {
+   padding: var(--spacing-6);
+   border-bottom: 1px solid var(--gray-200);
+   background: var(--gray-50);
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+}
+
+.card-header h2,
+.card-header h3 {
+   margin: 0;
+   color: var(--gray-900);
+}
+
+.card-body {
+   padding: var(--spacing-6);
+}
+
+.card-footer {
+   padding: var(--spacing-6);
+   border-top: 1px solid var(--gray-200);
+   background: var(--gray-50);
+}
+
+/* ===== BOTONES ===== */
+.btn {
+   display: inline-flex;
+   align-items: center;
+   justify-content: center;
+   gap: var(--spacing-2);
+   padding: var(--spacing-2) var(--spacing-4);
+   border: 1px solid transparent;
+   border-radius: var(--radius);
+   font-weight: 500;
+   font-size: 0.875rem;
+   text-decoration: none;
+   cursor: pointer;
+   transition: var(--transition);
+   white-space: nowrap;
+}
+
+.btn:disabled {
+   opacity: 0.5;
+   cursor: not-allowed;
+}
+
+/* Variantes de botones */
+.btn-primary {
+   background-color: var(--primary-600);
+   color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+   background-color: var(--primary-700);
+}
+
+.btn-success {
+   background-color: var(--success-600);
+   color: white;
+}
+
+.btn-success:hover:not(:disabled) {
+   background-color: var(--success-500);
+}
+
+.btn-warning {
+   background-color: var(--warning-600);
+   color: white;
+}
+
+.btn-warning:hover:not(:disabled) {
+   background-color: var(--warning-500);
+}
+
+.btn-danger {
+   background-color: var(--danger-600);
+   color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+   background-color: var(--danger-500);
+}
+
+.btn-secondary {
+   background-color: var(--gray-200);
+   color: var(--gray-700);
+}
+
+.btn-secondary:hover:not(:disabled) {
+   background-color: var(--gray-300);
+}
+
+.btn-outline {
+   background-color: transparent;
+   border: 1px solid currentColor;
+}
+
+.btn-outline-primary {
+   color: var(--primary-600);
+   border-color: var(--primary-600);
+}
+
+.btn-outline-primary:hover:not(:disabled) {
+   background-color: var(--primary-600);
+   color: white;
+}
+
+/* Tamaños de botones */
+.btn-sm {
+   padding: var(--spacing-1) var(--spacing-3);
+   font-size: 0.75rem;
+}
+
+.btn-lg {
+   padding: var(--spacing-3) var(--spacing-6);
+   font-size: 1rem;
+}
+
+.btn-block {
+   width: 100%;
+}
+
+/* ===== FORMULARIOS ===== */
+.form-group {
+   margin-bottom: var(--spacing-4);
+}
+
+.form-label {
+   display: block;
+   margin-bottom: var(--spacing-2);
+   font-weight: 500;
+   color: var(--gray-700);
+}
+
+.form-control {
+   width: 100%;
+   padding: var(--spacing-3);
+   border: 1px solid var(--gray-300);
+   border-radius: var(--radius);
+   font-size: 0.875rem;
+   transition: var(--transition);
+}
+
+.form-control:focus {
+   outline: none;
+   border-color: var(--primary-500);
+   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-control.is-invalid {
+   border-color: var(--danger-500);
+}
+
+.form-actions {
+   display: flex;
+   gap: var(--spacing-3);
+   margin-top: var(--spacing-6);
+}
+
+.required {
+   color: var(--danger-500);
+}
+
+.invalid-feedback,
+.error-message {
+   color: var(--danger-600);
+   font-size: 0.75rem;
+   margin-top: var(--spacing-1);
+}
+
+/* ===== TABLAS ===== */
+.table-container {
+   overflow-x: auto;
+   border-radius: var(--radius-lg);
+   border: 1px solid var(--gray-200);
+}
+
+.table {
+   width: 100%;
+   border-collapse: collapse;
+   background: white;
+}
+
+.table th,
+.table td {
+   padding: var(--spacing-3) var(--spacing-4);
+   text-align: left;
+   border-bottom: 1px solid var(--gray-200);
+}
+
+.table th {
+   background: var(--gray-50);
+   font-weight: 600;
+   color: var(--gray-700);
+}
+
+.table tbody tr:hover {
+   background: var(--gray-50);
+}
+
+/* ===== ALERTAS ===== */
+.alert {
+   padding: var(--spacing-4);
+   border-radius: var(--radius);
+   margin-bottom: var(--spacing-4);
+   border: 1px solid transparent;
+}
+
+.alert-success {
+   background-color: var(--success-50);
+   color: var(--success-600);
+   border-color: var(--success-200);
+}
+
+.alert-warning {
+   background-color: #fef3c7;
+   color: var(--warning-600);
+   border-color: #fde68a;
+}
+
+.alert-danger {
+   background-color: #fee2e2;
+   color: var(--danger-600);
+   border-color: #fecaca;
+}
+
+.alert-info {
+   background-color: var(--primary-50);
+   color: var(--primary-600);
+   border-color: var(--primary-200);
+}
+
+/* ===== BADGES ===== */
+.badge {
+   display: inline-flex;
+   align-items: center;
+   padding: var(--spacing-1) var(--spacing-2);
+   font-size: 0.75rem;
+   font-weight: 500;
+   border-radius: var(--radius);
+   background-color: var(--gray-100);
+   color: var(--gray-700);
+}
+
+.badge-primary {
+   background-color: var(--primary-100);
+   color: var(--primary-700);
+}
+
+.badge-success {
+   background-color: var(--success-50);
+   color: var(--success-600);
+}
+
+/* ===== ESTADOS ESPECIALES ===== */
+.loading {
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   padding: var(--spacing-8);
+   color: var(--gray-500);
+}
+
+.empty-state {
+   text-align: center;
+   padding: var(--spacing-8);
+   color: var(--gray-500);
+}
+
+.empty-state h3 {
+   margin-bottom: var(--spacing-4);
+   color: var(--gray-700);
+}
+
+.error-message {
+   text-align: center;
+   padding: var(--spacing-6);
+   color: var(--danger-600);
+   background: var(--danger-50);
+   border: 1px solid var(--danger-200);
+   border-radius: var(--radius);
+}
+
+/* ===== UTILIDADES ===== */
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+.mb-2 { margin-bottom: var(--spacing-2); }
+.mb-4 { margin-bottom: var(--spacing-4); }
+.mb-6 { margin-bottom: var(--spacing-6); }
+.mb-8 { margin-bottom: var(--spacing-8); }
+
+.mt-2 { margin-top: var(--spacing-2); }
+.mt-4 { margin-top: var(--spacing-4); }
+.mt-6 { margin-top: var(--spacing-6); }
+
+.p-4 { padding: var(--spacing-4); }
+.p-6 { padding: var(--spacing-6); }
+
+.hidden { display: none !important; }
+.sr-only { 
+   position: absolute;
+   width: 1px;
+   height: 1px;
+   padding: 0;
+   margin: -1px;
+   overflow: hidden;
+   clip: rect(0, 0, 0, 0);
+   white-space: nowrap;
+   border: 0;
+}
+
+/* ===== FOOTER ===== */
+.app-footer {
+   background: var(--gray-800);
+   color: var(--gray-300);
+   padding: var(--spacing-8) 0;
+   margin-top: auto;
+}
+
+.footer-content {
+   display: grid;
+   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+   gap: var(--spacing-6);
+   margin-bottom: var(--spacing-6);
+}
+
+.footer-section h3 {
+   color: white;
+   margin-bottom: var(--spacing-4);
+}
+
+.footer-section a {
+   display: block;
+   color: var(--gray-300);
+   text-decoration: none;
+   margin-bottom: var(--spacing-2);
+   transition: var(--transition);
+}
+
+.footer-section a:hover {
+   color: white;
+}
+
+.footer-bottom {
+   text-align: center;
+   padding-top: var(--spacing-6);
+   border-top: 1px solid var(--gray-700);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+   .container {
+       padding: 0 var(--spacing-3);
+   }
+   
+   .nav-toggle {
+       display: flex;
+   }
+   
+   .nav-menu {
+       display: none;
+       position: absolute;
+       top: 100%;
+       left: 0;
+       right: 0;
+       background: white;
+       border-top: 1px solid var(--gray-200);
+       flex-direction: column;
+       padding: var(--spacing-4);
+       gap: var(--spacing-2);
+   }
+   
+   .app-header h1 {
+       font-size: 2rem;
+   }
+   
+   .grid-cols-2,
+   .grid-cols-3,
+   .grid-cols-4 {
+       grid-template-columns: repeat(1, minmax(0, 1fr));
+   }
+   
+   .form-actions {
+       flex-direction: column;
+   }
+   
+   .btn-block {
+       width: 100%;
+   }
+}
+
+/* ===== COMPONENTES ESPECÍFICOS ===== */
+.stats-grid .stat-card {
+   text-align: center;
+   padding: var(--spacing-6);
+}
+
+.stat-number {
+   font-size: 2rem;
+   font-weight: 700;
+   color: var(--primary-600);
+   display: block;
+   margin-bottom: var(--spacing-2);
+}
+
+.stat-label {
+   font-size: 0.875rem;
+   color: var(--gray-600);
+}
+
+.animate-target {
+   transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.animate-target:hover {
+   transform: translateY(-2px);
+   box-shadow: var(--shadow-lg);
+}
+
+/* Dropdown */
+.dropdown {
+   position: relative;
+}
+
+.dropdown-menu {
+   position: absolute;
+   top: 100%;
+   right: 0;
+   background: white;
+   border: 1px solid var(--gray-200);
+   border-radius: var(--radius);
+   box-shadow: var(--shadow-lg);
+   min-width: 200px;
+   z-index: var(--z-dropdown);
+   margin-top: var(--spacing-2);
+   display: none;
+}
+
+.dropdown-menu.show {
+   display: block;
+}
+
+.dropdown-item {
+   display: block;
+   width: 100%;
+   padding: var(--spacing-3) var(--spacing-4);
+   color: var(--gray-700);
+   text-decoration: none;
+   border: none;
+   background: none;
+   text-align: left;
+   cursor: pointer;
+   transition: var(--transition);
+}
+
+.dropdown-item:hover {
+   background: var(--gray-50);
+   color: var(--primary-600);
+}
+
+/* Modal */
+.modal {
+   position: fixed;
+   top: 0;
+   left: 0;
+   width: 100%;
+   height: 100%;
+   background: rgba(0, 0, 0, 0.5);
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   z-index: var(--z-modal);
+}
+
+.modal-content {
+   background: white;
+   border-radius: var(--radius-lg);
+   max-width: 500px;
+   width: 90%;
+   max-height: 80vh;
+   overflow-y: auto;
+}
+
+.modal-header {
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
+   padding: var(--spacing-6);
+   border-bottom: 1px solid var(--gray-200);
+}
+
+.modal-body {
+   padding: var(--spacing-6);
+}
+
+.modal-footer {
+   display: flex;
+   gap: var(--spacing-3);
+   padding: var(--spacing-6);
+   border-top: 1px solid var(--gray-200);
+   justify-content: flex-end;
+}
+
+.modal-close {
+   background: none;
+   border: none;
+   font-size: 1.5rem;
+   cursor: pointer;
+   color: var(--gray-400);
+   padding: 0;
+   line-height: 1;
+}
+
+.modal-close:hover {
+   color: var(--gray-600);
+}
+[/file]
+[/template]
+
+[template public generateMainAppJS(app : Aplicacion)]
+[file ('web/assets/js/app.js', false, 'UTF-8')]
+/**
+* ARCHIVO PRINCIPAL DE APLICACIÓN - [app.nombre/]
+* Este archivo inicializa todo el sistema unificado
+*/
+
+// Verificar que todos los módulos estén disponibles
+const REQUIRED_MODULES = ['['/]'UnifiedDatabaseManager', 'UnifiedAppManager', 'UnifiedEntityManager', 'UnifiedSurveyQuizManager', 'UnifiedUIManager'];
+const MISSING_MODULES = ['['/]];
+
+REQUIRED_MODULES.forEach(module => {
+   if (typeof window['['/]module] === 'undefined') {
+       MISSING_MODULES.push(module);
+   }
+});
+
+if (MISSING_MODULES.length > 0) {
+   console.error('❌ Módulos faltantes:', MISSING_MODULES);
+   console.error('Asegúrate de que todos los archivos JS estén cargados correctamente');
+}
+
+// Configuración global de la aplicación
+window.AppGlobalConfig = {
+   name: '[app.nombre/]',
+   version: '1.0.0',
+   debug: true,
+   entities: ['['/]
+       [for (entidad : Entidad | app.entidades) separator(',')]
+       {
+           name: '[entidad.nombre/]',
+           tableName: '[entidad.tableName/]',
+           primaryKey: '[entidad.atributos->select(a | a.isPrimaryKey)->first().nombre/]'
+       }
+       [/for]
+   ],
+   roles: ['['/]
+       [for (rol : Rol | app.roles) separator (', ')]
+       '[rol.nombre/]'
+       [/for]
+   ],
+   surveys: ['['/]
+       [for (encuesta : Encuesta | app.encuestas) separator(',')]
+       {
+           name: '[encuesta.nombre/]',
+           title: '[encuesta.titulo/]',
+           type: 'survey'
+       }
+       [/for]
+   ],
+   quizzes: ['['/]
+       [for (cuestionario : Cuestionario | app.cuestionarios) separator(',')]
+       {
+           name: '[cuestionario.nombre/]',
+           title: '[cuestionario.titulo/]',
+           type: 'quiz'
+       }
+       [/for]
+   ]
+};
+
+// Función de inicialización administrativa
+function initializeAdminRoles() {
+   const adminRoles = ['['/]
+       [for (rol : Rol | app.roles)]
+       [let maxPages : Integer = app.roles->collect(r | r.paginasAccesibles->size())->max()]
+       [let maxEntidades : Integer = app.roles->collect(r | r.numeroEntidadesAccesibles)->max()]
+       [let isAdminRole : Boolean = rol.paginasAccesibles->size() = maxPages or (rol.paginasAccesibles->size() < maxPages and rol.numeroEntidadesAccesibles = maxEntidades)]
+       [if (isAdminRole)]'[rol.nombre/]'[if (rol <> app.roles->last())], [/if][/if]
+       [/let]
+       [/let]
+       [/let]
+       [/for]
+   ];
+   
+   localStorage.setItem('admin_roles', JSON.stringify(adminRoles));
+   
+   if (window.AppGlobalConfig.debug) {
+       console.log('✅ Roles administrativos inicializados:', adminRoles);
+   }
+}
+
+// Funciones de compatibilidad global (mantener para no romper código existente)
+window.selectRole = function(roleName) {
+   if (window.DataWebApp) {
+       window.DataWebApp.setRole(roleName);
+       return false;
+   }
+   
+   // Fallback si la app no está lista
+   localStorage.setItem('current_role', roleName);
+   window.location.href = `${roleName.toLowerCase()}/dashboard.html`;
+   return false;
+};
+
+window.openSurveyPage = function(surveyName) {
+   if (window.DataWebApp && window.DataWebApp.surveys) {
+       window.DataWebApp.surveys.openItem(surveyName, 'survey');
+   } else {
+       console.warn('Sistema de encuestas no disponible');
+   }
+};
+
+window.openQuizPage = function(quizName) {
+   if (window.DataWebApp && window.DataWebApp.surveys) {
+       window.DataWebApp.surveys.openItem(quizName, 'quiz');
+   } else {
+       console.warn('Sistema de cuestionarios no disponible');
+   }
+};
+
+// Funciones de utilidad global
+window.DataWebUtils = {
+   formatDate: function(date, options = {}) {
+       if (!date) return '-';
+       const defaultOptions = {
+           year: 'numeric',
+           month: 'short',
+           day: 'numeric'
+       };
+       return new Date(date).toLocaleDateString('es-ES', { ...defaultOptions, ...options });
+   },
+   
+   formatNumber: function(number, decimals = 0) {
+       if (typeof number !== 'number') return '-';
+       return number.toLocaleString('es-ES', { 
+           minimumFractionDigits: decimals, 
+           maximumFractionDigits: decimals 
+       });
+   },
+   
+   showNotification: function(message, type = 'info') {
+       if (window.DataWebApp && window.DataWebApp.ui) {
+           window.DataWebApp.ui.showAlert(message, type);
+       } else {
+           // Fallback básico
+           alert(message);
+       }
+   },
+   
+   confirmAction: function(message, callback) {
+       if (window.DataWebApp && window.DataWebApp.ui) {
+           window.DataWebApp.ui.confirmAction(message, callback);
+       } else {
+           // Fallback básico
+           if (confirm(message) && callback) {
+               callback();
+           }
+       }
+   },
+   
+   getCurrentRole: function() {
+       return localStorage.getItem('current_role') || null;
+   },
+   
+   isAdmin: function() {
+       const currentRole = this.getCurrentRole();
+       const adminRoles = JSON.parse(localStorage.getItem('admin_roles') || '['['/]']');
+       return adminRoles.includes(currentRole);
+   }
+};
+
+// Event listener principal para inicialización
+document.addEventListener('DOMContentLoaded', function() {
+   if (window.AppGlobalConfig.debug) {
+       console.log(`🚀 Iniciando ${window.AppGlobalConfig.name} v${window.AppGlobalConfig.version}`);
+   }
+   
+   // Inicializar roles administrativos
+   initializeAdminRoles();
+   
+   // El UnifiedAppManager se inicializa automáticamente mediante su propio DOMContentLoaded
+   // Solo necesitamos esperar a que esté disponible
+   
+   // Verificar si todos los scripts se cargaron correctamente
+   setTimeout(() => {
+       if (window.DataWebApp) {
+           if (window.AppGlobalConfig.debug) {
+               console.log('✅ Sistema DataWeb inicializado correctamente');
+               console.log('- Base de datos:', window.DataWebApp.db ? '✅' : '❌');
+               console.log('- UI Manager:', window.DataWebApp.ui ? '✅' : '❌');
+               console.log('- Entity Manager:', window.DataWebApp.entities ? '✅' : '❌');
+               console.log('- Survey Manager:', window.DataWebApp.surveys ? '✅' : '❌');
+           }
+       } else {
+           console.error('❌ Error: DataWebApp no se inicializó correctamente');
+           console.error('Verifica que todos los archivos JS estén incluidos en el HTML');
+       }
+   }, 1000);
+});
+
+// Manejo de errores globales
+window.addEventListener('error', function(event) {
+   if (window.AppGlobalConfig.debug) {
+       console.error('❌ Error global capturado:', event.error);
+   }
+   
+   // En producción, podrías enviar estos errores a un servicio de logging
+});
+
+window.addEventListener('unhandledrejection', function(event) {
+   if (window.AppGlobalConfig.debug) {
+       console.error('❌ Promise rechazada no manejada:', event.reason);
+	}
+   
+   // Prevenir que el error se muestre en consola del navegador
+   event.preventDefault();
+});
+
+// Funciones de desarrollo y debugging
+if (window.AppGlobalConfig.debug) {
+   window.DataWebDebug = {
+       showConfig: () => console.table(window.AppGlobalConfig),
+       showDB: async () => {
+           if (window.DataWebApp && window.DataWebApp.db) {
+               const stores = window.AppGlobalConfig.entities.map(e => e.tableName);
+               stores.push('ENCUESTAS', 'CUESTIONARIOS');
+               
+               for (const store of stores) {
+                   try {
+                       const data = await window.DataWebApp.db.execute('getAll', store);
+                       console.log(`📊 ${store}:`, data);
+                   } catch (error) {
+                       console.log(`❌ ${store}: Error cargando`);
+                   }
+               }
+           }
+       },
+       clearDB: async () => {
+           if (confirm('¿Seguro que quieres limpiar toda la base de datos?')) {
+               localStorage.clear();
+               const databases = await indexedDB.databases();
+               for (const db of databases) {
+                   indexedDB.deleteDatabase(db.name);
+               }
+               location.reload();
+           }
+       },
+       testAlert: (type = 'info') => {
+           window.DataWebUtils.showNotification(`Prueba de alerta ${type}`, type);
+       }
+   };
+   
+   console.log('🔧 Herramientas de debug disponibles en window.DataWebDebug');
+}
+[/file]
+[/template]
+
+[template public generateDynamicPageGenerator(app : Aplicacion)]
+[file ('web/assets/js/dynamic-page-generator.js', false, 'UTF-8')]
+/**
+* GENERADOR DINÁMICO DE PÁGINAS - [app.nombre/]
+* Genera páginas HTML en tiempo real para encuestas y cuestionarios
+*/
+
+class DynamicPageGenerator {
+   constructor() {
+       this.templates = {
+           survey: this.getSurveyTemplate(),
+           quiz: this.getQuizTemplate()
+       };
+   }
+
+   async generateSurveyPage(surveyName) {
+       try {
+           if (!window.UnifiedDB) {
+               throw new Error('Base de datos no disponible');
+           }
+           
+           await window.UnifiedDB.init();
+           const surveys = await window.UnifiedDB.execute('getAll', 'ENCUESTAS');
+           const survey = surveys.find(s => s.nombre === surveyName);
+           
+           if (!survey) {
+               return this.getErrorPage('Encuesta no encontrada');
+           }
+           
+           return this.templates.survey
+               .replace(/\{\{TITLE\}\}/g, survey.titulo)
+               .replace(/\{\{DESCRIPTION\}\}/g, survey.descripcion || '')
+               .replace(/\{\{NAME\}\}/g, survey.nombre)
+               .replace(/\{\{TYPE\}\}/g, 'survey');
+               
+       } catch (error) {
+           console.error('Error generando página de encuesta:', error);
+           return this.getErrorPage('Error cargando encuesta');
+       }
+   }
+
+   async generateQuizPage(quizName) {
+       try {
+           if (!window.UnifiedDB) {
+               throw new Error('Base de datos no disponible');
+           }
+           
+           await window.UnifiedDB.init();
+           const quizzes = await window.UnifiedDB.execute('getAll', 'CUESTIONARIOS');
+           const quiz = quizzes.find(q => q.nombre === quizName);
+           
+           if (!quiz) {
+               return this.getErrorPage('Cuestionario no encontrado');
+           }
+           
+           return this.templates.quiz
+               .replace(/\{\{TITLE\}\}/g, quiz.titulo)
+               .replace(/\{\{DESCRIPTION\}\}/g, quiz.descripcion || '')
+               .replace(/\{\{NAME\}\}/g, quiz.nombre)
+               .replace(/\{\{TIME_LIMIT\}\}/g, quiz.tiempoLimite || 30)
+               .replace(/\{\{TYPE\}\}/g, 'quiz');
+               
+       } catch (error) {
+           console.error('Error generando página de cuestionario:', error);
+           return this.getErrorPage('Error cargando cuestionario');
+       }
+   }
+
+   getSurveyTemplate() {
+       return `<!DOCTYPE html>
+<html lang="es">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>{{TITLE}} - [app.nombre/]</title>
+   <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+   <header class="app-header">
+       <div class="container">
+           <h1>{{TITLE}}</h1>
+           <p>{{DESCRIPTION}}</p>
+       </div>
+   </header>
+   
+   <nav class="main-nav">
+       <div class="container nav-container">
+           <div class="nav-brand">
+               <a href="../index.html" class="nav-logo">[app.nombre/]</a>
+           </div>
+           <ul class="nav-menu">
+               <li class="nav-item"><a href="../index.html" class="nav-link">Inicio</a></li>
+               <li class="nav-item"><a href="index.html" class="nav-link">Encuestas</a></li>
+           </ul>
+       </div>
+   </nav>
+   
+   <main class="main-content">
+       <div class="container">
+           <div class="card">
+               <div class="card-header">
+                   <h2>Participar en Encuesta</h2>
+               </div>
+               <div class="card-body">
+                   <div class="progress-bar mb-4">
+                       <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                   </div>
+                   
+                   <form id="survey-form" data-survey="{{NAME}}">
+                       <div id="questions-container">
+                           <!-- Pregunta de ejemplo -->
+                           <div class="question-item active" data-question="1">
+                               <h3>Pregunta de ejemplo</h3>
+                               <p class="question-description">Esta es una pregunta de demostración. En una implementación completa, las preguntas se cargarían desde la base de datos.</p>
+                               
+                               <div class="form-group">
+                                   <label class="form-label">¿Cómo calificarías tu experiencia?</label>
+                                   <div class="radio-group">
+                                       <label class="radio-label">
+                                           <input type="radio" name="question_1" value="excelente" required>
+                                           <span>Excelente</span>
+                                       </label>
+                                       <label class="radio-label">
+                                           <input type="radio" name="question_1" value="buena" required>
+                                           <span>Buena</span>
+                                       </label>
+                                       <label class="radio-label">
+                                           <input type="radio" name="question_1" value="regular" required>
+                                           <span>Regular</span>
+                                       </label>
+                                       <label class="radio-label">
+                                           <input type="radio" name="question_1" value="mala" required>
+                                           <span>Mala</span>
+                                       </label>
+                                   </div>
+                               </div>
+                           </div>
+                           
+                           <div class="question-item" data-question="2">
+                               <h3>Comentarios adicionales</h3>
+                               <div class="form-group">
+                                   <label class="form-label">¿Tienes algún comentario o sugerencia?</label>
+                                   <textarea name="question_2" class="form-control" rows="4" placeholder="Escribe tus comentarios aquí (opcional)"></textarea>
+                               </div>
+                           </div>
+                       </div>
+                       
+                       <div class="form-navigation">
+                           <button type="button" id="prev-btn" class="btn btn-secondary" disabled>Anterior</button>
+                           <button type="button" id="next-btn" class="btn btn-primary">Siguiente</button>
+                           <button type="submit" id="submit-btn" class="btn btn-success" style="display: none;">Enviar Encuesta</button>
+                       </div>
+                   </form>
+               </div>
+           </div>
+       </div>
+   </main>
+   
+   <script>
+       class SurveyHandler {
+           constructor() {
+               this.currentQuestion = 1;
+               this.totalQuestions = 2;
+               this.answers = {};
+               this.init();
+           }
+           
+           init() {
+               this.updateUI();
+               this.bindEvents();
+           }
+           
+           bindEvents() {
+               document.getElementById('next-btn').addEventListener('click', () => this.nextQuestion());
+               document.getElementById('prev-btn').addEventListener('click', () => this.prevQuestion());
+               document.getElementById('survey-form').addEventListener('submit', (e) => this.handleSubmit(e));
+               
+               // Actualizar progreso cuando cambian las respuestas
+               document.addEventListener('change', () => this.updateProgress());
+           }
+           
+           nextQuestion() {
+               if (this.currentQuestion < this.totalQuestions) {
+                   this.hideQuestion(this.currentQuestion);
+                   this.currentQuestion++;
+                   this.showQuestion(this.currentQuestion);
+                   this.updateUI();
+               }
+           }
+           
+           prevQuestion() {
+               if (this.currentQuestion > 1) {
+                   this.hideQuestion(this.currentQuestion);
+                   this.currentQuestion--;
+                   this.showQuestion(this.currentQuestion);
+                   this.updateUI();
+               }
+           }
+           
+           showQuestion(num) {
+               const question = document.querySelector(\`['['/]data-question="\${num}"]\`);
+               if (question) {
+                   question.classList.add('active');
+                   question.style.display = 'block';
+               }
+           }
+           
+           hideQuestion(num) {
+               const question = document.querySelector(\`['['/]data-question="\${num}"]\`);
+               if (question) {
+                   question.classList.remove('active');
+                   question.style.display = 'none';
+               }
+           }
+           
+           updateUI() {
+               const prevBtn = document.getElementById('prev-btn');
+               const nextBtn = document.getElementById('next-btn');
+               const submitBtn = document.getElementById('submit-btn');
+               
+               prevBtn.disabled = this.currentQuestion === 1;
+               
+               if (this.currentQuestion === this.totalQuestions) {
+                   nextBtn.style.display = 'none';
+                   submitBtn.style.display = 'inline-block';
+               } else {
+                   nextBtn.style.display = 'inline-block';
+                   submitBtn.style.display = 'none';
+               }
+               
+               this.updateProgress();
+           }
+           
+           updateProgress() {
+               const progress = (this.currentQuestion / this.totalQuestions) * 100;
+               const progressFill = document.getElementById('progress-fill');
+               if (progressFill) {
+                   progressFill.style.width = progress + '%';
+               }
+           }
+           
+           async handleSubmit(e) {
+               e.preventDefault();
+               
+               const formData = new FormData(e.target);
+               const surveyName = e.target.dataset.survey;
+               
+               const response = {
+                   id: 'resp_' + Date.now(),
+                   surveyName: surveyName,
+                   userId: 'usuario@example.com',
+                   timestamp: Date.now(),
+                   answers: Object.fromEntries(formData),
+                   approved: false
+               };
+               
+               try {
+                   // En una implementación real, esto se guardaría en la base de datos
+                   console.log('Respuesta de encuesta:', response);
+                   
+                   this.showSuccessMessage();
+               } catch (error) {
+                   console.error('Error enviando encuesta:', error);
+                   alert('Error al enviar la encuesta. Por favor, inténtalo de nuevo.');
+               }
+           }
+           
+           showSuccessMessage() {
+               document.querySelector('.main-content').innerHTML = \`
+                   <div class="container">
+                       <div class="card">
+                           <div class="card-body text-center">
+                               <div style="font-size: 4rem; color: var(--success-500); margin-bottom: 1rem;">✓</div>
+                               <h2>¡Encuesta enviada!</h2>
+                               <p>Gracias por tu participación. Tu respuesta ha sido registrada correctamente.</p>
+                               <div class="mt-4">
+                                   <button onclick="window.close()" class="btn btn-primary">Cerrar</button>
+                                   <a href="../surveys/index.html" class="btn btn-secondary">Ver más encuestas</a>
+                               </div>
+                           </div>
+                       </div>
+                   </div>
+               \`;
+           }
+       }
+       
+       // Inicializar cuando el DOM esté listo
+       document.addEventListener('DOMContentLoaded', () => {
+           new SurveyHandler();
+       });
+   </script>
+   
+   <style>
+       .question-item {
+           display: none;
+       }
+       
+       .question-item.active {
+           display: block;
+       }
+       
+       .question-item h3 {
+           margin-bottom: 1rem;
+           color: var(--gray-800);
+       }
+       
+       .question-description {
+           margin-bottom: 1.5rem;
+           color: var(--gray-600);
+       }
+       
+       .radio-group {
+           display: flex;
+           flex-direction: column;
+           gap: 0.75rem;
+       }
+       
+       .radio-label {
+           display: flex;
+           align-items: center;
+           gap: 0.5rem;
+           padding: 0.75rem;
+           border: 1px solid var(--gray-200);
+           border-radius: var(--radius);
+           cursor: pointer;
+           transition: var(--transition);
+       }
+       
+       .radio-label:hover {
+           background: var(--gray-50);
+           border-color: var(--primary-300);
+       }
+       
+       .radio-label input:checked + span {
+           color: var(--primary-600);
+           font-weight: 500;
+       }
+       
+       .progress-bar {
+           width: 100%;
+           height: 8px;
+           background: var(--gray-200);
+           border-radius: var(--radius);
+           overflow: hidden;
+       }
+       
+       .progress-fill {
+           height: 100%;
+           background: var(--primary-500);
+           transition: width 0.3s ease;
+       }
+       
+       .form-navigation {
+           display: flex;
+           justify-content: space-between;
+           margin-top: 2rem;
+           padding-top: 2rem;
+           border-top: 1px solid var(--gray-200);
+       }
+       
+       @media (max-width: 768px) {
+           .form-navigation {
+               flex-direction: column;
+               gap: 1rem;
+           }
+           
+           .radio-group {
+               gap: 0.5rem;
+           }
+       }
+   </style>
+</body>
+</html>`;
+   }
+
+   getQuizTemplate() {
+       return `<!DOCTYPE html>
+<html lang="es">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>{{TITLE}} - [app.nombre/]</title>
+   <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+   <header class="app-header">
+       <div class="container">
+           <h1>{{TITLE}}</h1>
+           <p>{{DESCRIPTION}}</p>
+       </div>
+   </header>
+   
+   <nav class="main-nav">
+       <div class="container nav-container">
+           <div class="nav-brand">
+               <a href="../index.html" class="nav-logo">[app.nombre/]</a>
+           </div>
+           <ul class="nav-menu">
+               <li class="nav-item"><a href="../index.html" class="nav-link">Inicio</a></li>
+               <li class="nav-item"><a href="index.html" class="nav-link">Cuestionarios</a></li>
+           </ul>
+       </div>
+   </nav>
+   
+   <main class="main-content">
+       <div class="container">
+           <div class="quiz-info-bar">
+               <div class="card">
+                   <div class="card-body">
+                       <div class="quiz-meta">
+                           <div class="quiz-timer">
+                               <span class="timer-label">Tiempo restante:</span>
+                               <span class="timer-display" id="timer">{{TIME_LIMIT}}:00</span>
+                           </div>
+                           <div class="quiz-progress">
+                               <span class="progress-label">Progreso:</span>
+                               <div class="progress-bar">
+                                   <div class="progress-fill" id="progress-fill"></div>
+                               </div>
+                               <span class="progress-text" id="progress-text">0 / 3</span>
+                           </div>
+                       </div>
+                   </div>
+               </div>
+           </div>
+           
+           <div class="card">
+               <div class="card-body">
+                   <form id="quiz-form" data-quiz="{{NAME}}">
+                       <div id="questions-container">
+                           <!-- Pregunta 1 -->
+                           <div class="question-item active" data-question="1">
+                               <div class="question-header">
+                                   <span class="question-number">Pregunta 1 de 3</span>
+                                   <span class="question-type badge badge-primary">Opción Múltiple</span>
+                               </div>
+                               <h3>¿Cuál es la capital de España?</h3>
+                               
+                               <div class="form-group">
+                                   <div class="radio-group">
+                                       <label class="radio-label">
+                                           <input type="radio" name="question_1" value="madrid" required>
+                                           <span>Madrid</span>
+                                       </label>
+                                       <label class="radio-label">
+                                           <input type="radio" name="question_1" value="barcelona" required>
+                                           <span>Barcelona</span>
+                                       </label>
+                                       <label class="radio-label">
+                                           <input type="radio" name="question_1" value="sevilla" required>
+                                           <span>Sevilla</span>
+                                       </label>
+                                       <label class="radio-label">
+                                           <input type="radio" name="question_1" value="valencia" required>
+                                           <span>Valencia</span>
+                                       </label>
+                                   </div>
+                               </div>
+                           </div>
+                           
+                           <!-- Pregunta 2 -->
+                           <div class="question-item" data-question="2">
+                               <div class="question-header">
+                                   <span class="question-number">Pregunta 2 de 3</span>
+                                   <span class="question-type badge badge-primary">Verdadero/Falso</span>
+                               </div>
+                               <h3>El Sol es una estrella</h3>
+                               
+                               <div class="form-group">
+                                   <div class="radio-group">
+                                       <label class="radio-label">
+                                           <input type="radio" name="question_2" value="true" required>
+                                           <span>Verdadero</span>
+                                       </label>
+                                       <label class="radio-label">
+                                           <input type="radio" name="question_2" value="false" required>
+                                           <span>Falso</span>
+                                       </label>
+                                   </div>
+                               </div>
+                           </div>
+                           
+                           <!-- Pregunta 3 -->
+                           <div class="question-item" data-question="3">
+                               <div class="question-header">
+                                   <span class="question-number">Pregunta 3 de 3</span>
+                                   <span class="question-type badge badge-primary">Respuesta Corta</span>
+                               </div>
+                               <h3>¿En qué año se descubrió América?</h3>
+                               
+                               <div class="form-group">
+                                   <input type="text" name="question_3" class="form-control" placeholder="Ingresa tu respuesta" required>
+                               </div>
+                           </div>
+                       </div>
+                       
+                       <div class="form-navigation">
+                           <button type="button" id="prev-btn" class="btn btn-secondary" disabled>Anterior</button>
+                           <button type="button" id="next-btn" class="btn btn-primary">Siguiente</button>
+                           <button type="submit" id="submit-btn" class="btn btn-success" style="display: none;">Finalizar Cuestionario</button>
+                       </div>
+                   </form>
+               </div>
+           </div>
+       </div>
+   </main>
+   
+   <script>
+       class QuizHandler {
+           constructor() {
+               this.currentQuestion = 1;
+               this.totalQuestions = 3;
+               this.timeLimit = {{TIME_LIMIT}} * 60; // en segundos
+               this.timeLeft = this.timeLimit;
+               this.answers = {};
+               this.timer = null;
+               this.init();
+           }
+           
+           init() {
+               this.startTimer();
+               this.updateUI();
+               this.bindEvents();
+           }
+           
+           bindEvents() {
+               document.getElementById('next-btn').addEventListener('click', () => this.nextQuestion());
+               document.getElementById('prev-btn').addEventListener('click', () => this.prevQuestion());
+               document.getElementById('quiz-form').addEventListener('submit', (e) => this.handleSubmit(e));
+               
+               // Actualizar progreso cuando cambian las respuestas
+               document.addEventListener('change', () => this.updateProgress());
+           }
+           
+           startTimer() {
+               this.timer = setInterval(() => {
+                   this.timeLeft--;
+                   this.updateTimerDisplay();
+                   
+                   if (this.timeLeft <= 0) {
+                       this.timeUp();
+                   }
+               }, 1000);
+           }
+           
+           updateTimerDisplay() {
+               const minutes = Math.floor(this.timeLeft / 60);
+               const seconds = this.timeLeft % 60;
+               const display = \`\${minutes}:\${seconds.toString().padStart(2, '0')}\`;
+               
+               const timerElement = document.getElementById('timer');
+               if (timerElement) {
+                   timerElement.textContent = display;
+                   
+                   // Cambiar color cuando queda poco tiempo
+                   if (this.timeLeft <= 60) {
+                       timerElement.style.color = 'var(--danger-500)';
+                   } else if (this.timeLeft <= 300) {
+                       timerElement.style.color = 'var(--warning-500)';
+                   }
+               }
+           }
+           
+           timeUp() {
+               clearInterval(this.timer);
+               alert('¡Se acabó el tiempo! El cuestionario se enviará automáticamente.');
+               document.getElementById('quiz-form').dispatchEvent(new Event('submit'));
+           }
+           
+           nextQuestion() {
+               if (this.currentQuestion < this.totalQuestions) {
+                   this.hideQuestion(this.currentQuestion);
+                   this.currentQuestion++;
+                   this.showQuestion(this.currentQuestion);
+                   this.updateUI();
+               }
+           }
+           
+           prevQuestion() {
+               if (this.currentQuestion > 1) {
+                   this.hideQuestion(this.currentQuestion);
+                   this.currentQuestion--;
+                   this.showQuestion(this.currentQuestion);
+                   this.updateUI();
+               }
+           }
+           
+           showQuestion(num) {
+               const question = document.querySelector(\`['['/]data-question="\${num}"]\`);
+               if (question) {
+                   question.classList.add('active');
+                   question.style.display = 'block';
+               }
+           }
+           
+           hideQuestion(num) {
+               const question = document.querySelector(\`['['/]data-question="\${num}"]\`);
+               if (question) {
+                   question.classList.remove('active');
+                   question.style.display = 'none';
+               }
+           }
+           
+           updateUI() {
+               const prevBtn = document.getElementById('prev-btn');
+               const nextBtn = document.getElementById('next-btn');
+               const submitBtn = document.getElementById('submit-btn');
+               
+               prevBtn.disabled = this.currentQuestion === 1;
+               
+               if (this.currentQuestion === this.totalQuestions) {
+                   nextBtn.style.display = 'none';
+                   submitBtn.style.display = 'inline-block';
+               } else {
+                   nextBtn.style.display = 'inline-block';
+                   submitBtn.style.display = 'none';
+               }
+               
+               this.updateProgress();
+           }
+           
+           updateProgress() {
+               const progress = (this.currentQuestion / this.totalQuestions) * 100;
+               const progressFill = document.getElementById('progress-fill');
+               const progressText = document.getElementById('progress-text');
+               
+               if (progressFill) {
+                   progressFill.style.width = progress + '%';
+               }
+               
+               if (progressText) {
+                   progressText.textContent = \`\${this.currentQuestion} / \${this.totalQuestions}\`;
+               }
+           }
+           
+           async handleSubmit(e) {
+               e.preventDefault();
+               
+               clearInterval(this.timer);
+               
+               const formData = new FormData(e.target);
+               const quizName = e.target.dataset.quiz;
+               
+               // Calcular puntuación (simulada)
+               const correctAnswers = {
+                   'question_1': 'madrid',
+                   'question_2': 'true',
+                   'question_3': '1492'
+               };
+               
+               let score = 0;
+               let totalAnswered = 0;
+               
+               for (const ['['/]key, value] of formData.entries()) {
+                   totalAnswered++;
+                   if (correctAnswers['['/]key] && correctAnswers['['/]key].toLowerCase() === value.toLowerCase()) {
+                       score++;
+                   }
+               }
+               
+               const percentage = Math.round((score / this.totalQuestions) * 100);
+               
+               const response = {
+                   id: 'resp_' + Date.now(),
+                   quizName: quizName,
+                   userId: 'usuario@example.com',
+                   timestamp: Date.now(),
+                   timeUsed: this.timeLimit - this.timeLeft,
+                   answers: Object.fromEntries(formData),
+                   results: {
+                       totalPreguntas: this.totalQuestions,
+                       totalCorrectas: score,
+                       porcentaje: percentage,
+                       gradeConfirmed: false
+                   }
+               };
+               
+               try {
+                   // En una implementación real, esto se guardaría en la base de datos
+                   console.log('Respuesta de cuestionario:', response);
+                   
+                   this.showResults(response.results);
+               } catch (error) {
+                   console.error('Error enviando cuestionario:', error);
+                   alert('Error al enviar el cuestionario. Por favor, inténtalo de nuevo.');
+               }
+           }
+           
+           showResults(results) {
+               let resultClass = 'success';
+               let resultIcon = '✓';
+               let resultMessage = '¡Excelente trabajo!';
+               
+               if (results.porcentaje < 60) {
+                   resultClass = 'danger';
+                   resultIcon = '✗';
+                   resultMessage = 'Necesitas mejorar';
+               } else if (results.porcentaje < 80) {
+                   resultClass = 'warning';
+                   resultIcon = '⚠';
+                   resultMessage = '¡Buen trabajo!';
+               }
+               
+               document.querySelector('.main-content').innerHTML = \`
+                   <div class="container">
+                       <div class="card">
+                           <div class="card-body text-center">
+                               <div style="font-size: 4rem; color: var(--\${resultClass}-500); margin-bottom: 1rem;">\${resultIcon}</div>
+                               <h2>¡Cuestionario completado!</h2>
+                               <p class="mb-4">\${resultMessage}</p>
+                               
+                               <div class="results-summary">
+                                   <div class="result-item">
+                                       <div class="result-number" style="color: var(--\${resultClass}-500)">\${results.porcentaje}%</div>
+                                       <div class="result-label">Puntuación</div>
+                                   </div>
+                                   <div class="result-item">
+                                       <div class="result-number">\${results.totalCorrectas}</div>
+                                       <div class="result-label">Respuestas Correctas</div>
+                                   </div>
+                                   <div class="result-item">
+                                       <div class="result-number">\${results.totalPreguntas}</div>
+                                       <div class="result-label">Total de Preguntas</div>
+                                   </div>
+                               </div>
+                               
+                               <div class="mt-4">
+                                   <button onclick="window.close()" class="btn btn-primary">Cerrar</button>
+                                   <a href="../quizzes/index.html" class="btn btn-secondary">Ver más cuestionarios</a>
+                               </div>
+                           </div>
+                       </div>
+                   </div>
+               \`;
+           }
+       }
+       
+       // Inicializar cuando el DOM esté listo
+       document.addEventListener('DOMContentLoaded', () => {
+           new QuizHandler();
+       });
+   </script>
+   
+   <style>
+       .quiz-info-bar {
+           margin-bottom: 1.5rem;
+       }
+       
+       .quiz-meta {
+           display: flex;
+           justify-content: space-between;
+           align-items: center;
+           gap: 2rem;
+       }
+       
+       .quiz-timer,
+       .quiz-progress {
+           display: flex;
+           align-items: center;
+           gap: 0.5rem;
+       }
+       
+       .timer-display {
+           font-weight: bold;
+           font-size: 1.25rem;
+           color: var(--primary-600);
+           min-width: 60px;
+       }
+       
+       .progress-bar {
+           width: 120px;
+           height: 8px;
+           background: var(--gray-200);
+           border-radius: var(--radius);
+           overflow: hidden;
+       }
+       
+       .progress-fill {
+           height: 100%;
+           background: var(--primary-500);
+           transition: width 0.3s ease;
+       }
+       
+       .progress-text {
+			font-weight: 500;
+           min-width: 40px;
+       }
+       
+       .question-item {
+           display: none;
+       }
+       
+       .question-item.active {
+           display: block;
+       }
+       
+       .question-header {
+           display: flex;
+           justify-content: space-between;
+           align-items: center;
+           margin-bottom: 1rem;
+           padding-bottom: 0.5rem;
+           border-bottom: 1px solid var(--gray-200);
+       }
+       
+       .question-number {
+           font-size: 0.875rem;
+           color: var(--gray-600);
+           font-weight: 500;
+       }
+       
+       .question-item h3 {
+           margin-bottom: 1.5rem;
+           color: var(--gray-800);
+           font-size: 1.25rem;
+       }
+       
+       .radio-group {
+           display: flex;
+           flex-direction: column;
+           gap: 0.75rem;
+       }
+       
+       .radio-label {
+           display: flex;
+           align-items: center;
+           gap: 0.75rem;
+           padding: 1rem;
+           border: 2px solid var(--gray-200);
+           border-radius: var(--radius);
+           cursor: pointer;
+           transition: var(--transition);
+           background: white;
+       }
+       
+       .radio-label:hover {
+           background: var(--gray-50);
+           border-color: var(--primary-300);
+       }
+       
+       .radio-label input {
+           margin: 0;
+       }
+       
+       .radio-label input:checked + span {
+           color: var(--primary-600);
+           font-weight: 600;
+       }
+       
+       .radio-label:has(input:checked) {
+           border-color: var(--primary-500);
+           background: var(--primary-50);
+       }
+       
+       .form-navigation {
+           display: flex;
+           justify-content: space-between;
+           margin-top: 2rem;
+           padding-top: 2rem;
+           border-top: 1px solid var(--gray-200);
+       }
+       
+       .results-summary {
+           display: flex;
+           justify-content: center;
+           gap: 2rem;
+           margin: 2rem 0;
+       }
+       
+       .result-item {
+           text-align: center;
+       }
+       
+       .result-number {
+           font-size: 2rem;
+           font-weight: bold;
+           margin-bottom: 0.5rem;
+       }
+       
+       .result-label {
+           font-size: 0.875rem;
+           color: var(--gray-600);
+       }
+       
+       @media (max-width: 768px) {
+           .quiz-meta {
+               flex-direction: column;
+               gap: 1rem;
+           }
+           
+           .quiz-timer,
+           .quiz-progress {
+               width: 100%;
+               justify-content: space-between;
+           }
+           
+           .progress-bar {
+               flex: 1;
+               margin: 0 1rem;
+           }
+           
+           .form-navigation {
+               flex-direction: column;
+               gap: 1rem;
+           }
+           
+           .results-summary {
+               flex-direction: column;
+               gap: 1rem;
+           }
+           
+           .radio-group {
+               gap: 0.5rem;
+           }
+           
+           .radio-label {
+               padding: 0.75rem;
+           }
+       }
+   </style>
+</body>
+</html>`;
+   }
+
+   getErrorPage(message) {
+       return `<!DOCTYPE html>
+<html lang="es">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Error - [app.nombre/]</title>
+   <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+   <header class="app-header">
+       <div class="container">
+           <h1>Error</h1>
+       </div>
+   </header>
+   
+   <main class="main-content">
+       <div class="container">
+           <div class="card">
+               <div class="card-body text-center">
+                   <div style="font-size: 4rem; color: var(--danger-500); margin-bottom: 1rem;">⚠</div>
+                   <h2>Oops! Algo salió mal</h2>
+                   <p>${message}</p>
+                   <div class="mt-4">
+                       <button onclick="window.close()" class="btn btn-primary">Cerrar</button>
+                       <a href="../index.html" class="btn btn-secondary">Volver al inicio</a>
+                   </div>
+               </div>
+           </div>
+       </div>
+   </main>
+</body>
+</html>`;
+   }
+
+   // Método público para generar páginas
+   async getSurveyPage(surveyName) {
+       return await this.generateSurveyPage(surveyName);
+   }
+
+   async getQuizPage(quizName) {
+       return await this.generateQuizPage(quizName);
+   }
+}
+
+// Hacer disponible globalmente
+window.pageGenerator = new DynamicPageGenerator();
+
+// Funciones de compatibilidad
+window.generateSurveyPage = async function(surveyName) {
+   return await window.pageGenerator.getSurveyPage(surveyName);
+};
+
+window.generateQuizPage = async function(quizName) {
+   return await window.pageGenerator.getQuizPage(quizName);
+};
+[/file]
+[/template]

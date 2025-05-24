@@ -14,12 +14,10 @@ public class ModelFactory {
     
     static {
         // Registramos los proveedores para cada tipo de modelo
-        builders.put(Cliente.class.getName(), Cliente::new);
-        builders.put(Cuenta.class.getName(), Cuenta::new);
-        builders.put(Transaccion.class.getName(), Transaccion::new);
-        builders.put(Empleado.class.getName(), Empleado::new);
+        builders.put(Libro.class.getName(), Libro::new);
+        builders.put(Categoria.class.getName(), Categoria::new);
+        builders.put(Usuario.class.getName(), Usuario::new);
         builders.put(Prestamo.class.getName(), Prestamo::new);
-        builders.put(TarjetaCredito.class.getName(), TarjetaCredito::new);
     }
     
     /**

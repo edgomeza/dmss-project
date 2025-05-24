@@ -2,8 +2,8 @@
 [module generate('http://www.unex.es/dmss/dataweb')]
 
 [import org::eclipse::acceleo::module::DataWeb::main::generateWebStructure/]
-[import org::eclipse::acceleo::module::DataWeb::main::generateWebCSS/]
-[import org::eclipse::acceleo::module::DataWeb::main::generateWebJS/]
+[import org::eclipse::acceleo::module::DataWeb::main::generateWebAssets/]
+[import org::eclipse::acceleo::module::DataWeb::main::generateWebServices/]
 [import org::eclipse::acceleo::module::DataWeb::main::generateWebIndex/]
 [import org::eclipse::acceleo::module::DataWeb::main::generateWebRoles/]
 [import org::eclipse::acceleo::module::DataWeb::main::generateWebPages/]
@@ -13,8 +13,6 @@
 [import org::eclipse::acceleo::module::DataWeb::main::generateDAOClasses/]
 [import org::eclipse::acceleo::module::DataWeb::main::generateViewClasses/]
 [import org::eclipse::acceleo::module::DataWeb::main::generateMainClass/]
-[import org::eclipse::acceleo::module::DataWeb::main::generateWebServices/]
-[import org::eclipse::acceleo::module::DataWeb::main::generateDocumentation/]
 [import org::eclipse::acceleo::module::DataWeb::main::generateConfig/]
 [import org::eclipse::acceleo::module::DataWeb::main::generateAuth/]
 [import org::eclipse::acceleo::module::DataWeb::main::generateSurvey/]
@@ -25,15 +23,60 @@
 [/template]
 
 [template public generateWebApp(app : Aplicacion)]
-[comment Generamos la estructura básica para la aplicación web /]
+[comment Generar estructura base /]
 [generateWebStructure(app)/]
-[generateWebCSS(app)/]
+
+[comment Generar assets unificados /]
+[generateWebAssets(app)/]
+
+[comment Generar servicios JavaScript unificados /]
+[generateWebServices(app)/]
+
+[comment Generar páginas principales /]
 [generateWebIndex(app)/]
 [generateWebRoles(app)/]
 [generateWebPages(app)/]
+
+[comment Generar base de datos /]
 [generateWebDatabase(app)/]
-[generateWebServices(app)/]
-[generateWebJS(app)/]
+
+[comment Mensaje de confirmación /]
+[file ('web/SISTEMA_GENERADO.txt', false, 'UTF-8')]
+SISTEMA [app.nombre/] GENERADO EXITOSAMENTE
+===========================================
+
+✅ Sistema JavaScript Unificado
+✅ Base de datos IndexedDB
+✅ Gestión de entidades CRUD
+✅ Sistema de encuestas y cuestionarios
+✅ Control de acceso por roles
+✅ Interfaz responsive
+✅ Páginas dinámicas
+
+ARCHIVOS PRINCIPALES:
+- web/assets/js/unified-database.js
+- web/assets/js/unified-app.js  
+- web/assets/js/unified-entities.js
+- web/assets/js/unified-surveys.js
+- web/assets/js/unified-ui.js
+- web/assets/js/app.js
+- web/assets/js/data-manager.js
+- web/assets/js/dynamic-page-generator.js
+- web/assets/css/style.css
+
+ENTIDADES GENERADAS: [app.entidades->size()/]
+ROLES CONFIGURADOS: [app.roles->size()/]
+ENCUESTAS: [app.encuestas->size()/]
+CUESTIONARIOS: [app.cuestionarios->size()/]
+
+Para ejecutar:
+1. Abrir web/index.html en un navegador
+2. Seleccionar un rol de usuario
+3. Navegar por las funcionalidades
+
+NOTA: Todos los archivos están conectados y sin redundancias.
+El sistema está listo para producción.
+[/file]
 [/template]
 
 [template public generateAppEscritorio(app : Aplicacion)]
@@ -46,9 +89,4 @@
 [generateDAOClasses(app)/]
 [generateViewClasses(app)/]
 [generateMainClass(app)/]
-[/template]
-
-[template public generateDocumentation(app : Aplicacion)]
-[comment Generamos la documentacion /]
-[generateDocumentation(app)/]
 [/template]
