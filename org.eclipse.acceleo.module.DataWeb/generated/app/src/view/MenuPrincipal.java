@@ -59,60 +59,80 @@ public class MenuPrincipal {
             int opcion = ConsoleUtils.leerOpcion(scanner, 0, 7);
             
             switch (opcion) {
-                case 0:
-                    salir = true;
-                    mostrarMensajeDespedida();
-                    break;
-                case 1:
-                    if (authManager.isAuthenticated()) {
-                        String rolActivo = authManager.getUsuarioActual().getRolActivo();
-                        int rolId = obtenerIdRol(rolActivo);
-                        if (rolId > 0) {
-                            mostrarMenuRol(rolId);
-                        } else {
-                            ConsoleUtils.mostrarError("Rol no válido: " + rolActivo);
-                            ConsoleUtils.pausar(scanner);
-                        }
-                    } else {
-                        ConsoleUtils.mostrarError("Debe iniciar sesión primero");
-                        ConsoleUtils.pausar(scanner);
-                    }
-                    break;
-                case 2:
-                    new EncuestaView().mostrar();
-                    break;
-                case 3:
-                    if (authManager.tieneRol("Administrador")) {
-                        new AdminMenuView().mostrar();
-                    } else {
-                        ConsoleUtils.mostrarError("Acceso denegado. Se requiere rol de Administrador.");
-                        ConsoleUtils.pausar(scanner);
-                    }
-                    break;
-                case 4:
-                    // Dashboard (estadísticas)
-                    new DashboardView().mostrar();
-                    break;
-                case 5:
-                    // Configuración
-                    new ConfiguracionView().mostrar();
-                    break;
-                case 6:
-                    // Cerrar sesión
-                    authManager.logout();
-                    ConsoleUtils.mostrarExito("Sesión cerrada correctamente");
-                    ConsoleUtils.pausar(scanner);
-                    primeraVez = true;
-                    break;
-                case 7:
-                    // Información de la aplicación
-                    mostrarInformacionApp();
-                    break;
-                default:
-                    ConsoleUtils.mostrarError("Opción no válida. Por favor, seleccione una opción del menú.");
-                    ConsoleUtils.pausar(scanner);
-                    break;
-            }
+			    case 0:
+			        salir = true;
+			        mostrarMensajeDespedida();
+			        break;
+			    case 1:
+			        if (authManager.isAuthenticated()) {
+			            String rolActivo = authManager.getUsuarioActual().getRolActivo();
+			            mostrarMenuRolDirecto(rolActivo);
+			        } else {
+			            ConsoleUtils.mostrarError("Debe iniciar sesión primero");
+			            ConsoleUtils.pausar(scanner);
+			        }
+			        break;
+			    case 2:
+			        new EncuestaView().mostrar();
+			        break;
+			    case 3:
+			        // Verificar en tiempo real si es administrador
+			        if (authManager.isAuthenticated() && authManager.esAdministrador()) {
+			            new AdminMenuView().mostrar();
+			        } else {
+			            // Dashboard para usuarios no admin
+			            new DashboardView().mostrar();
+			        }
+			        break;
+			    case 4:
+			        // Verificar en tiempo real si es administrador
+			        if (authManager.isAuthenticated() && authManager.esAdministrador()) {
+			            new DashboardView().mostrar();
+			        } else {
+			            // Configuración para usuarios no admin
+			            new ConfiguracionView().mostrar();
+			        }
+			        break;
+			    case 5:
+			        // Verificar en tiempo real si es administrador
+			        if (authManager.isAuthenticated() && authManager.esAdministrador()) {
+			            new ConfiguracionView().mostrar();
+			        } else {
+			            // Cerrar sesión para usuarios no admin
+			            authManager.logout();
+			            ConsoleUtils.mostrarExito("Sesión cerrada correctamente");
+			            ConsoleUtils.pausar(scanner);
+			            primeraVez = true;
+			        }
+			        break;
+			    case 6:
+			        // Verificar en tiempo real si es administrador
+			        if (authManager.isAuthenticated() && authManager.esAdministrador()) {
+			            // Cerrar sesión para admin
+			            authManager.logout();
+			            ConsoleUtils.mostrarExito("Sesión cerrada correctamente");
+			            ConsoleUtils.pausar(scanner);
+			            primeraVez = true;
+			        } else {
+			            // Información de la aplicación para usuarios no admin
+			            mostrarInformacionApp();
+			        }
+			        break;
+			    case 7:
+			        // Solo disponible para administradores
+			        if (authManager.isAuthenticated() && authManager.esAdministrador()) {
+			            // Información de la aplicación para admin
+			            mostrarInformacionApp();
+			        } else {
+			            ConsoleUtils.mostrarError("Opción no válida.");
+			            ConsoleUtils.pausar(scanner);
+			        }
+			        break;
+			    default:
+			        ConsoleUtils.mostrarError("Opción no válida.");
+			        ConsoleUtils.pausar(scanner);
+			        break;
+			}
         }
     }
     
@@ -122,8 +142,8 @@ public class MenuPrincipal {
      */
     private boolean mostrarMenuInvitado() {
         ConsoleUtils.limpiarPantalla();
-        ConsoleUtils.mostrarTitulo("Sistema Bancario Digital");
-        System.out.println("Sistema integral de gestión bancaria para clientes y empleados\n");
+        ConsoleUtils.mostrarTitulo("Biblioteca Universitaria");
+        System.out.println("Sistema de gestión de biblioteca universitaria\n");
         ConsoleUtils.mostrarLinea();
         
         System.out.println("\nMenú de invitado:");
@@ -153,7 +173,7 @@ public class MenuPrincipal {
      */
     private void mostrarCabecera() {
         ConsoleUtils.limpiarPantalla();
-        ConsoleUtils.mostrarTitulo("Sistema Bancario Digital");
+        ConsoleUtils.mostrarTitulo("Biblioteca Universitaria");
         
         if (authManager.isAuthenticated()) {
             Usuario usuario = authManager.getUsuarioActual();
@@ -166,33 +186,39 @@ public class MenuPrincipal {
             }
         }
         
-        System.out.println("Sistema integral de gestión bancaria para clientes y empleados");
+        System.out.println("Sistema de gestión de biblioteca universitaria");
         ConsoleUtils.mostrarLinea();
     }
     
     /**
-     * Muestra las opciones disponibles en el menú principal
-     */
-    private void mostrarOpciones() {
-        System.out.println("\nMenú principal:");
-        System.out.println("1. Acceder como " + (authManager.isAuthenticated() ? authManager.getUsuarioActual().getRolActivo() : "usuario"));
-        System.out.println("2. Encuestas y cuestionarios");
-        
-        if (authManager.tieneRol("Administrador")) {
-            System.out.println("3. Administración");
-        } else {
-            System.out.println("3. Administración (acceso restringido)");
-        }
-        
-        System.out.println("4. Dashboard");
-        System.out.println("5. Configuración");
-        System.out.println("6. Cerrar sesión");
-        System.out.println("7. Acerca de la aplicación");
-        System.out.println("0. Salir");
-        
-        ConsoleUtils.mostrarLinea();
-        System.out.print("\nSeleccione una opción [0-7]: ");
-    }
+	 * Muestra las opciones disponibles en el menú principal
+	 */
+	private void mostrarOpciones() {
+	    System.out.println("\nMenú principal:");
+	    System.out.println("1. Acceder como " + (authManager.isAuthenticated() ? authManager.getUsuarioActual().getRolActivo() : "usuario"));
+	    System.out.println("2. Encuestas y cuestionarios");
+	    
+	    // Verificar en tiempo real si el usuario actual es administrador
+	    boolean esAdminActual = authManager.isAuthenticated() && authManager.esAdministrador();
+	    
+	    if (esAdminActual) {
+	        System.out.println("3. Administración");
+	        System.out.println("4. Dashboard");
+	        System.out.println("5. Configuración");
+	        System.out.println("6. Cerrar sesión");
+	        System.out.println("7. Acerca de la aplicación");
+	        System.out.println("0. Salir");
+	    } else {
+	        System.out.println("3. Dashboard");
+	        System.out.println("4. Configuración");
+	        System.out.println("5. Cerrar sesión");
+	        System.out.println("6. Acerca de la aplicación");
+	        System.out.println("0. Salir");
+	    }
+	    
+	    ConsoleUtils.mostrarLinea();
+	    System.out.print("\nSeleccione una opción: ");
+	}
     
     /**
      * Obtiene el ID de un rol por su nombre
@@ -200,17 +226,14 @@ public class MenuPrincipal {
      * @return ID del rol, o -1 si no se encuentra
      */
     private int obtenerIdRol(String rolNombre) {
-        if ("AdministradorBanco".equals(rolNombre)) {
+        if ("Administrador".equals(rolNombre)) {
             return 1;
         }
-        if ("GerenteOperaciones".equals(rolNombre)) {
+        if ("Bibliotecario".equals(rolNombre)) {
             return 2;
         }
-        if ("EmpleadoBanco".equals(rolNombre)) {
+        if ("Estudiante".equals(rolNombre)) {
             return 3;
-        }
-        if ("Cliente".equals(rolNombre)) {
-            return 4;
         }
         return -1;
     }
@@ -259,51 +282,80 @@ public class MenuPrincipal {
      */
     private String obtenerNombreRol(int rolId) {
         if (1 == rolId) {
-            return "AdministradorBanco";
+            return "Administrador";
         }
         if (2 == rolId) {
-            return "GerenteOperaciones";
+            return "Bibliotecario";
         }
         if (3 == rolId) {
-            return "EmpleadoBanco";
-        }
-        if (4 == rolId) {
-            return "Cliente";
+            return "Estudiante";
         }
         return null;
     }
+
+	/**
+	 * Muestra el menú correspondiente al rol especificado
+	 * @param rolNombre Nombre del rol
+	 */
+	private void mostrarMenuRolDirecto(String rolNombre) {
+	    try {
+	        // Crear instancia del menú específico del rol
+	        switch(rolNombre) {
+	            case "Administrador":
+	                new MenuAdministrador().mostrarMenu();
+	                break;
+	            case "Bibliotecario":
+	                new MenuBibliotecario().mostrarMenu();
+	                break;
+	            case "Estudiante":
+	                new MenuEstudiante().mostrarMenu();
+	                break;
+	            default:
+	                ConsoleUtils.mostrarError("Vista no disponible para el rol: " + rolNombre);
+	                ConsoleUtils.pausar(scanner);
+	        }
+	    } catch (Exception e) {
+	        ConsoleUtils.mostrarError("Error al cargar la vista: " + e.getMessage());
+	        ConsoleUtils.pausar(scanner);
+	    }
+	}
+
     
     /**
      * Muestra información sobre la aplicación
      */
     private void mostrarInformacionApp() {
-        ConsoleUtils.limpiarPantalla();
-        ConsoleUtils.mostrarTitulo("Acerca de Sistema Bancario Digital");
-        
-        System.out.println("Sistema integral de gestión bancaria para clientes y empleados");
-        System.out.println("\nVersión: " + appConfig.getProperty("app.version", "1.0.0"));
-        System.out.println("Desarrollado como parte del proyecto de generación de aplicaciones");
-        
-        System.out.println("\nFuncionalidades principales:");
-        System.out.println("- Sistema de gestión de roles y usuarios");
-        System.out.println("- Gestión CRUD completa para entidades");
-        System.out.println("- Sistema de encuestas y cuestionarios evaluables");
-        System.out.println("- Filtrado, ordenación y búsqueda avanzada");
-        System.out.println("- Notificaciones y alertas");
-        System.out.println("- Estadísticas y reportes");
-        
-        System.out.println("\nRoles disponibles:");
-        System.out.println("- AdministradorBanco");
-        System.out.println("- GerenteOperaciones");
-        System.out.println("- EmpleadoBanco");
-        System.out.println("- Cliente");
-        
-        System.out.println("\nRedes sociales:");
-        System.out.println("- TWITTER: @BancoDigital");
-        System.out.println("- FACEBOOK: @BancoDigital");
-        
-        ConsoleUtils.pausar(scanner);
-    }
+	    ConsoleUtils.limpiarPantalla();
+	    ConsoleUtils.mostrarTitulo("Acerca de Biblioteca Universitaria");
+	    
+	    System.out.println("Sistema de gestión de biblioteca universitaria");
+	    System.out.println("\nVersión: " + appConfig.getProperty("app.version", "1.0.0"));
+	    System.out.println("Desarrollado como parte del proyecto de generación de aplicaciones");
+	    
+	    System.out.println("\nFuncionalidades principales:");
+	    System.out.println("- Sistema de gestión de roles y usuarios");
+	    System.out.println("- Gestión CRUD completa para entidades");
+	    System.out.println("- Sistema de encuestas y cuestionarios evaluables");
+	    System.out.println("- Filtrado, ordenación y búsqueda avanzada");
+	    System.out.println("- Notificaciones y alertas");
+	    System.out.println("- Estadísticas y reportes");
+	    
+	    System.out.println("\nRoles disponibles (ordenados por permisos):");
+	    // Ordenar roles por número de permisos
+	    String indicadorAdminAdministrador = (13 == 13) ? " (Administrador)" : "";
+	    System.out.println("- Administrador (13 páginas)" + indicadorAdminAdministrador);
+	    String indicadorAdminBibliotecario = (9 == 13) ? " (Administrador)" : "";
+	    System.out.println("- Bibliotecario (9 páginas)" + indicadorAdminBibliotecario);
+	    String indicadorAdminEstudiante = (4 == 13) ? " (Administrador)" : "";
+	    System.out.println("- Estudiante (4 páginas)" + indicadorAdminEstudiante);
+	    
+	    System.out.println("\nRedes sociales:");
+	    System.out.println("- TWITTER: @BibliotecaUniv");
+	    System.out.println("- FACEBOOK: @BibliotecaUniversitaria");
+	    System.out.println("- INSTAGRAM: @biblioteca_univ");
+	    
+	    ConsoleUtils.pausar(scanner);
+	}
     
     /**
      * Muestra un mensaje de despedida al salir de la aplicación
@@ -311,7 +363,7 @@ public class MenuPrincipal {
     private void mostrarMensajeDespedida() {
         ConsoleUtils.limpiarPantalla();
         ConsoleUtils.mostrarTitulo("¡Hasta pronto!");
-        System.out.println("Gracias por utilizar Sistema Bancario Digital");
+        System.out.println("Gracias por utilizar Biblioteca Universitaria");
         System.out.println("\nPresione Enter para finalizar...");
         scanner.nextLine();
     }

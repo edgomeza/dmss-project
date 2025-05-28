@@ -64,60 +64,80 @@ public class MenuPrincipal {
             int opcion = ConsoleUtils.leerOpcion(scanner, 0, 7);
             
             switch (opcion) {
-                case 0:
-                    salir = true;
-                    mostrarMensajeDespedida();
-                    break;
-                case 1:
-                    if (authManager.isAuthenticated()) {
-                        String rolActivo = authManager.getUsuarioActual().getRolActivo();
-                        int rolId = obtenerIdRol(rolActivo);
-                        if (rolId > 0) {
-                            mostrarMenuRol(rolId);
-                        } else {
-                            ConsoleUtils.mostrarError("Rol no válido: " + rolActivo);
-                            ConsoleUtils.pausar(scanner);
-                        }
-                    } else {
-                        ConsoleUtils.mostrarError("Debe iniciar sesión primero");
-                        ConsoleUtils.pausar(scanner);
-                    }
-                    break;
-                case 2:
-                    new EncuestaView().mostrar();
-                    break;
-                case 3:
-                    if (authManager.tieneRol("Administrador")) {
-                        new AdminMenuView().mostrar();
-                    } else {
-                        ConsoleUtils.mostrarError("Acceso denegado. Se requiere rol de Administrador.");
-                        ConsoleUtils.pausar(scanner);
-                    }
-                    break;
-                case 4:
-                    // Dashboard (estadísticas)
-                    new DashboardView().mostrar();
-                    break;
-                case 5:
-                    // Configuración
-                    new ConfiguracionView().mostrar();
-                    break;
-                case 6:
-                    // Cerrar sesión
-                    authManager.logout();
-                    ConsoleUtils.mostrarExito("Sesión cerrada correctamente");
-                    ConsoleUtils.pausar(scanner);
-                    primeraVez = true;
-                    break;
-                case 7:
-                    // Información de la aplicación
-                    mostrarInformacionApp();
-                    break;
-                default:
-                    ConsoleUtils.mostrarError("Opción no válida. Por favor, seleccione una opción del menú.");
-                    ConsoleUtils.pausar(scanner);
-                    break;
-            }
+			    case 0:
+			        salir = true;
+			        mostrarMensajeDespedida();
+			        break;
+			    case 1:
+			        if (authManager.isAuthenticated()) {
+			            String rolActivo = authManager.getUsuarioActual().getRolActivo();
+			            mostrarMenuRolDirecto(rolActivo);
+			        } else {
+			            ConsoleUtils.mostrarError("Debe iniciar sesión primero");
+			            ConsoleUtils.pausar(scanner);
+			        }
+			        break;
+			    case 2:
+			        new EncuestaView().mostrar();
+			        break;
+			    case 3:
+			        // Verificar en tiempo real si es administrador
+			        if (authManager.isAuthenticated() && authManager.esAdministrador()) {
+			            new AdminMenuView().mostrar();
+			        } else {
+			            // Dashboard para usuarios no admin
+			            new DashboardView().mostrar();
+			        }
+			        break;
+			    case 4:
+			        // Verificar en tiempo real si es administrador
+			        if (authManager.isAuthenticated() && authManager.esAdministrador()) {
+			            new DashboardView().mostrar();
+			        } else {
+			            // Configuración para usuarios no admin
+			            new ConfiguracionView().mostrar();
+			        }
+			        break;
+			    case 5:
+			        // Verificar en tiempo real si es administrador
+			        if (authManager.isAuthenticated() && authManager.esAdministrador()) {
+			            new ConfiguracionView().mostrar();
+			        } else {
+			            // Cerrar sesión para usuarios no admin
+			            authManager.logout();
+			            ConsoleUtils.mostrarExito("Sesión cerrada correctamente");
+			            ConsoleUtils.pausar(scanner);
+			            primeraVez = true;
+			        }
+			        break;
+			    case 6:
+			        // Verificar en tiempo real si es administrador
+			        if (authManager.isAuthenticated() && authManager.esAdministrador()) {
+			            // Cerrar sesión para admin
+			            authManager.logout();
+			            ConsoleUtils.mostrarExito("Sesión cerrada correctamente");
+			            ConsoleUtils.pausar(scanner);
+			            primeraVez = true;
+			        } else {
+			            // Información de la aplicación para usuarios no admin
+			            mostrarInformacionApp();
+			        }
+			        break;
+			    case 7:
+			        // Solo disponible para administradores
+			        if (authManager.isAuthenticated() && authManager.esAdministrador()) {
+			            // Información de la aplicación para admin
+			            mostrarInformacionApp();
+			        } else {
+			            ConsoleUtils.mostrarError("Opción no válida.");
+			            ConsoleUtils.pausar(scanner);
+			        }
+			        break;
+			    default:
+			        ConsoleUtils.mostrarError("Opción no válida.");
+			        ConsoleUtils.pausar(scanner);
+			        break;
+			}
         }
     }
     
@@ -176,28 +196,34 @@ public class MenuPrincipal {
     }
     
     /**
-     * Muestra las opciones disponibles en el menú principal
-     */
-    private void mostrarOpciones() {
-        System.out.println("\nMenú principal:");
-        System.out.println("1. Acceder como " + (authManager.isAuthenticated() ? authManager.getUsuarioActual().getRolActivo() : "usuario"));
-        System.out.println("2. Encuestas y cuestionarios");
-        
-        if (authManager.tieneRol("Administrador")) {
-            System.out.println("3. Administración");
-        } else {
-            System.out.println("3. Administración (acceso restringido)");
-        }
-        
-        System.out.println("4. Dashboard");
-        System.out.println("5. Configuración");
-        System.out.println("6. Cerrar sesión");
-        System.out.println("7. Acerca de la aplicación");
-        System.out.println("0. Salir");
-        
-        ConsoleUtils.mostrarLinea();
-        System.out.print("\nSeleccione una opción ['['/]0-7]: ");
-    }
+	 * Muestra las opciones disponibles en el menú principal
+	 */
+	private void mostrarOpciones() {
+	    System.out.println("\nMenú principal:");
+	    System.out.println("1. Acceder como " + (authManager.isAuthenticated() ? authManager.getUsuarioActual().getRolActivo() : "usuario"));
+	    System.out.println("2. Encuestas y cuestionarios");
+	    
+	    // Verificar en tiempo real si el usuario actual es administrador
+	    boolean esAdminActual = authManager.isAuthenticated() && authManager.esAdministrador();
+	    
+	    if (esAdminActual) {
+	        System.out.println("3. Administración");
+	        System.out.println("4. Dashboard");
+	        System.out.println("5. Configuración");
+	        System.out.println("6. Cerrar sesión");
+	        System.out.println("7. Acerca de la aplicación");
+	        System.out.println("0. Salir");
+	    } else {
+	        System.out.println("3. Dashboard");
+	        System.out.println("4. Configuración");
+	        System.out.println("5. Cerrar sesión");
+	        System.out.println("6. Acerca de la aplicación");
+	        System.out.println("0. Salir");
+	    }
+	    
+	    ConsoleUtils.mostrarLinea();
+	    System.out.print("\nSeleccione una opción: ");
+	}
     
     /**
      * Obtiene el ID de un rol por su nombre
@@ -263,38 +289,66 @@ public class MenuPrincipal {
         [/for]
         return null;
     }
+
+	/**
+	 * Muestra el menú correspondiente al rol especificado
+	 * @param rolNombre Nombre del rol
+	 */
+	private void mostrarMenuRolDirecto(String rolNombre) {
+	    try {
+	        // Crear instancia del menú específico del rol
+	        switch(rolNombre) {
+	            [for (rol : Rol | app.roles)]
+	            case "[rol.nombre/]":
+	                new Menu[rol.nombre/]().mostrarMenu();
+	                break;
+	            [/for]
+	            default:
+	                ConsoleUtils.mostrarError("Vista no disponible para el rol: " + rolNombre);
+	                ConsoleUtils.pausar(scanner);
+	        }
+	    } catch (Exception e) {
+	        ConsoleUtils.mostrarError("Error al cargar la vista: " + e.getMessage());
+	        ConsoleUtils.pausar(scanner);
+	    }
+	}
+
     
     /**
      * Muestra información sobre la aplicación
      */
     private void mostrarInformacionApp() {
-        ConsoleUtils.limpiarPantalla();
-        ConsoleUtils.mostrarTitulo("Acerca de [app.nombre/]");
-        
-        System.out.println("[app.descripcion/]");
-        System.out.println("\nVersión: " + appConfig.getProperty("app.version", "1.0.0"));
-        System.out.println("Desarrollado como parte del proyecto de generación de aplicaciones");
-        
-        System.out.println("\nFuncionalidades principales:");
-        System.out.println("- Sistema de gestión de roles y usuarios");
-        System.out.println("- Gestión CRUD completa para entidades");
-        System.out.println("- Sistema de encuestas y cuestionarios evaluables");
-        System.out.println("- Filtrado, ordenación y búsqueda avanzada");
-        System.out.println("- Notificaciones y alertas");
-        System.out.println("- Estadísticas y reportes");
-        
-        System.out.println("\nRoles disponibles:");
-        [for (rol : Rol | app.roles)]
-        System.out.println("- [rol.nombre/]");
-        [/for]
-        
-        System.out.println("\nRedes sociales:");
-        [for (red : RedSocial | app.redesSociales)]
-        System.out.println("- [red.tipo/]: @[red.nombreCuenta/]");
-        [/for]
-        
-        ConsoleUtils.pausar(scanner);
-    }
+	    ConsoleUtils.limpiarPantalla();
+	    ConsoleUtils.mostrarTitulo("Acerca de [app.nombre/]");
+	    
+	    System.out.println("[app.descripcion/]");
+	    System.out.println("\nVersión: " + appConfig.getProperty("app.version", "1.0.0"));
+	    System.out.println("Desarrollado como parte del proyecto de generación de aplicaciones");
+	    
+	    System.out.println("\nFuncionalidades principales:");
+	    System.out.println("- Sistema de gestión de roles y usuarios");
+	    System.out.println("- Gestión CRUD completa para entidades");
+	    System.out.println("- Sistema de encuestas y cuestionarios evaluables");
+	    System.out.println("- Filtrado, ordenación y búsqueda avanzada");
+	    System.out.println("- Notificaciones y alertas");
+	    System.out.println("- Estadísticas y reportes");
+	    
+	    System.out.println("\nRoles disponibles (ordenados por permisos):");
+	    // Ordenar roles por número de permisos
+	    [let rolesSorted : OrderedSet(Rol) = app.roles->sortedBy(r | r.paginasAccesibles->size())->reverse()->asOrderedSet()]
+	    [for (rol : Rol | rolesSorted)]
+	    String indicadorAdmin[rol.nombre/] = ([rol.paginasAccesibles->size()/] == [rolesSorted->first().paginasAccesibles->size()/]) ? " (Administrador)" : "";
+	    System.out.println("- [rol.nombre/] ([rol.paginasAccesibles->size()/] páginas)" + indicadorAdmin[rol.nombre/]);
+	    [/for]
+	    [/let]
+	    
+	    System.out.println("\nRedes sociales:");
+	    [for (red : RedSocial | app.redesSociales)]
+	    System.out.println("- [red.tipo/]: @[red.nombreCuenta/]");
+	    [/for]
+	    
+	    ConsoleUtils.pausar(scanner);
+	}
     
     /**
      * Muestra un mensaje de despedida al salir de la aplicación
@@ -478,52 +532,92 @@ public class DashboardView {
     }
     
     /**
-     * Muestra acciones rápidas disponibles para el usuario
-     */
-    private void mostrarAccionesRapidas() {
-        ConsoleUtils.mostrarSubtitulo("Acciones Rápidas");
-        
-        System.out.println("1. Responder encuestas pendientes");
-        System.out.println("2. Ver mis respuestas anteriores");
-        
-        if (authManager.tieneRol("Administrador")) {
-            System.out.println("3. Crear nueva encuesta");
-            System.out.println("4. Administrar usuarios");
-        }
-        
-        System.out.println("0. Volver al menú principal");
-        
-        int opcion = ConsoleUtils.leerOpcion(scanner, 0, authManager.tieneRol("Administrador") ? 4 : 2);
-        
-        switch (opcion) {
-            case 0:
-                // Volver al menú principal
-                break;
-            case 1:
-                new EncuestaView().mostrar();
-                break;
-            case 2:
-                // Implementar vista directa a mis respuestas
-                ConsoleUtils.mostrarInfo("Funcionalidad no implementada directamente. Use el menú de encuestas.");
-                ConsoleUtils.pausar(scanner);
-                break;
-            case 3:
-                if (authManager.tieneRol("Administrador")) {
-                    // Implementar acceso directo a crear encuesta
-                    ConsoleUtils.mostrarInfo("Funcionalidad no implementada directamente. Use el menú de administración.");
-                    ConsoleUtils.pausar(scanner);
-                }
-                break;
-            case 4:
-                if (authManager.tieneRol("Administrador")) {
-                    // Implementar acceso directo a administrar usuarios
-                    ConsoleUtils.mostrarInfo("Funcionalidad no implementada directamente. Use el menú de administración.");
-                    ConsoleUtils.pausar(scanner);
-                }
-                break;
-        }
-    }
+	 * Muestra acciones rápidas disponibles para el usuario
+	 */
+	private void mostrarAccionesRapidas() {
+	    ConsoleUtils.mostrarSubtitulo("Acciones Rápidas");
+	    
+	    System.out.println("1. Responder encuestas pendientes");
+	    System.out.println("2. Ver mis respuestas anteriores");
+	    
+	    if (authManager.esAdministrador()) {
+	        System.out.println("3. Crear nueva encuesta");
+	        System.out.println("4. Administrar usuarios");
+	        System.out.println("5. Ver estadísticas globales");
+	    }
+	    
+	    System.out.println("0. Volver al menú principal");
+	    
+	    int maxOpcion = authManager.esAdministrador() ? 5 : 2;
+	    int opcion = ConsoleUtils.leerOpcion(scanner, 0, maxOpcion);
+	    
+	    switch (opcion) {
+	        case 0:
+	            // Volver al menú principal
+	            break;
+	        case 1:
+	            new EncuestaView().mostrar();
+	            break;
+	        case 2:
+	            ConsoleUtils.mostrarInfo("Funcionalidad disponible en el menú de encuestas.");
+	            ConsoleUtils.pausar(scanner);
+	            break;
+	        case 3:
+	            if (authManager.esAdministrador()) {
+	                ConsoleUtils.mostrarInfo("Redirigiendo al menú de administración...");
+	                new view.admin.AdminMenuView().mostrar();
+	            }
+	            break;
+	        case 4:
+	            if (authManager.esAdministrador()) {
+	                ConsoleUtils.mostrarInfo("Funcionalidad disponible en el menú de administración.");
+	                ConsoleUtils.pausar(scanner);
+	            }
+	            break;
+	        case 5:
+	            if (authManager.esAdministrador()) {
+	                mostrarEstadisticasGlobales();
+	            }
+	            break;
+	    }
+	}
+
+	/**
+	 * Muestra estadísticas globales del sistema (solo para administradores)
+	 */
+	private void mostrarEstadisticasGlobales() {
+	    ConsoleUtils.limpiarPantalla();
+	    ConsoleUtils.mostrarTitulo("Estadísticas Globales del Sistema");
+	    
+	    System.out.println("Información de roles y accesos:");
+	    System.out.println("- Administrador: Acceso completo al sistema");
+	    System.out.println("- Otros roles: Acceso limitado según permisos");
+	    
+	    System.out.println("\nRol administrador actual: " + authManager.getRolAdministrador());
+	    
+	    // Mostrar estadísticas de entidades
+	    try {
+	        Map<String, Integer> conteoEntidades = new HashMap<>();
+	        for (Object dao : DAOFactory.getAllDAOs()) {
+	            if (dao instanceof IDAO) {
+	                IDAO<?, ?> idao = (IDAO<?, ?>) dao;
+	                String nombreEntidad = dao.getClass().getSimpleName().replace("DAO", "");
+	                conteoEntidades.put(nombreEntidad, idao.count());
+	            }
+	        }
+	        
+	        System.out.println("\nRegistros por entidad:");
+	        for (Map.Entry<String, Integer> entry : conteoEntidades.entrySet()) {
+	            System.out.println("- " + entry.getKey() + ": " + entry.getValue() + " registros");
+	        }
+	    } catch (Exception e) {
+	        System.out.println("No se pudieron cargar las estadísticas de entidades");
+	    }
+	    
+	    ConsoleUtils.pausar(scanner);
+	}
 }
+
 [/file]
 
 [file ('app/src/view/settings/ConfiguracionView.java', false, 'UTF-8')]
@@ -552,77 +646,47 @@ public class ConfiguracionView {
     }
     
     /**
-     * Muestra la pantalla de configuración
-     */
-    public void mostrar() {
-        boolean salir = false;
-        
-        while (!salir) {
-            ConsoleUtils.limpiarPantalla();
-            ConsoleUtils.mostrarTitulo("Configuración");
-            
-            System.out.println("1. Apariencia");
-            System.out.println("2. Preferencias de visualización");
-            
-            if (authManager.isAuthenticated()) {
-                System.out.println("3. Perfil de usuario");
-                System.out.println("4. Cambiar rol activo");
-            }
-            
-            System.out.println("0. Volver al menú principal");
-            
-            int maxOpcion = authManager.isAuthenticated() ? 4 : 2;
-            int opcion = ConsoleUtils.leerOpcion(scanner, 0, maxOpcion);
-            
-            switch (opcion) {
-                case 0:
-                    salir = true;
-                    break;
-                case 1:
-                    configurarApariencia();
-                    break;
-                case 2:
-                    configurarPreferencias();
-                    break;
-                case 3:
-                    if (authManager.isAuthenticated()) {
-                        configurarPerfil();
-                    }
-                    break;
-                case 4:
-                    if (authManager.isAuthenticated()) {
-                        cambiarRol();
-                    }
-                    break;
-            }
-        }
-    }
-    
-    /**
-     * Configura las opciones de apariencia
-     */
-    private void configurarApariencia() {
-        ConsoleUtils.limpiarPantalla();
-        ConsoleUtils.mostrarTitulo("Configuración de Apariencia");
-        
-        boolean modoOscuro = appConfig.isDarkModeEnabled();
-        System.out.println("Modo oscuro: " + (modoOscuro ? "Activado" : "Desactivado"));
-        
-        boolean cambiar = ConsoleUtils.leerBooleano(scanner, "¿Desea cambiar el modo de visualización?", false);
-        
-        if (cambiar) {
-            appConfig.setDarkMode(!modoOscuro);
-            appConfig.saveConfiguration();
-            
-            if (appConfig.isDarkModeEnabled()) {
-                ConsoleUtils.mostrarExito("Modo oscuro activado");
-            } else {
-                ConsoleUtils.mostrarExito("Modo claro activado");
-            }
-        }
-        
-        ConsoleUtils.pausar(scanner);
-    }
+	 * Muestra la pantalla de configuración
+	 */
+	public void mostrar() {
+	    boolean salir = false;
+	    
+	    while (!salir) {
+	        ConsoleUtils.limpiarPantalla();
+	        ConsoleUtils.mostrarTitulo("Configuración");
+	        
+	        System.out.println("1. Preferencias de visualización");
+	        
+	        if (authManager.isAuthenticated()) {
+	            System.out.println("2. Perfil de usuario");
+	            System.out.println("3. Cambiar rol activo");
+	        }
+	        
+	        System.out.println("0. Volver al menú principal");
+	        
+	        int maxOpcion = authManager.isAuthenticated() ? 3 : 1;
+	        int opcion = ConsoleUtils.leerOpcion(scanner, 0, maxOpcion);
+	        
+	        switch (opcion) {
+	            case 0:
+	                salir = true;
+	                break;
+	            case 1:
+	                configurarPreferencias();
+	                break;
+	            case 2:
+	                if (authManager.isAuthenticated()) {
+	                    configurarPerfil();
+	                }
+	                break;
+	            case 3:
+	                if (authManager.isAuthenticated()) {
+	                    cambiarRol();
+	                }
+	                break;
+	        }
+	    }
+	}
     
     /**
      * Configura las preferencias de visualización
@@ -811,6 +875,8 @@ public class ConfiguracionView {
 package view.admin;
 
 import java.util.Scanner;
+import java.util.List;
+import java.util.ArrayList;
 import view.util.ConsoleUtils;
 import auth.AuthManager;
 import survey.SurveyManager;
@@ -834,50 +900,93 @@ public class AdminMenuView {
      * Muestra el menú de administración
      */
     public void mostrar() {
-        if (!authManager.tieneRol("Administrador")) {
-            ConsoleUtils.mostrarError("Acceso denegado. Se requiere rol de Administrador.");
-            ConsoleUtils.pausar(scanner);
-            return;
-        }
-        
-        boolean salir = false;
-        
-        while (!salir) {
-            ConsoleUtils.limpiarPantalla();
-            ConsoleUtils.mostrarTitulo("Panel de Administración");
-            
-            System.out.println("1. Gestión de usuarios");
-            System.out.println("2. Gestión de encuestas y cuestionarios");
-            System.out.println("3. Gestión de entidades");
-            System.out.println("4. Configuración del sistema");
-            System.out.println("5. Estadísticas y reportes");
-            System.out.println("0. Volver al menú principal");
-            
-            int opcion = ConsoleUtils.leerOpcion(scanner, 0, 5);
-            
-            switch (opcion) {
-                case 0:
-                    salir = true;
-                    break;
-                case 1:
-                    gestionUsuarios();
-                    break;
-                case 2:
-                    new EncuestaAdminView().mostrar();
-                    break;
-                case 3:
-                    gestionEntidades();
-                    break;
-                case 4:
-                    configuracionSistema();
-                    break;
-                case 5:
-                    estadisticas();
-                    break;
-            }
-        }
-    }
-    
+	    if (!authManager.esAdministrador()) {
+	        ConsoleUtils.mostrarError("Acceso denegado. Se requiere el rol con permisos de administrador.");
+	        ConsoleUtils.pausar(scanner);
+	        return;
+	    }
+	    
+	    boolean salir = false;
+	    
+	    while (!salir) {
+	        ConsoleUtils.limpiarPantalla();
+	        ConsoleUtils.mostrarTitulo("Panel de Administración");
+	        
+	        // Mostrar información del rol administrador actual
+	        String rolAdmin = authManager.getRolAdministrador();
+	        System.out.println("Rol administrador identificado: " + rolAdmin);
+	        System.out.println("Acceso a todas las funcionalidades del sistema");
+	        
+	        ConsoleUtils.mostrarLinea();
+	        
+	        System.out.println("1. Gestión de usuarios");
+	        System.out.println("2. Gestión de encuestas y cuestionarios");
+	        System.out.println("3. Gestión de entidades");
+	        System.out.println("4. Configuración del sistema");
+	        System.out.println("5. Estadísticas y reportes");
+	        System.out.println("6. Información de roles y permisos");
+	        System.out.println("0. Volver al menú principal");
+	        
+	        int opcion = ConsoleUtils.leerOpcion(scanner, 0, 6);
+	        
+	        switch (opcion) {
+	            case 0:
+	                salir = true;
+	                break;
+	            case 1:
+	                gestionUsuarios();
+	                break;
+	            case 2:
+	                new EncuestaAdminView().mostrar();
+	                break;
+	            case 3:
+	                gestionEntidades();
+	                break;
+	            case 4:
+	                configuracionSistema();
+	                break;
+	            case 5:
+	                estadisticas();
+	                break;
+	            case 6:
+	                mostrarInformacionRoles();
+	                break;
+	        }
+	    }
+	}
+
+	/**
+	 * Muestra información detallada sobre roles y permisos
+	 */
+	private void mostrarInformacionRoles() {
+	    ConsoleUtils.limpiarPantalla();
+	    ConsoleUtils.mostrarTitulo("Información de Roles y Permisos");
+	    
+	    System.out.println("Análisis automático de roles del sistema:\n");
+	    
+	    String['['/]] headers = {"Rol", "Páginas", "Tipo", "Descripción"};
+	    List<String['['/]]> data = new ArrayList<>();
+	    
+	    [for (rol : Rol | app.roles->sortedBy(r | r.paginasAccesibles->size())->reverse())]
+	    [let maxPermisos : Integer = app.roles->collect(r | r.paginasAccesibles->size())->max()]
+	    String tipoRol[rol.nombre/] = ([rol.paginasAccesibles->size()/] == [maxPermisos/]) ? "Administrador" : "Usuario";
+	    [/let]
+	    data.add(new String['['/]]{"[rol.nombre/]", "[rol.paginasAccesibles->size()/]", tipoRol[rol.nombre/], "[if (rol.descripcion.oclIsUndefined() = false)][rol.descripcion/][else]Sin descripción[/if]"});
+	    [/for]
+	    
+	    ConsoleUtils.mostrarTabla(headers, data);
+	    
+	    System.out.println("\nDetalle de páginas por rol:");
+	    [for (rol : Rol | app.roles)]
+	    System.out.println("\n[rol.nombre/]:");
+	    [for (pagina : Pagina | rol.paginasAccesibles)]
+	    System.out.println("  - [pagina.titulo/] ([pagina.eClass().name/])");
+	    [/for]
+	    [/for]
+	    
+	    ConsoleUtils.pausar(scanner);
+	}
+
     /**
      * Muestra el menú de gestión de usuarios
      */
@@ -1613,6 +1722,10 @@ import java.util.Scanner;
 import view.util.ConsoleUtils;
 import survey.*;
 import auth.AuthManager;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * Vista para la administración de encuestas
@@ -2803,34 +2916,52 @@ public class LoginView {
         ConsoleUtils.limpiarPantalla();
         ConsoleUtils.mostrarTitulo("Inicio de Sesión");
         
-        // Si ya hay un usuario autenticado, ofrecer cerrar sesión
+        // Mostrar usuarios disponibles
+        System.out.println("Usuarios disponibles:");
+        System.out.println("- admin/admin (Administrador - puede elegir rol)");
+        System.out.println("- bibliotecario/bibliotecario (Rol: Bibliotecario - rol fijo)");
+        System.out.println("- estudiante/estudiante (Rol: Estudiante - rol fijo)");
+        ConsoleUtils.mostrarLinea();
+        
+        // Si ya hay un usuario autenticado
         if (authManager.isAuthenticated()) {
             Usuario usuario = authManager.getUsuarioActual();
-            ConsoleUtils.mostrarInfo("Has iniciado sesión como " + usuario.getNombre() + 
-                                     " (" + usuario.getUsername() + ")");
-            ConsoleUtils.mostrarInfo("Rol actual: " + usuario.getRolActivo());
+            ConsoleUtils.mostrarInfo("Sesión activa: " + usuario.getNombre() + " (" + usuario.getRolActivo() + ")");
             
             System.out.println("\nOpciones:");
             System.out.println("1. Continuar con la sesión actual");
-            System.out.println("2. Cambiar de rol");
-            System.out.println("3. Cerrar sesión");
+            if (authManager.puedeElegirRol()) {
+                System.out.println("2. Cambiar de rol");
+                System.out.println("3. Cerrar sesión");
+            } else {
+                System.out.println("2. Cerrar sesión");
+            }
             
-            int opcion = ConsoleUtils.leerOpcion(scanner, 1, 3);
+            int maxOpcion = authManager.puedeElegirRol() ? 3 : 2;
+            int opcion = ConsoleUtils.leerOpcion(scanner, 1, maxOpcion);
             
             switch (opcion) {
                 case 1:
                     return true;
                 case 2:
-                    mostrarMenuCambioRol();
-                    return true;
+                    if (authManager.puedeElegirRol()) {
+                        mostrarMenuCambioRol();
+                        return true;
+                    } else {
+                        // Cerrar sesión
+                        authManager.logout();
+                        ConsoleUtils.mostrarExito("Sesión cerrada correctamente");
+                        ConsoleUtils.pausar(scanner);
+                        return false;
+                    }
                 case 3:
-                    authManager.logout();
-                    ConsoleUtils.mostrarExito("Sesión cerrada correctamente");
-                    ConsoleUtils.pausar(scanner);
-                    // Continuar con el inicio de sesión
+                    if (authManager.puedeElegirRol()) {
+                        authManager.logout();
+                        ConsoleUtils.mostrarExito("Sesión cerrada correctamente");
+                        ConsoleUtils.pausar(scanner);
+                        return false;
+                    }
                     break;
-                default:
-                    return false;
             }
         }
         
@@ -2843,14 +2974,17 @@ public class LoginView {
             ConsoleUtils.mostrarExito("Inicio de sesión exitoso");
             Usuario usuario = authManager.getUsuarioActual();
             ConsoleUtils.mostrarInfo("Bienvenido, " + usuario.getNombre() + " (" + usuario.getRolActivo() + ")");
-            ConsoleUtils.pausar(scanner);
             
-            // Si el usuario tiene múltiples roles, mostrar selección
-            if (usuario.getRoles().size() > 1) {
+            // Solo el administrador puede elegir rol
+            if (authManager.puedeElegirRol() && usuario.getRoles().size() > 1) {
+                ConsoleUtils.mostrarInfo("Como administrador, puedes elegir con qué rol trabajar");
+                ConsoleUtils.pausar(scanner);
                 mostrarMenuCambioRol();
+            } else {
+                ConsoleUtils.mostrarInfo("Rol asignado: " + usuario.getRolActivo());
+                ConsoleUtils.pausar(scanner);
             }
             
-            // Guardar preferencias de usuario
             AppConfig.getInstance().setSessionValue("lastLogin", usuario.getUltimoAcceso());
             return true;
         } else {
@@ -2861,24 +2995,42 @@ public class LoginView {
     }
     
     /**
-     * Muestra el menú para cambiar de rol
+     * Muestra el menú para cambiar de rol (solo para administradores)
      */
     private void mostrarMenuCambioRol() {
-        if (!authManager.isAuthenticated()) {
+        if (!authManager.isAuthenticated() || !authManager.puedeElegirRol()) {
+            ConsoleUtils.mostrarError("No tiene permisos para cambiar de rol");
+            ConsoleUtils.pausar(scanner);
             return;
         }
         
         ConsoleUtils.limpiarPantalla();
-        ConsoleUtils.mostrarTitulo("Cambio de Rol");
+        ConsoleUtils.mostrarTitulo("Selección de Rol (Solo Administrador)");
         
         Usuario usuario = authManager.getUsuarioActual();
         String['['/]] roles = usuario.getRoles().toArray(new String['['/]0]);
         
         System.out.println("Rol actual: " + usuario.getRolActivo());
-        System.out.println("\nSeleccione un nuevo rol:");
+        System.out.println("\nComo administrador, puedes trabajar con cualquier rol:");
+        System.out.println("(Esto te permite ver el sistema desde la perspectiva de cada usuario)\n");
         
         for (int i = 0; i < roles.length; i++) {
-            ConsoleUtils.mostrarElementoLista(i + 1, roles['['/]i]);
+            String descripcion = "";
+            // Añadir descripciones según el rol
+            switch(roles['['/]i]) {
+                case "Administrador":
+                    descripcion = " - Acceso total al sistema";
+                    break;
+                case "Bibliotecario":
+                    descripcion = " - Gestión de libros y préstamos";
+                    break;
+                case "Estudiante":
+                    descripcion = " - Consulta de libros disponibles";
+                    break;
+                default:
+                    descripcion = " - Sin descripción";
+            }
+            ConsoleUtils.mostrarElementoLista(i + 1, roles['['/]i] + descripcion);
         }
         
         int opcion = ConsoleUtils.leerOpcion(scanner, 1, roles.length);
@@ -2886,11 +3038,274 @@ public class LoginView {
         if (opcion > 0 && opcion <= roles.length) {
             String nuevoRol = roles['['/]opcion - 1];
             usuario.setRolActivo(nuevoRol);
-            ConsoleUtils.mostrarExito("Rol cambiado a: " + nuevoRol);
+            ConsoleUtils.mostrarExito("Trabajando ahora como: " + nuevoRol);
+            
+            if (!nuevoRol.equals(authManager.getRolAdministrador())) {
+                ConsoleUtils.mostrarInfo("Nota: Estás viendo el sistema desde la perspectiva de " + nuevoRol);
+            }
         }
         
         ConsoleUtils.pausar(scanner);
     }
 }
 [/file]
+
+[for (rol : Rol | app.roles)]
+[file ('app/src/view/Menu'+rol.nombre+'.java', false, 'UTF-8')]
+package view;
+
+import java.util.Scanner;
+import view.util.ConsoleUtils;
+import auth.AuthManager;
+import dao.DAOFactory;
+[for (entidad : Entidad | app.entidades)]
+import dao.[entidad.nombre/]DAO;
+import model.[entidad.nombre/];
+[/for]
+import java.util.List;
+
+/**
+ * Menú específico para el rol [rol.nombre/]
+ * [if (rol.descripcion.oclIsUndefined() = false)][rol.descripcion/][/if]
+ */
+public class Menu[rol.nombre/] {
+    private Scanner scanner;
+    private AuthManager authManager;
+    
+    public Menu[rol.nombre/]() {
+        scanner = new Scanner(System.in);
+        authManager = AuthManager.getInstance();
+    }
+    
+    public void mostrarMenu() {
+        // Verificar que el usuario tiene el rol correcto
+        if (!authManager.isAuthenticated() || !authManager.tieneRol("[rol.nombre/]")) {
+            ConsoleUtils.mostrarError("Acceso denegado. Se requiere el rol [rol.nombre/]");
+            ConsoleUtils.pausar(scanner);
+            return;
+        }
+        
+        boolean salir = false;
+        
+        while (!salir) {
+            ConsoleUtils.limpiarPantalla();
+            ConsoleUtils.mostrarTitulo("Menú [rol.nombre/]");
+            System.out.println("[if (rol.descripcion.oclIsUndefined() = false)][rol.descripcion/][/if]");
+            ConsoleUtils.mostrarLinea();
+            
+            mostrarOpciones();
+            
+            int maxOpcion = [rol.paginasAccesibles->size()/];
+            int opcion = ConsoleUtils.leerOpcion(scanner, 0, maxOpcion);
+            
+            if (opcion == 0) {
+                salir = true;
+            } else if (opcion >= 1 && opcion <= maxOpcion) {
+                ejecutarOpcion(opcion);
+            } else {
+                ConsoleUtils.mostrarError("Opción no válida");
+                ConsoleUtils.pausar(scanner);
+            }
+        }
+    }
+    
+    private void mostrarOpciones() {
+        System.out.println("Páginas disponibles para [rol.nombre/]:");
+        [for (i : Integer | Sequence{1..rol.paginasAccesibles->size()})]
+        [let pagina : Pagina = rol.paginasAccesibles->at(i)]
+        System.out.println("[i/]. [pagina.titulo/]");
+        [/let]
+        [/for]
+        System.out.println("0. Volver al menú principal");
+    }
+    
+    private void ejecutarOpcion(int opcion) {
+        switch(opcion) {
+            [for (i : Integer | Sequence{1..rol.paginasAccesibles->size()})]
+            [let pagina : Pagina = rol.paginasAccesibles->at(i)]
+            case [i/]:
+                [if (pagina.oclIsKindOf(PaginaHome))]
+                mostrarPaginaHome();
+                [elseif (pagina.oclIsKindOf(PaginaContenido))]
+                mostrarPaginaContenido();
+                [elseif (pagina.oclIsKindOf(PaginaIndice) or pagina.oclIsKindOf(PaginaIndicePaginada) or pagina.oclIsKindOf(PaginaIndiceFiltros) or pagina.oclIsKindOf(PaginaIndicePaginadaFiltrada))]
+                mostrarIndice[pagina.oclAsType(PaginaCRUD).entidad.nombre/]();
+                [elseif (pagina.oclIsKindOf(PaginaDetalle))]
+                mostrarDetalle[pagina.oclAsType(PaginaCRUD).entidad.nombre/]();
+                [elseif (pagina.oclIsKindOf(PaginaCreacion))]
+                crearNuevo[pagina.oclAsType(PaginaCRUD).entidad.nombre/]();
+                [elseif (pagina.oclIsKindOf(PaginaActualizacion))]
+                actualizar[pagina.oclAsType(PaginaCRUD).entidad.nombre/]();
+                [elseif (pagina.oclIsKindOf(PaginaBorrado))]
+                borrar[pagina.oclAsType(PaginaCRUD).entidad.nombre/]();
+                [else]
+                ConsoleUtils.mostrarInfo("Funcionalidad de [pagina.titulo/] disponible");
+                ConsoleUtils.pausar(scanner);
+                [/if]
+                break;
+            [/let]
+            [/for]
+            default:
+                ConsoleUtils.mostrarError("Opción no válida");
+                ConsoleUtils.pausar(scanner);
+        }
+    }
+    
+    [comment Generar métodos para páginas específicas /]
+    [for (pagina : Pagina | rol.paginasAccesibles->select(p | p.oclIsKindOf(PaginaHome)))]
+    private void mostrarPaginaHome() {
+        ConsoleUtils.limpiarPantalla();
+        ConsoleUtils.mostrarTitulo("Página de Inicio - [rol.nombre/]");
+        System.out.println("Bienvenido al sistema [app.nombre/]");
+        System.out.println("[app.descripcion/]");
+        
+        // Mostrar redes sociales asociadas
+        [for (red : RedSocial | pagina.redesSociales)]
+        System.out.println("Síguenos en [red.tipo/]: @[red.nombreCuenta/]");
+        [/for]
+        
+        // Mostrar fuentes RSS
+        [for (rss : FuenteRSS | pagina.fuentesRSS)]
+        System.out.println("RSS: [rss.titulo/] - [rss.url/]");
+        [/for]
+        
+        ConsoleUtils.pausar(scanner);
+    }
+    [/for]
+    
+    [for (pagina : Pagina | rol.paginasAccesibles->select(p | p.oclIsKindOf(PaginaContenido)))]
+    private void mostrarPaginaContenido() {
+        ConsoleUtils.limpiarPantalla();
+        ConsoleUtils.mostrarTitulo("[pagina.titulo/]");
+        System.out.println("[pagina.oclAsType(PaginaContenido).contenido/]");
+        ConsoleUtils.pausar(scanner);
+    }
+    [/for]
+    
+    [comment Generar métodos CRUD para cada entidad accesible por este rol /]
+    [for (entidad : Entidad | rol.paginasAccesibles->select(p | p.oclIsKindOf(PaginaCRUD)).oclAsType(PaginaCRUD).entidad->asSet())]
+    
+    [comment Método para mostrar índice /]
+    [if (rol.paginasAccesibles->exists(p | p.oclIsKindOf(PaginaIndice) and p.oclAsType(PaginaCRUD).entidad = entidad) or 
+         rol.paginasAccesibles->exists(p | p.oclIsKindOf(PaginaIndicePaginada) and p.oclAsType(PaginaCRUD).entidad = entidad) or
+         rol.paginasAccesibles->exists(p | p.oclIsKindOf(PaginaIndiceFiltros) and p.oclAsType(PaginaCRUD).entidad = entidad) or
+         rol.paginasAccesibles->exists(p | p.oclIsKindOf(PaginaIndicePaginadaFiltrada) and p.oclAsType(PaginaCRUD).entidad = entidad) or
+         entidad.hasCRUD)]
+    private void mostrarIndice[entidad.nombre/]() {
+        ConsoleUtils.limpiarPantalla();
+        ConsoleUtils.mostrarTitulo("Listado de [entidad.nombre/]");
+        
+        [entidad.nombre/]DAO dao = [entidad.nombre/]DAO.getInstance();
+        List<[entidad.nombre/]> lista = dao.findAll();
+        
+        if (lista.isEmpty()) {
+            ConsoleUtils.mostrarAdvertencia("No hay registros de [entidad.nombre/]");
+        } else {
+            System.out.println("Total de registros: " + lista.size());
+            ConsoleUtils.mostrarLinea();
+            
+            for (int i = 0; i < lista.size(); i++) {
+                [entidad.nombre/] item = lista.get(i);
+                System.out.println((i + 1) + ". " + item.toDisplayString());
+            }
+        }
+        
+        ConsoleUtils.pausar(scanner);
+    }
+    [/if]
+    
+    [comment Método para mostrar detalles /]
+    [if (rol.paginasAccesibles->exists(p | p.oclIsKindOf(PaginaDetalle) and p.oclAsType(PaginaCRUD).entidad = entidad) or entidad.hasCRUD)]
+    private void mostrarDetalle[entidad.nombre/]() {
+        ConsoleUtils.limpiarPantalla();
+        ConsoleUtils.mostrarTitulo("Detalle de [entidad.nombre/]");
+        
+        [entidad.nombre/]DAO dao = [entidad.nombre/]DAO.getInstance();
+        List<[entidad.nombre/]> lista = dao.findAll();
+        
+        if (lista.isEmpty()) {
+            ConsoleUtils.mostrarAdvertencia("No hay registros de [entidad.nombre/]");
+            ConsoleUtils.pausar(scanner);
+            return;
+        }
+        
+        for (int i = 0; i < lista.size(); i++) {
+            System.out.println((i + 1) + ". " + lista.get(i).toDisplayString());
+        }
+        
+        int indice = ConsoleUtils.leerEntero(scanner, "Seleccione el número del registro", 
+                valor -> valor >= 1 && valor <= lista.size(), 1);
+        
+        if (indice >= 1 && indice <= lista.size()) {
+            [entidad.nombre/] item = lista.get(indice - 1);
+            ConsoleUtils.mostrarSubtitulo("Detalles de [entidad.nombre/]");
+            System.out.println(item.toString());
+        }
+        
+        ConsoleUtils.pausar(scanner);
+    }
+    [/if]
+    
+    [comment Método para crear nuevo /]
+    [if (rol.paginasAccesibles->exists(p | p.oclIsKindOf(PaginaCreacion) and p.oclAsType(PaginaCRUD).entidad = entidad) or entidad.hasCRUD)]
+    private void crearNuevo[entidad.nombre/]() {
+        ConsoleUtils.limpiarPantalla();
+        ConsoleUtils.mostrarTitulo("Crear Nuevo [entidad.nombre/]");
+        
+        [entidad.nombre/] nuevo = new [entidad.nombre/]();
+        
+        // Solicitar datos básicos
+        [for (atrib : Atributo | entidad.atributos->select(a | not a.isPrimaryKey or a.tipo <> TipoAtributo::INTEGER))]
+        [if (atrib.tipo = TipoAtributo::INTEGER)]
+        int [atrib.nombre/] = ConsoleUtils.leerEntero(scanner, "[atrib.nombre/]", null, 0);
+        nuevo.set[atrib.nombre.toUpperFirst()/]([atrib.nombre/]);
+        [elseif (atrib.tipo = TipoAtributo::BOOLEAN)]
+        boolean [atrib.nombre/] = ConsoleUtils.leerBooleano(scanner, "[atrib.nombre/]", false);
+        nuevo.set[atrib.nombre.toUpperFirst()/]([atrib.nombre/]);
+        [elseif (atrib.tipo = TipoAtributo::DECIMAL)]
+        double [atrib.nombre/] = ConsoleUtils.leerDecimal(scanner, "[atrib.nombre/]", null, 0.0);
+        nuevo.set[atrib.nombre.toUpperFirst()/]([atrib.nombre/]);
+        [else]
+        String [atrib.nombre/] = ConsoleUtils.leerString(scanner, "[atrib.nombre/]", null, "");
+        nuevo.set[atrib.nombre.toUpperFirst()/]([atrib.nombre/]);
+        [/if]
+        [/for]
+        
+        try {
+            nuevo.validarDatos();
+            [entidad.nombre/]DAO dao = [entidad.nombre/]DAO.getInstance();
+            dao.save(nuevo);
+            ConsoleUtils.mostrarCreacion("[entidad.nombre/]");
+        } catch (Exception e) {
+            ConsoleUtils.mostrarError("Error al crear [entidad.nombre/]: " + e.getMessage());
+        }
+        
+        ConsoleUtils.pausar(scanner);
+    }
+    [/if]
+    
+    [comment Método para actualizar /]
+    [if (rol.paginasAccesibles->exists(p | p.oclIsKindOf(PaginaActualizacion) and p.oclAsType(PaginaCRUD).entidad = entidad) or entidad.hasCRUD)]
+    private void actualizar[entidad.nombre/]() {
+        ConsoleUtils.limpiarPantalla();
+        ConsoleUtils.mostrarTitulo("Actualizar [entidad.nombre/]");
+        ConsoleUtils.mostrarInfo("Funcionalidad de actualización disponible para [entidad.nombre/]");
+        ConsoleUtils.pausar(scanner);
+    }
+    [/if]
+    
+    [comment Método para borrar /]
+    [if (rol.paginasAccesibles->exists(p | p.oclIsKindOf(PaginaBorrado) and p.oclAsType(PaginaCRUD).entidad = entidad) or entidad.hasCRUD)]
+    private void borrar[entidad.nombre/]() {
+        ConsoleUtils.limpiarPantalla();
+        ConsoleUtils.mostrarTitulo("Eliminar [entidad.nombre/]");
+        ConsoleUtils.mostrarInfo("Funcionalidad de eliminación disponible para [entidad.nombre/]");
+        ConsoleUtils.pausar(scanner);
+    }
+    [/if]
+    
+    [/for]
+}
+[/file]
+[/for]
 [/template]

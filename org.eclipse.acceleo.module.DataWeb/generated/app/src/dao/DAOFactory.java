@@ -3,12 +3,10 @@ package dao;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Collection;
-import model.Cliente;
-import model.Cuenta;
-import model.Transaccion;
-import model.Empleado;
+import model.Libro;
+import model.Categoria;
+import model.Usuario;
 import model.Prestamo;
-import model.TarjetaCredito;
 
 /**
  * Factoría para la creación y obtención de DAOs
@@ -28,21 +26,17 @@ public class DAOFactory {
             System.out.println("Inicializando DAOFactory...");
             
             // Primero registramos todos los DAOs
-            daoMap.put(Cliente.class, ClienteDAO.getInstance());
-            daoMap.put(Cuenta.class, CuentaDAO.getInstance());
-            daoMap.put(Transaccion.class, TransaccionDAO.getInstance());
-            daoMap.put(Empleado.class, EmpleadoDAO.getInstance());
+            daoMap.put(Libro.class, LibroDAO.getInstance());
+            daoMap.put(Categoria.class, CategoriaDAO.getInstance());
+            daoMap.put(Usuario.class, UsuarioDAO.getInstance());
             daoMap.put(Prestamo.class, PrestamoDAO.getInstance());
-            daoMap.put(TarjetaCredito.class, TarjetaCreditoDAO.getInstance());
             
             // Marcamos como inicializado antes de configurar relaciones
             initialized = true;
             
             // Después configuramos las relaciones entre entidades
-            ((CuentaDAO) daoMap.get(Cuenta.class)).setupRelationships();
-            ((TransaccionDAO) daoMap.get(Transaccion.class)).setupRelationships();
+            ((LibroDAO) daoMap.get(Libro.class)).setupRelationships();
             ((PrestamoDAO) daoMap.get(Prestamo.class)).setupRelationships();
-            ((TarjetaCreditoDAO) daoMap.get(TarjetaCredito.class)).setupRelationships();
             
             initializing = false;
             System.out.println("DAOFactory inicializado correctamente");

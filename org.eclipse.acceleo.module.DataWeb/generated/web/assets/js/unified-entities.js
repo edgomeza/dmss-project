@@ -1,5 +1,5 @@
 /**
- * GESTOR UNIFICADO DE ENTIDADES - Sistema Bancario Digital
+ * GESTOR UNIFICADO DE ENTIDADES - Biblioteca Universitaria
  * Maneja CRUD para todas las entidades del sistema
  */
 
@@ -11,124 +11,57 @@ class UnifiedEntityManager {
         this.currentPage = null;
         
         this.entityConfig = {
-            'cliente': {
-                name: 'Cliente',
-                tableName: 'CLIENTES',
-                primaryKey: 'id_cliente',
+            'libro': {
+                name: 'Libro',
+                tableName: 'LIBROS',
+                primaryKey: 'id_libro',
                 fields: [
                     {
-                        name: 'id_cliente',
+                        name: 'id_libro',
                         type: 'INTEGER',
                         isPrimaryKey: true,
                         required: true
                     }
 ,                    {
-                        name: 'dni',
+                        name: 'titulo',
                         type: 'STRING',
                         isPrimaryKey: false,
                         required: true
                     }
 ,                    {
-                        name: 'nombre',
+                        name: 'autor',
                         type: 'STRING',
                         isPrimaryKey: false,
                         required: true
                     }
 ,                    {
-                        name: 'apellidos',
-                        type: 'STRING',
+                        name: 'añoPublicacion',
+                        type: 'INTEGER',
                         isPrimaryKey: false,
                         required: true
                     }
 ,                    {
-                        name: 'email',
-                        type: 'STRING',
-                        isPrimaryKey: false,
-                        required: true
-                    }
-,                    {
-                        name: 'telefono',
-                        type: 'STRING',
-                        isPrimaryKey: false,
-                        required: true
-                    }
-,                    {
-                        name: 'fecha_registro',
-                        type: 'STRING',
-                        isPrimaryKey: false,
-                        required: true
-                    }
-,                    {
-                        name: 'activo',
+                        name: 'disponible',
                         type: 'BOOLEAN',
                         isPrimaryKey: false,
                         required: true
                     }
                 ]
             }
-,            'cuenta': {
-                name: 'Cuenta',
-                tableName: 'CUENTAS',
-                primaryKey: 'numero_cuenta',
+,            'categoria': {
+                name: 'Categoria',
+                tableName: 'CATEGORIAS',
+                primaryKey: 'id_categoria',
                 fields: [
                     {
-                        name: 'numero_cuenta',
-                        type: 'STRING',
-                        isPrimaryKey: true,
-                        required: true
-                    }
-,                    {
-                        name: 'tipo_cuenta',
-                        type: 'STRING',
-                        isPrimaryKey: false,
-                        required: true
-                    }
-,                    {
-                        name: 'saldo',
-                        type: 'DECIMAL',
-                        isPrimaryKey: false,
-                        required: true
-                    }
-,                    {
-                        name: 'fecha_apertura',
-                        type: 'STRING',
-                        isPrimaryKey: false,
-                        required: true
-                    }
-,                    {
-                        name: 'activa',
-                        type: 'BOOLEAN',
-                        isPrimaryKey: false,
-                        required: true
-                    }
-                ]
-            }
-,            'transaccion': {
-                name: 'Transaccion',
-                tableName: 'TRANSACCIONES',
-                primaryKey: 'id_transaccion',
-                fields: [
-                    {
-                        name: 'id_transaccion',
+                        name: 'id_categoria',
                         type: 'INTEGER',
                         isPrimaryKey: true,
                         required: true
                     }
 ,                    {
-                        name: 'fecha_transaccion',
+                        name: 'nombre_categoria',
                         type: 'STRING',
-                        isPrimaryKey: false,
-                        required: true
-                    }
-,                    {
-                        name: 'tipo_transaccion',
-                        type: 'STRING',
-                        isPrimaryKey: false,
-                        required: true
-                    }
-,                    {
-                        name: 'monto',
-                        type: 'DECIMAL',
                         isPrimaryKey: false,
                         required: true
                     }
@@ -138,45 +71,21 @@ class UnifiedEntityManager {
                         isPrimaryKey: false,
                         required: true
                     }
-,                    {
-                        name: 'estado',
-                        type: 'STRING',
-                        isPrimaryKey: false,
-                        required: true
-                    }
                 ]
             }
-,            'empleado': {
-                name: 'Empleado',
-                tableName: 'EMPLEADOS',
-                primaryKey: 'id_empleado',
+,            'usuario': {
+                name: 'Usuario',
+                tableName: 'USUARIOS',
+                primaryKey: 'id_usuario',
                 fields: [
                     {
-                        name: 'id_empleado',
+                        name: 'id_usuario',
                         type: 'INTEGER',
                         isPrimaryKey: true,
                         required: true
                     }
 ,                    {
-                        name: 'codigo_empleado',
-                        type: 'STRING',
-                        isPrimaryKey: false,
-                        required: true
-                    }
-,                    {
-                        name: 'nombre',
-                        type: 'STRING',
-                        isPrimaryKey: false,
-                        required: true
-                    }
-,                    {
-                        name: 'puesto',
-                        type: 'STRING',
-                        isPrimaryKey: false,
-                        required: true
-                    }
-,                    {
-                        name: 'departamento',
+                        name: 'nombre_usuario',
                         type: 'STRING',
                         isPrimaryKey: false,
                         required: true
@@ -207,75 +116,14 @@ class UnifiedEntityManager {
                         required: true
                     }
 ,                    {
-                        name: 'monto_solicitado',
-                        type: 'DECIMAL',
-                        isPrimaryKey: false,
-                        required: true
-                    }
-,                    {
-                        name: 'tasa_interes',
-                        type: 'DECIMAL',
-                        isPrimaryKey: false,
-                        required: true
-                    }
-,                    {
-                        name: 'plazo_meses',
-                        type: 'INTEGER',
-                        isPrimaryKey: false,
-                        required: true
-                    }
-,                    {
-                        name: 'estado_prestamo',
+                        name: 'fechaPrestamo',
                         type: 'STRING',
                         isPrimaryKey: false,
                         required: true
                     }
 ,                    {
-                        name: 'fecha_solicitud',
+                        name: 'fechaDevolucion',
                         type: 'STRING',
-                        isPrimaryKey: false,
-                        required: true
-                    }
-,                    {
-                        name: 'fecha_aprobacion',
-                        type: 'STRING',
-                        isPrimaryKey: false,
-                        required: true
-                    }
-                ]
-            }
-,            'tarjetacredito': {
-                name: 'TarjetaCredito',
-                tableName: 'TARJETAS_CREDITO',
-                primaryKey: 'numero_tarjeta',
-                fields: [
-                    {
-                        name: 'numero_tarjeta',
-                        type: 'STRING',
-                        isPrimaryKey: true,
-                        required: true
-                    }
-,                    {
-                        name: 'limite_credito',
-                        type: 'DECIMAL',
-                        isPrimaryKey: false,
-                        required: true
-                    }
-,                    {
-                        name: 'saldo_actual',
-                        type: 'DECIMAL',
-                        isPrimaryKey: false,
-                        required: true
-                    }
-,                    {
-                        name: 'fecha_vencimiento',
-                        type: 'STRING',
-                        isPrimaryKey: false,
-                        required: true
-                    }
-,                    {
-                        name: 'activa',
-                        type: 'BOOLEAN',
                         isPrimaryKey: false,
                         required: true
                     }

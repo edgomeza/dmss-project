@@ -1,11 +1,11 @@
 /**
- * GESTOR DE BASE DE DATOS UNIFICADO - Sistema Bancario Digital
+ * GESTOR DE BASE DE DATOS UNIFICADO - Biblioteca Universitaria
  * Centraliza toda la gestión de IndexedDB
  */
 
 class UnifiedDatabaseManager {
     constructor() {
-        this.dbName = 'Sistema_Bancario Digital_DB';
+        this.dbName = 'Biblioteca_Universitaria_DB';
         this.version = 2;
         this.db = null;
         this.initialized = false;
@@ -32,12 +32,10 @@ class UnifiedDatabaseManager {
                 
                 // Stores de entidades
                 const entityStores = {
-                    'CLIENTES': 'id_cliente'
-,                    'CUENTAS': 'numero_cuenta'
-,                    'TRANSACCIONES': 'id_transaccion'
-,                    'EMPLEADOS': 'id_empleado'
+                    'LIBROS': 'id_libro'
+,                    'CATEGORIAS': 'id_categoria'
+,                    'USUARIOS': 'id_usuario'
 ,                    'PRESTAMOS': 'id_prestamo'
-,                    'TARJETAS_CREDITO': 'numero_tarjeta'
                 };
                 
                 // Stores del sistema
@@ -57,7 +55,7 @@ class UnifiedDatabaseManager {
                 Object.entries(allStores).forEach(([storeName, keyPath]) => {
                     if (!db.objectStoreNames.contains(storeName)) {
                         console.log(`📊 Creando store: ${storeName}`);
-                        const autoIncrement = storeName === 'CLIENTES' ? true : storeName === 'CUENTAS' ? false : storeName === 'TRANSACCIONES' ? true : storeName === 'EMPLEADOS' ? true : storeName === 'PRESTAMOS' ? true : storeName === 'TARJETAS_CREDITO' ? false : keyPath.includes('id_');
+                        const autoIncrement = storeName === 'LIBROS' ? true : storeName === 'CATEGORIAS' ? true : storeName === 'USUARIOS' ? true : storeName === 'PRESTAMOS' ? true : keyPath.includes('id_');
                         db.createObjectStore(storeName, { keyPath, autoIncrement });
                     }
                 });
@@ -75,12 +73,10 @@ class UnifiedDatabaseManager {
         
         try {
             // Datos iniciales para entidades - métodos específicos
-            await this.seedClienteData(db);
-            await this.seedCuentaData(db);
-            await this.seedTransaccionData(db);
-            await this.seedEmpleadoData(db);
+            await this.seedLibroData(db);
+            await this.seedCategoriaData(db);
+            await this.seedUsuarioData(db);
             await this.seedPrestamoData(db);
-            await this.seedTarjetaCreditoData(db);
             
             // Datos iniciales para encuestas
             await this.seedSurveyData(db);
@@ -94,8 +90,8 @@ class UnifiedDatabaseManager {
         }
     }
     
-    async seedClienteData(db) {
-        const tableName = 'CLIENTES';
+    async seedLibroData(db) {
+        const tableName = 'LIBROS';
         
         if (!db.objectStoreNames.contains(tableName)) return;
         
@@ -105,12 +101,70 @@ class UnifiedDatabaseManager {
             
             for (let i = 1; i <= 3; i++) {
                 const data = {
-                    dni: `Cliente ${i}`,
-                    nombre: `Cliente ${i}`,
-                    apellidos: `Cliente ${i}`,
-                    email: `Cliente ${i}`,
-                    telefono: `Cliente ${i}`,
-                    fecha_registro: `Cliente ${i}`,
+                    titulo: `Libro ${i}`,
+                    autor: `Libro ${i}`,
+                    añoPublicacion: (Math.floor(Math.random() * 100) + 1),
+                    disponible: (Math.random() > 0.5)
+                };
+                
+                // Añadir clave primaria si no es auto-increment
+                
+                await new Promise((resolve, reject) => {
+                    const request = store.add(data);
+                    request.onsuccess = () => resolve();
+                    request.onerror = () => reject(request.error);
+                });
+            }
+            
+            console.log(`📊 Datos de ejemplo creados para Libro`);
+        } catch (error) {
+            console.error(`❌ Error creando datos para Libro:`, error);
+        }
+    }
+    
+    async seedCategoriaData(db) {
+        const tableName = 'CATEGORIAS';
+        
+        if (!db.objectStoreNames.contains(tableName)) return;
+        
+        try {
+            const transaction = db.transaction([tableName], 'readwrite');
+            const store = transaction.objectStore(tableName);
+            
+            for (let i = 1; i <= 3; i++) {
+                const data = {
+                    nombre_categoria: `Categoria ${i}`,
+                    descripcion: `Categoria ${i}`
+                };
+                
+                // Añadir clave primaria si no es auto-increment
+                
+                await new Promise((resolve, reject) => {
+                    const request = store.add(data);
+                    request.onsuccess = () => resolve();
+                    request.onerror = () => reject(request.error);
+                });
+            }
+            
+            console.log(`📊 Datos de ejemplo creados para Categoria`);
+        } catch (error) {
+            console.error(`❌ Error creando datos para Categoria:`, error);
+        }
+    }
+    
+    async seedUsuarioData(db) {
+        const tableName = 'USUARIOS';
+        
+        if (!db.objectStoreNames.contains(tableName)) return;
+        
+        try {
+            const transaction = db.transaction([tableName], 'readwrite');
+            const store = transaction.objectStore(tableName);
+            
+            for (let i = 1; i <= 3; i++) {
+                const data = {
+                    nombre_usuario: `Usuario ${i}`,
+                    email: `Usuario ${i}`,
                     activo: (Math.random() > 0.5)
                 };
                 
@@ -123,109 +177,9 @@ class UnifiedDatabaseManager {
                 });
             }
             
-            console.log(`📊 Datos de ejemplo creados para Cliente`);
+            console.log(`📊 Datos de ejemplo creados para Usuario`);
         } catch (error) {
-            console.error(`❌ Error creando datos para Cliente:`, error);
-        }
-    }
-    
-    async seedCuentaData(db) {
-        const tableName = 'CUENTAS';
-        
-        if (!db.objectStoreNames.contains(tableName)) return;
-        
-        try {
-            const transaction = db.transaction([tableName], 'readwrite');
-            const store = transaction.objectStore(tableName);
-            
-            for (let i = 1; i <= 3; i++) {
-                const data = {
-                    tipo_cuenta: `Cuenta ${i}`,
-                    saldo: (Math.round(Math.random() * 1000 * 100) / 100),
-                    fecha_apertura: `Cuenta ${i}`,
-                    activa: (Math.random() > 0.5)
-                };
-                
-                // Añadir clave primaria si no es auto-increment
-                data.numero_cuenta = `cuenta_${i}`;
-                
-                await new Promise((resolve, reject) => {
-                    const request = store.add(data);
-                    request.onsuccess = () => resolve();
-                    request.onerror = () => reject(request.error);
-                });
-            }
-            
-            console.log(`📊 Datos de ejemplo creados para Cuenta`);
-        } catch (error) {
-            console.error(`❌ Error creando datos para Cuenta:`, error);
-        }
-    }
-    
-    async seedTransaccionData(db) {
-        const tableName = 'TRANSACCIONES';
-        
-        if (!db.objectStoreNames.contains(tableName)) return;
-        
-        try {
-            const transaction = db.transaction([tableName], 'readwrite');
-            const store = transaction.objectStore(tableName);
-            
-            for (let i = 1; i <= 3; i++) {
-                const data = {
-                    fecha_transaccion: `Transaccion ${i}`,
-                    tipo_transaccion: `Transaccion ${i}`,
-                    monto: (Math.round(Math.random() * 1000 * 100) / 100),
-                    descripcion: `Transaccion ${i}`,
-                    estado: `Transaccion ${i}`
-                };
-                
-                // Añadir clave primaria si no es auto-increment
-                
-                await new Promise((resolve, reject) => {
-                    const request = store.add(data);
-                    request.onsuccess = () => resolve();
-                    request.onerror = () => reject(request.error);
-                });
-            }
-            
-            console.log(`📊 Datos de ejemplo creados para Transaccion`);
-        } catch (error) {
-            console.error(`❌ Error creando datos para Transaccion:`, error);
-        }
-    }
-    
-    async seedEmpleadoData(db) {
-        const tableName = 'EMPLEADOS';
-        
-        if (!db.objectStoreNames.contains(tableName)) return;
-        
-        try {
-            const transaction = db.transaction([tableName], 'readwrite');
-            const store = transaction.objectStore(tableName);
-            
-            for (let i = 1; i <= 3; i++) {
-                const data = {
-                    codigo_empleado: `Empleado ${i}`,
-                    nombre: `Empleado ${i}`,
-                    puesto: `Empleado ${i}`,
-                    departamento: `Empleado ${i}`,
-                    email: `Empleado ${i}`,
-                    activo: (Math.random() > 0.5)
-                };
-                
-                // Añadir clave primaria si no es auto-increment
-                
-                await new Promise((resolve, reject) => {
-                    const request = store.add(data);
-                    request.onsuccess = () => resolve();
-                    request.onerror = () => reject(request.error);
-                });
-            }
-            
-            console.log(`📊 Datos de ejemplo creados para Empleado`);
-        } catch (error) {
-            console.error(`❌ Error creando datos para Empleado:`, error);
+            console.error(`❌ Error creando datos para Usuario:`, error);
         }
     }
     
@@ -240,12 +194,8 @@ class UnifiedDatabaseManager {
             
             for (let i = 1; i <= 3; i++) {
                 const data = {
-                    monto_solicitado: (Math.round(Math.random() * 1000 * 100) / 100),
-                    tasa_interes: (Math.round(Math.random() * 1000 * 100) / 100),
-                    plazo_meses: (Math.floor(Math.random() * 100) + 1),
-                    estado_prestamo: `Prestamo ${i}`,
-                    fecha_solicitud: `Prestamo ${i}`,
-                    fecha_aprobacion: `Prestamo ${i}`
+                    fechaPrestamo: `Prestamo ${i}`,
+                    fechaDevolucion: `Prestamo ${i}`
                 };
                 
                 // Añadir clave primaria si no es auto-increment
@@ -263,39 +213,6 @@ class UnifiedDatabaseManager {
         }
     }
     
-    async seedTarjetaCreditoData(db) {
-        const tableName = 'TARJETAS_CREDITO';
-        
-        if (!db.objectStoreNames.contains(tableName)) return;
-        
-        try {
-            const transaction = db.transaction([tableName], 'readwrite');
-            const store = transaction.objectStore(tableName);
-            
-            for (let i = 1; i <= 3; i++) {
-                const data = {
-                    limite_credito: (Math.round(Math.random() * 1000 * 100) / 100),
-                    saldo_actual: (Math.round(Math.random() * 1000 * 100) / 100),
-                    fecha_vencimiento: `TarjetaCredito ${i}`,
-                    activa: (Math.random() > 0.5)
-                };
-                
-                // Añadir clave primaria si no es auto-increment
-                data.numero_tarjeta = `tarjetacredito_${i}`;
-                
-                await new Promise((resolve, reject) => {
-                    const request = store.add(data);
-                    request.onsuccess = () => resolve();
-                    request.onerror = () => reject(request.error);
-                });
-            }
-            
-            console.log(`📊 Datos de ejemplo creados para TarjetaCredito`);
-        } catch (error) {
-            console.error(`❌ Error creando datos para TarjetaCredito:`, error);
-        }
-    }
-    
     
     async seedSurveyData(db) {
         if (!db.objectStoreNames.contains('ENCUESTAS')) return;
@@ -306,10 +223,10 @@ class UnifiedDatabaseManager {
             
             const surveys = [
                 {
-                    nombre: 'preferenciasBancarias',
-                    titulo: 'Encuesta de Servicios Preferidos',
-                    descripcion: 'Ayúdanos a conocer tus preferencias bancarias',
-                    tipo_representacion: 'CIRCULAR',
+                    nombre: 'preferenciasBiblioteca',
+                    titulo: 'Encuesta de Preferencias',
+                    descripcion: 'Ayúdanos a conocer tus preferencias de lectura',
+                    tipo_representacion: 'BARRAS',
                     activa: true,
                     fecha_creacion: new Date().toISOString()
                 }
@@ -338,9 +255,9 @@ class UnifiedDatabaseManager {
             
             const quizzes = [
                 {
-                    nombre: 'satisfaccionCliente',
-                    titulo: 'Encuesta de Satisfacción Bancaria',
-                    descripcion: 'Evalúa tu experiencia con nuestros servicios',
+                    nombre: 'satisfaccionBiblioteca',
+                    titulo: 'Cuestionario de Satisfacción',
+                    descripcion: 'Evalúa tu experiencia con la biblioteca',
                     tiempoLimite: 30,
                     puntuacion_minima: 60,
                     activo: true,

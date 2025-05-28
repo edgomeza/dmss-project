@@ -1,5 +1,5 @@
 /**
- * GESTOR UNIFICADO DE ENCUESTAS Y CUESTIONARIOS - Sistema Bancario Digital
+ * GESTOR UNIFICADO DE ENCUESTAS Y CUESTIONARIOS - Biblioteca Universitaria
  * Maneja creación, administración y ejecución
  */
 

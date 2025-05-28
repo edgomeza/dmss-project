@@ -166,49 +166,89 @@ public class DashboardView {
     }
     
     /**
-     * Muestra acciones rápidas disponibles para el usuario
-     */
-    private void mostrarAccionesRapidas() {
-        ConsoleUtils.mostrarSubtitulo("Acciones Rápidas");
-        
-        System.out.println("1. Responder encuestas pendientes");
-        System.out.println("2. Ver mis respuestas anteriores");
-        
-        if (authManager.tieneRol("Administrador")) {
-            System.out.println("3. Crear nueva encuesta");
-            System.out.println("4. Administrar usuarios");
-        }
-        
-        System.out.println("0. Volver al menú principal");
-        
-        int opcion = ConsoleUtils.leerOpcion(scanner, 0, authManager.tieneRol("Administrador") ? 4 : 2);
-        
-        switch (opcion) {
-            case 0:
-                // Volver al menú principal
-                break;
-            case 1:
-                new EncuestaView().mostrar();
-                break;
-            case 2:
-                // Implementar vista directa a mis respuestas
-                ConsoleUtils.mostrarInfo("Funcionalidad no implementada directamente. Use el menú de encuestas.");
-                ConsoleUtils.pausar(scanner);
-                break;
-            case 3:
-                if (authManager.tieneRol("Administrador")) {
-                    // Implementar acceso directo a crear encuesta
-                    ConsoleUtils.mostrarInfo("Funcionalidad no implementada directamente. Use el menú de administración.");
-                    ConsoleUtils.pausar(scanner);
-                }
-                break;
-            case 4:
-                if (authManager.tieneRol("Administrador")) {
-                    // Implementar acceso directo a administrar usuarios
-                    ConsoleUtils.mostrarInfo("Funcionalidad no implementada directamente. Use el menú de administración.");
-                    ConsoleUtils.pausar(scanner);
-                }
-                break;
-        }
-    }
+	 * Muestra acciones rápidas disponibles para el usuario
+	 */
+	private void mostrarAccionesRapidas() {
+	    ConsoleUtils.mostrarSubtitulo("Acciones Rápidas");
+	    
+	    System.out.println("1. Responder encuestas pendientes");
+	    System.out.println("2. Ver mis respuestas anteriores");
+	    
+	    if (authManager.esAdministrador()) {
+	        System.out.println("3. Crear nueva encuesta");
+	        System.out.println("4. Administrar usuarios");
+	        System.out.println("5. Ver estadísticas globales");
+	    }
+	    
+	    System.out.println("0. Volver al menú principal");
+	    
+	    int maxOpcion = authManager.esAdministrador() ? 5 : 2;
+	    int opcion = ConsoleUtils.leerOpcion(scanner, 0, maxOpcion);
+	    
+	    switch (opcion) {
+	        case 0:
+	            // Volver al menú principal
+	            break;
+	        case 1:
+	            new EncuestaView().mostrar();
+	            break;
+	        case 2:
+	            ConsoleUtils.mostrarInfo("Funcionalidad disponible en el menú de encuestas.");
+	            ConsoleUtils.pausar(scanner);
+	            break;
+	        case 3:
+	            if (authManager.esAdministrador()) {
+	                ConsoleUtils.mostrarInfo("Redirigiendo al menú de administración...");
+	                new view.admin.AdminMenuView().mostrar();
+	            }
+	            break;
+	        case 4:
+	            if (authManager.esAdministrador()) {
+	                ConsoleUtils.mostrarInfo("Funcionalidad disponible en el menú de administración.");
+	                ConsoleUtils.pausar(scanner);
+	            }
+	            break;
+	        case 5:
+	            if (authManager.esAdministrador()) {
+	                mostrarEstadisticasGlobales();
+	            }
+	            break;
+	    }
+	}
+
+	/**
+	 * Muestra estadísticas globales del sistema (solo para administradores)
+	 */
+	private void mostrarEstadisticasGlobales() {
+	    ConsoleUtils.limpiarPantalla();
+	    ConsoleUtils.mostrarTitulo("Estadísticas Globales del Sistema");
+	    
+	    System.out.println("Información de roles y accesos:");
+	    System.out.println("- Administrador: Acceso completo al sistema");
+	    System.out.println("- Otros roles: Acceso limitado según permisos");
+	    
+	    System.out.println("\nRol administrador actual: " + authManager.getRolAdministrador());
+	    
+	    // Mostrar estadísticas de entidades
+	    try {
+	        Map<String, Integer> conteoEntidades = new HashMap<>();
+	        for (Object dao : DAOFactory.getAllDAOs()) {
+	            if (dao instanceof IDAO) {
+	                IDAO<?, ?> idao = (IDAO<?, ?>) dao;
+	                String nombreEntidad = dao.getClass().getSimpleName().replace("DAO", "");
+	                conteoEntidades.put(nombreEntidad, idao.count());
+	            }
+	        }
+	        
+	        System.out.println("\nRegistros por entidad:");
+	        for (Map.Entry<String, Integer> entry : conteoEntidades.entrySet()) {
+	            System.out.println("- " + entry.getKey() + ": " + entry.getValue() + " registros");
+	        }
+	    } catch (Exception e) {
+	        System.out.println("No se pudieron cargar las estadísticas de entidades");
+	    }
+	    
+	    ConsoleUtils.pausar(scanner);
+	}
 }
+

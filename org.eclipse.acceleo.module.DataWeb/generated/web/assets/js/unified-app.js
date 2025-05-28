@@ -1,18 +1,17 @@
 /**
- * GESTOR PRINCIPAL DE LA APLICACIÓN - Sistema Bancario Digital
+ * GESTOR PRINCIPAL DE LA APLICACIÓN - Biblioteca Universitaria
  * Coordina todos los módulos del sistema
  */
 
 class UnifiedAppManager {
     constructor() {
         this.config = {
-            appName: 'Sistema Bancario Digital',
+            appName: 'Biblioteca Universitaria',
             debug: true,
             roles: [
-                'AdministradorBanco'
-,                 'GerenteOperaciones'
-,                 'EmpleadoBanco'
-,                 'Cliente'
+                'Administrador'
+,                 'Bibliotecario'
+,                 'Estudiante'
             ],
             currentRole: localStorage.getItem('current_role') || null
         };
@@ -169,10 +168,9 @@ class UnifiedAppManager {
 
     isAdmin() {
         const adminRoles = [
-            'AdministradorBanco', 
-            'GerenteOperaciones', 
-            
-            
+            'Administrador', 
+            'Bibliotecario', 
+            'Estudiante'
         ];
         return adminRoles.includes(this.config.currentRole);
     }

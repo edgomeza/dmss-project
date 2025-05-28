@@ -1,62 +1,51 @@
 /**
-* ARCHIVO PRINCIPAL DE APLICACIÓN - Sistema Bancario Digital
+* ARCHIVO PRINCIPAL DE APLICACIÓN - Biblioteca Universitaria
 * Este archivo inicializa todo el sistema unificado
 */
 
 // Configuración global de la aplicación
 window.AppGlobalConfig = {
-   name: 'Sistema Bancario Digital',
+   name: 'Biblioteca Universitaria',
    version: '1.0.0',
    debug: true,
    entities: [
        {
-           name: 'Cliente',
-           tableName: 'CLIENTES',
-           primaryKey: 'id_cliente'
+           name: 'Libro',
+           tableName: 'LIBROS',
+           primaryKey: 'id_libro'
        }
 ,       {
-           name: 'Cuenta',
-           tableName: 'CUENTAS',
-           primaryKey: 'numero_cuenta'
+           name: 'Categoria',
+           tableName: 'CATEGORIAS',
+           primaryKey: 'id_categoria'
        }
 ,       {
-           name: 'Transaccion',
-           tableName: 'TRANSACCIONES',
-           primaryKey: 'id_transaccion'
-       }
-,       {
-           name: 'Empleado',
-           tableName: 'EMPLEADOS',
-           primaryKey: 'id_empleado'
+           name: 'Usuario',
+           tableName: 'USUARIOS',
+           primaryKey: 'id_usuario'
        }
 ,       {
            name: 'Prestamo',
            tableName: 'PRESTAMOS',
            primaryKey: 'id_prestamo'
        }
-,       {
-           name: 'TarjetaCredito',
-           tableName: 'TARJETAS_CREDITO',
-           primaryKey: 'numero_tarjeta'
-       }
    ],
    roles: [
-       'AdministradorBanco'
-,        'GerenteOperaciones'
-,        'EmpleadoBanco'
-,        'Cliente'
+       'Administrador'
+,        'Bibliotecario'
+,        'Estudiante'
    ],
    surveys: [
        {
-           name: 'preferenciasBancarias',
-           title: 'Encuesta de Servicios Preferidos',
+           name: 'preferenciasBiblioteca',
+           title: 'Encuesta de Preferencias',
            type: 'survey'
        }
    ],
    quizzes: [
        {
-           name: 'satisfaccionCliente',
-           title: 'Encuesta de Satisfacción Bancaria',
+           name: 'satisfaccionBiblioteca',
+           title: 'Cuestionario de Satisfacción',
            type: 'quiz'
        }
    ]
@@ -65,10 +54,9 @@ window.AppGlobalConfig = {
 // Función de inicialización administrativa
 function initializeAdminRoles() {
    const adminRoles = [
-       'AdministradorBanco', 
-       'GerenteOperaciones', 
-       
-       
+       'Administrador', 
+       'Bibliotecario', 
+       'Estudiante'
    ];
    
    localStorage.setItem('admin_roles', JSON.stringify(adminRoles));

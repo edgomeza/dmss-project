@@ -5,12 +5,11 @@
 // Configuración global
 const CONFIG = {
     SYSTEM_ROLES: [
-        'AdministradorBanco'
-,         'GerenteOperaciones'
-,         'EmpleadoBanco'
-,         'Cliente'
+        'Administrador'
+,         'Bibliotecario'
+,         'Estudiante'
     ],
-    DB_NAME: 'Sistema_Bancario Digital_DB',
+    DB_NAME: 'Biblioteca_Universitaria_DB',
     DB_VERSION: 2
 };
 

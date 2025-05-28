@@ -28,7 +28,7 @@ class PrestamoManager {
         const self = this;
         
         return new Promise((resolve, reject) => {
-            const request = indexedDB.open('Sistema_Bancario Digital_DB', 2);
+            const request = indexedDB.open('Biblioteca_Universitaria_DB', 2);
             
             request.onsuccess = () => {
                 const db = request.result;
@@ -134,12 +134,8 @@ class PrestamoManager {
             // Crear 3 registros de ejemplo
             for (let i = 1; i <= 3; i++) {
                 const data = {
-                    monto_solicitado: Math.round(Math.random() * 1000 * 100) / 100,
-                    tasa_interes: Math.round(Math.random() * 1000 * 100) / 100,
-                    plazo_meses: Math.floor(Math.random() * 100) + 1,
-                    estado_prestamo: `Prestamo ${i}`,
-                    fecha_solicitud: `Prestamo ${i}`,
-                    fecha_aprobacion: `Prestamo ${i}`
+                    fechaPrestamo: `Prestamo ${i}`,
+                    fechaDevolucion: `Prestamo ${i}`
                 };
                 
                 
@@ -191,9 +187,6 @@ class PrestamoManager {
         const data = Object.fromEntries(formData);
         
         // Convertir tipos de datos
-        if (data.monto_solicitado) data.monto_solicitado = parseFloat(data.monto_solicitado) || 0.0;
-        if (data.tasa_interes) data.tasa_interes = parseFloat(data.tasa_interes) || 0.0;
-        if (data.plazo_meses) data.plazo_meses = parseInt(data.plazo_meses) || 0;
         
         try {
             await this.db.create(data);
@@ -214,9 +207,6 @@ class PrestamoManager {
         
         // Convertir tipos de datos
         if (data.id_prestamo) data.id_prestamo = parseInt(data.id_prestamo) || 0;
-        if (data.monto_solicitado) data.monto_solicitado = parseFloat(data.monto_solicitado) || 0.0;
-        if (data.tasa_interes) data.tasa_interes = parseFloat(data.tasa_interes) || 0.0;
-        if (data.plazo_meses) data.plazo_meses = parseInt(data.plazo_meses) || 0;
         
         try {
             await this.db.update(data);
@@ -241,19 +231,15 @@ class PrestamoManager {
             }
             
             if (entities.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" class="text-center">No hay datos disponibles</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center">No hay datos disponibles</td></tr>';
                 return;
             }
             
             tbody.innerHTML = entities.map(entity => `
                 <tr>
                     <td>${this.formatValue(entity.id_prestamo, 'INTEGER')}</td>
-                    <td>${this.formatValue(entity.monto_solicitado, 'DECIMAL')}</td>
-                    <td>${this.formatValue(entity.tasa_interes, 'DECIMAL')}</td>
-                    <td>${this.formatValue(entity.plazo_meses, 'INTEGER')}</td>
-                    <td>${this.formatValue(entity.estado_prestamo, 'STRING')}</td>
-                    <td>${this.formatValue(entity.fecha_solicitud, 'STRING')}</td>
-                    <td>${this.formatValue(entity.fecha_aprobacion, 'STRING')}</td>
+                    <td>${this.formatValue(entity.fechaPrestamo, 'STRING')}</td>
+                    <td>${this.formatValue(entity.fechaDevolucion, 'STRING')}</td>
                     <td>
                         <a href="detail.html?id=${entity[this.primaryKey]}" class="btn btn-info btn-sm">Ver</a>
                         <a href="edit.html?id=${entity[this.primaryKey]}" class="btn btn-warning btn-sm">Editar</a>
@@ -265,7 +251,7 @@ class PrestamoManager {
             console.error('Error loading table data:', error);
             const tbody = document.getElementById('tableBody');
             if (tbody) {
-                tbody.innerHTML = '<tr><td colspan="8" class="text-center error-message">Error cargando datos</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center error-message">Error cargando datos</td></tr>';
             }
         }
     }
@@ -284,29 +270,13 @@ class PrestamoManager {
                 if (field_id_prestamo) {
                     field_id_prestamo.value = entity.id_prestamo || '';
                 }
-                const field_monto_solicitado = document.getElementById('monto_solicitado');
-                if (field_monto_solicitado) {
-                    field_monto_solicitado.value = entity.monto_solicitado || '';
+                const field_fechaPrestamo = document.getElementById('fechaPrestamo');
+                if (field_fechaPrestamo) {
+                    field_fechaPrestamo.value = entity.fechaPrestamo || '';
                 }
-                const field_tasa_interes = document.getElementById('tasa_interes');
-                if (field_tasa_interes) {
-                    field_tasa_interes.value = entity.tasa_interes || '';
-                }
-                const field_plazo_meses = document.getElementById('plazo_meses');
-                if (field_plazo_meses) {
-                    field_plazo_meses.value = entity.plazo_meses || '';
-                }
-                const field_estado_prestamo = document.getElementById('estado_prestamo');
-                if (field_estado_prestamo) {
-                    field_estado_prestamo.value = entity.estado_prestamo || '';
-                }
-                const field_fecha_solicitud = document.getElementById('fecha_solicitud');
-                if (field_fecha_solicitud) {
-                    field_fecha_solicitud.value = entity.fecha_solicitud || '';
-                }
-                const field_fecha_aprobacion = document.getElementById('fecha_aprobacion');
-                if (field_fecha_aprobacion) {
-                    field_fecha_aprobacion.value = entity.fecha_aprobacion || '';
+                const field_fechaDevolucion = document.getElementById('fechaDevolucion');
+                if (field_fechaDevolucion) {
+                    field_fechaDevolucion.value = entity.fechaDevolucion || '';
                 }
                 
                 const loadingForm = document.getElementById('loadingForm');
@@ -337,29 +307,13 @@ class PrestamoManager {
                 if (field_id_prestamo) {
                     field_id_prestamo.textContent = this.formatValue(entity.id_prestamo, 'INTEGER');
                 }
-                const field_monto_solicitado = document.getElementById('field_monto_solicitado');
-                if (field_monto_solicitado) {
-                    field_monto_solicitado.textContent = this.formatValue(entity.monto_solicitado, 'DECIMAL');
+                const field_fechaPrestamo = document.getElementById('field_fechaPrestamo');
+                if (field_fechaPrestamo) {
+                    field_fechaPrestamo.textContent = this.formatValue(entity.fechaPrestamo, 'STRING');
                 }
-                const field_tasa_interes = document.getElementById('field_tasa_interes');
-                if (field_tasa_interes) {
-                    field_tasa_interes.textContent = this.formatValue(entity.tasa_interes, 'DECIMAL');
-                }
-                const field_plazo_meses = document.getElementById('field_plazo_meses');
-                if (field_plazo_meses) {
-                    field_plazo_meses.textContent = this.formatValue(entity.plazo_meses, 'INTEGER');
-                }
-                const field_estado_prestamo = document.getElementById('field_estado_prestamo');
-                if (field_estado_prestamo) {
-                    field_estado_prestamo.textContent = this.formatValue(entity.estado_prestamo, 'STRING');
-                }
-                const field_fecha_solicitud = document.getElementById('field_fecha_solicitud');
-                if (field_fecha_solicitud) {
-                    field_fecha_solicitud.textContent = this.formatValue(entity.fecha_solicitud, 'STRING');
-                }
-                const field_fecha_aprobacion = document.getElementById('field_fecha_aprobacion');
-                if (field_fecha_aprobacion) {
-                    field_fecha_aprobacion.textContent = this.formatValue(entity.fecha_aprobacion, 'STRING');
+                const field_fechaDevolucion = document.getElementById('field_fechaDevolucion');
+                if (field_fechaDevolucion) {
+                    field_fechaDevolucion.textContent = this.formatValue(entity.fechaDevolucion, 'STRING');
                 }
                 
                 const editLink = document.getElementById('editLink');

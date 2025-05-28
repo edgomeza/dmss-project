@@ -2,10 +2,10 @@ package dao;
 
 import model.Prestamo;
 // Importación de modelos relacionados
-import model.Cliente;
-import dao.ClienteDAO;
-import model.Empleado;
-import dao.EmpleadoDAO;
+import model.Usuario;
+import dao.UsuarioDAO;
+import model.Libro;
+import dao.LibroDAO;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -70,18 +70,14 @@ public class PrestamoDAO implements IDAO<Prestamo, Integer> {
             
             // Generamos valores para cada atributo según su tipo
             entity.setId_prestamo(i);
-            entity.setMonto_solicitado(Math.round(rand.nextDouble() * 10000.0) / 100.0); // Dos decimales
-            entity.setTasa_interes(Math.round(rand.nextDouble() * 10000.0) / 100.0); // Dos decimales
-            entity.setPlazo_meses(rand.nextInt(1000) + 1);
-            entity.setEstado_prestamo(estadosPosibles[rand.nextInt(estadosPosibles.length)]);
 			// Generamos fechas aleatorias con nombres únicos
-			long offset_fecha_solicitud = (long) (rand.nextDouble() * 395) - 365;
-			Date date_fecha_solicitud = new Date(currentDate.getTime() + offset_fecha_solicitud * 24 * 60 * 60 * 1000);
-			entity.setFecha_solicitud(dateFormat.format(date_fecha_solicitud));
+			long offset_fechaPrestamo = (long) (rand.nextDouble() * 395) - 365;
+			Date date_fechaPrestamo = new Date(currentDate.getTime() + offset_fechaPrestamo * 24 * 60 * 60 * 1000);
+			entity.setFechaPrestamo(dateFormat.format(date_fechaPrestamo));
 			// Generamos fechas aleatorias con nombres únicos
-			long offset_fecha_aprobacion = (long) (rand.nextDouble() * 395) - 365;
-			Date date_fecha_aprobacion = new Date(currentDate.getTime() + offset_fecha_aprobacion * 24 * 60 * 60 * 1000);
-			entity.setFecha_aprobacion(dateFormat.format(date_fecha_aprobacion));
+			long offset_fechaDevolucion = (long) (rand.nextDouble() * 395) - 365;
+			Date date_fechaDevolucion = new Date(currentDate.getTime() + offset_fechaDevolucion * 24 * 60 * 60 * 1000);
+			entity.setFechaDevolucion(dateFormat.format(date_fechaDevolucion));
             
             // Guardamos la entidad en el mapa
             data.put(entity.getId_prestamo(), entity);
@@ -105,11 +101,11 @@ public class PrestamoDAO implements IDAO<Prestamo, Integer> {
         
         try {
             // Obtener instancias de la entidad referenciada
-            ClienteDAO cliente_solicitanteDAO = (ClienteDAO) DAOFactory.getDAO(Cliente.class);
-            List<Cliente> cliente_solicitanteList = cliente_solicitanteDAO.findAll();
+            UsuarioDAO prestamo_usuarioDAO = (UsuarioDAO) DAOFactory.getDAO(Usuario.class);
+            List<Usuario> prestamo_usuarioList = prestamo_usuarioDAO.findAll();
             
-            if (cliente_solicitanteList.isEmpty()) {
-                System.out.println("Advertencia: No hay entidades Cliente disponibles para establecer relaciones");
+            if (prestamo_usuarioList.isEmpty()) {
+                System.out.println("Advertencia: No hay entidades Usuario disponibles para establecer relaciones");
                 return;
             }
             
@@ -117,22 +113,22 @@ public class PrestamoDAO implements IDAO<Prestamo, Integer> {
             for (Prestamo entity : data.values()) {
                 // Determinar si asignamos una relación (80% de probabilidad)
                 if (rand.nextDouble() < 0.8) {
-                    Cliente related = cliente_solicitanteList.get(rand.nextInt(cliente_solicitanteList.size()));
-                    entity.setCliente_solicitante(related);
+                    Usuario related = prestamo_usuarioList.get(rand.nextInt(prestamo_usuarioList.size()));
+                    entity.setPrestamo_usuario(related);
                 }
             }
-            System.out.println("Relaciones cliente_solicitante configuradas correctamente");
+            System.out.println("Relaciones prestamo_usuario configuradas correctamente");
         } catch (Exception e) {
-            System.err.println("Error al configurar relaciones cliente_solicitante: " + e.getMessage());
+            System.err.println("Error al configurar relaciones prestamo_usuario: " + e.getMessage());
             e.printStackTrace();
         }
         try {
             // Obtener instancias de la entidad referenciada
-            EmpleadoDAO empleado_aprobadorDAO = (EmpleadoDAO) DAOFactory.getDAO(Empleado.class);
-            List<Empleado> empleado_aprobadorList = empleado_aprobadorDAO.findAll();
+            LibroDAO prestamo_libroDAO = (LibroDAO) DAOFactory.getDAO(Libro.class);
+            List<Libro> prestamo_libroList = prestamo_libroDAO.findAll();
             
-            if (empleado_aprobadorList.isEmpty()) {
-                System.out.println("Advertencia: No hay entidades Empleado disponibles para establecer relaciones");
+            if (prestamo_libroList.isEmpty()) {
+                System.out.println("Advertencia: No hay entidades Libro disponibles para establecer relaciones");
                 return;
             }
             
@@ -140,13 +136,13 @@ public class PrestamoDAO implements IDAO<Prestamo, Integer> {
             for (Prestamo entity : data.values()) {
                 // Determinar si asignamos una relación (80% de probabilidad)
                 if (rand.nextDouble() < 0.8) {
-                    Empleado related = empleado_aprobadorList.get(rand.nextInt(empleado_aprobadorList.size()));
-                    entity.setEmpleado_aprobador(related);
+                    Libro related = prestamo_libroList.get(rand.nextInt(prestamo_libroList.size()));
+                    entity.setPrestamo_libro(related);
                 }
             }
-            System.out.println("Relaciones empleado_aprobador configuradas correctamente");
+            System.out.println("Relaciones prestamo_libro configuradas correctamente");
         } catch (Exception e) {
-            System.err.println("Error al configurar relaciones empleado_aprobador: " + e.getMessage());
+            System.err.println("Error al configurar relaciones prestamo_libro: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -299,71 +295,26 @@ public class PrestamoDAO implements IDAO<Prestamo, Integer> {
     // Métodos específicos para búsquedas por atributos
     
     /**
-     * Busca entidades por el atributo monto_solicitado
+     * Busca entidades por el atributo fechaPrestamo
      * @param value Valor a buscar
      * @return Lista de entidades que coinciden con el valor
      */
-    public List<Prestamo> findByMonto_solicitado(double value) {
+    public List<Prestamo> findByFechaPrestamo(String value) {
         return findByFilter(entity -> {
-            return entity.getMonto_solicitado() == value;
+            return entity.getFechaPrestamo() != null && 
+                   entity.getFechaPrestamo().toLowerCase().contains(value.toLowerCase());
         });
     }
     
     /**
-     * Busca entidades por el atributo tasa_interes
+     * Busca entidades por el atributo fechaDevolucion
      * @param value Valor a buscar
      * @return Lista de entidades que coinciden con el valor
      */
-    public List<Prestamo> findByTasa_interes(double value) {
+    public List<Prestamo> findByFechaDevolucion(String value) {
         return findByFilter(entity -> {
-            return entity.getTasa_interes() == value;
-        });
-    }
-    
-    /**
-     * Busca entidades por el atributo plazo_meses
-     * @param value Valor a buscar
-     * @return Lista de entidades que coinciden con el valor
-     */
-    public List<Prestamo> findByPlazo_meses(int value) {
-        return findByFilter(entity -> {
-            return entity.getPlazo_meses() == value;
-        });
-    }
-    
-    /**
-     * Busca entidades por el atributo estado_prestamo
-     * @param value Valor a buscar
-     * @return Lista de entidades que coinciden con el valor
-     */
-    public List<Prestamo> findByEstado_prestamo(String value) {
-        return findByFilter(entity -> {
-            return entity.getEstado_prestamo() != null && 
-                   entity.getEstado_prestamo().toLowerCase().contains(value.toLowerCase());
-        });
-    }
-    
-    /**
-     * Busca entidades por el atributo fecha_solicitud
-     * @param value Valor a buscar
-     * @return Lista de entidades que coinciden con el valor
-     */
-    public List<Prestamo> findByFecha_solicitud(String value) {
-        return findByFilter(entity -> {
-            return entity.getFecha_solicitud() != null && 
-                   entity.getFecha_solicitud().toLowerCase().contains(value.toLowerCase());
-        });
-    }
-    
-    /**
-     * Busca entidades por el atributo fecha_aprobacion
-     * @param value Valor a buscar
-     * @return Lista de entidades que coinciden con el valor
-     */
-    public List<Prestamo> findByFecha_aprobacion(String value) {
-        return findByFilter(entity -> {
-            return entity.getFecha_aprobacion() != null && 
-                   entity.getFecha_aprobacion().toLowerCase().contains(value.toLowerCase());
+            return entity.getFechaDevolucion() != null && 
+                   entity.getFechaDevolucion().toLowerCase().contains(value.toLowerCase());
         });
     }
     
@@ -371,28 +322,28 @@ public class PrestamoDAO implements IDAO<Prestamo, Integer> {
     // Métodos para búsqueda por relaciones
     
     /**
-     * Busca entidades por su relación con Cliente
-     * @param clienteId ID de la entidad Cliente relacionada
-     * @return Lista de entidades relacionadas con la Cliente especificada
+     * Busca entidades por su relación con Usuario
+     * @param usuarioId ID de la entidad Usuario relacionada
+     * @return Lista de entidades relacionadas con la Usuario especificada
      */
-	public List<Prestamo> findByCliente_solicitante(Integer refId) {
+	public List<Prestamo> findByPrestamo_usuario(Integer refId) {
 	    return findByFilter(entity -> 
-	        entity.getCliente_solicitante() != null && 
-	        entity.getCliente_solicitante().getId_cliente() != null && 
-	        entity.getCliente_solicitante().getId_cliente() == refId
+	        entity.getPrestamo_usuario() != null && 
+	        entity.getPrestamo_usuario().getId_usuario() != null && 
+	        entity.getPrestamo_usuario().getId_usuario() == refId
 	    );
 	}
     
     /**
-     * Busca entidades por su relación con Empleado
-     * @param empleadoId ID de la entidad Empleado relacionada
-     * @return Lista de entidades relacionadas con la Empleado especificada
+     * Busca entidades por su relación con Libro
+     * @param libroId ID de la entidad Libro relacionada
+     * @return Lista de entidades relacionadas con la Libro especificada
      */
-	public List<Prestamo> findByEmpleado_aprobador(Integer refId) {
+	public List<Prestamo> findByPrestamo_libro(Integer refId) {
 	    return findByFilter(entity -> 
-	        entity.getEmpleado_aprobador() != null && 
-	        entity.getEmpleado_aprobador().getId_empleado() != null && 
-	        entity.getEmpleado_aprobador().getId_empleado() == refId
+	        entity.getPrestamo_libro() != null && 
+	        entity.getPrestamo_libro().getId_libro() != null && 
+	        entity.getPrestamo_libro().getId_libro() == refId
 	    );
 	}
     

@@ -23,77 +23,47 @@ public class ConfiguracionView {
     }
     
     /**
-     * Muestra la pantalla de configuración
-     */
-    public void mostrar() {
-        boolean salir = false;
-        
-        while (!salir) {
-            ConsoleUtils.limpiarPantalla();
-            ConsoleUtils.mostrarTitulo("Configuración");
-            
-            System.out.println("1. Apariencia");
-            System.out.println("2. Preferencias de visualización");
-            
-            if (authManager.isAuthenticated()) {
-                System.out.println("3. Perfil de usuario");
-                System.out.println("4. Cambiar rol activo");
-            }
-            
-            System.out.println("0. Volver al menú principal");
-            
-            int maxOpcion = authManager.isAuthenticated() ? 4 : 2;
-            int opcion = ConsoleUtils.leerOpcion(scanner, 0, maxOpcion);
-            
-            switch (opcion) {
-                case 0:
-                    salir = true;
-                    break;
-                case 1:
-                    configurarApariencia();
-                    break;
-                case 2:
-                    configurarPreferencias();
-                    break;
-                case 3:
-                    if (authManager.isAuthenticated()) {
-                        configurarPerfil();
-                    }
-                    break;
-                case 4:
-                    if (authManager.isAuthenticated()) {
-                        cambiarRol();
-                    }
-                    break;
-            }
-        }
-    }
-    
-    /**
-     * Configura las opciones de apariencia
-     */
-    private void configurarApariencia() {
-        ConsoleUtils.limpiarPantalla();
-        ConsoleUtils.mostrarTitulo("Configuración de Apariencia");
-        
-        boolean modoOscuro = appConfig.isDarkModeEnabled();
-        System.out.println("Modo oscuro: " + (modoOscuro ? "Activado" : "Desactivado"));
-        
-        boolean cambiar = ConsoleUtils.leerBooleano(scanner, "¿Desea cambiar el modo de visualización?", false);
-        
-        if (cambiar) {
-            appConfig.setDarkMode(!modoOscuro);
-            appConfig.saveConfiguration();
-            
-            if (appConfig.isDarkModeEnabled()) {
-                ConsoleUtils.mostrarExito("Modo oscuro activado");
-            } else {
-                ConsoleUtils.mostrarExito("Modo claro activado");
-            }
-        }
-        
-        ConsoleUtils.pausar(scanner);
-    }
+	 * Muestra la pantalla de configuración
+	 */
+	public void mostrar() {
+	    boolean salir = false;
+	    
+	    while (!salir) {
+	        ConsoleUtils.limpiarPantalla();
+	        ConsoleUtils.mostrarTitulo("Configuración");
+	        
+	        System.out.println("1. Preferencias de visualización");
+	        
+	        if (authManager.isAuthenticated()) {
+	            System.out.println("2. Perfil de usuario");
+	            System.out.println("3. Cambiar rol activo");
+	        }
+	        
+	        System.out.println("0. Volver al menú principal");
+	        
+	        int maxOpcion = authManager.isAuthenticated() ? 3 : 1;
+	        int opcion = ConsoleUtils.leerOpcion(scanner, 0, maxOpcion);
+	        
+	        switch (opcion) {
+	            case 0:
+	                salir = true;
+	                break;
+	            case 1:
+	                configurarPreferencias();
+	                break;
+	            case 2:
+	                if (authManager.isAuthenticated()) {
+	                    configurarPerfil();
+	                }
+	                break;
+	            case 3:
+	                if (authManager.isAuthenticated()) {
+	                    cambiarRol();
+	                }
+	                break;
+	        }
+	    }
+	}
     
     /**
      * Configura las preferencias de visualización

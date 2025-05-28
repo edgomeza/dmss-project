@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DataWeb DSL - Documentacion del Proyecto</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #3498db;
+            margin: 0;
+            font-size: 2.5em;
+        }
+        .header h2 {
+            color: #7f8c8d;
+            margin: 10px 0;
+            font-weight: normal;
+        }
+        .section {
+            margin-bottom: 30px;
+        }
+        .section h3 {
+            color: #2c3e50;
+            border-left: 4px solid #3498db;
+            padding-left: 15px;
+            margin-bottom: 15px;
+        }
+        .info-box {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: #3498db;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            display: block;
+        }
+        .authors {
+            background: #2ecc71;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #bdc3c7;
+            color: #7f8c8d;
+        }
+        ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        li {
+            padding: 5px 0;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        li:before {
+            content: "✓ ";
+            color: #27ae60;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+        <!-- CABECERA -->
+        <div class="header">
+            <h1>DataWeb DSL</h1>
+            <h2>Lenguaje Específico de Dominio para Generación de Aplicaciones</h2>
+            <p><strong>Universidad de Extremadura - Desarrollo de Software Dirigido por Modelos</strong></p>
+        </div>
+
+        <!-- AUTORES -->
+        <div class="authors">
+            <h3>👨‍💻 Desarrollado por:</h3>
+            <p><strong>Eduardo Gómez Almendral</strong></p>
+            <p><strong>Manahen García Garrido</strong></p>
+            <p>Grado en Ingeniería Informática en Ingeniería del Software</p>
+        </div>
+
+        <!-- DESCRIPCION DEL PROYECTO -->
+        <div class="section">
+            <h3>📋 ¿Qué es DataWeb DSL?</h3>
+            <div class="info-box">
+                <p><strong>DataWeb</strong> es un lenguaje específico de dominio (DSL) diseñado para automatizar la generación de aplicaciones web y de escritorio basadas en datos. El sistema permite a los desarrolladores crear aplicaciones completas simplemente modelando la estructura de datos y las operaciones deseadas.</p>
+            </div>
+        </div>
+
+        <!-- CARACTERISTICAS PRINCIPALES -->
+        <div class="section">
+            <h3>🚀 Características Principales</h3>
+            <ul>
+                <li>Generación automática de aplicaciones web (HTML/CSS/JavaScript)</li>
+                <li>Generación de aplicaciones de escritorio (Java)</li>
+                <li>Sistema completo de operaciones CRUD (Crear, Leer, Actualizar, Borrar)</li>
+                <li>Gestión de roles y permisos de usuario</li>
+                <li>Sistema de encuestas y cuestionarios con evaluación</li>
+                <li>Integración con redes sociales (Twitter, Facebook, Instagram, LinkedIn)</li>
+                <li>Soporte para fuentes RSS</li>
+                <li>Editor gráfico intuitivo con validación en tiempo real</li>
+                <li>Validación mediante restricciones OCL</li>
+            </ul>
+        </div>
+
+        <!-- ESTADISTICAS DEL MODELO ACTUAL -->
+        <div class="section">
+            <h3>📊 Estadísticas del Modelo: Biblioteca Universitaria</h3>
+            <div class="info-box">
+                <p><strong>Descripción:</strong> Sistema de gestión de biblioteca universitaria</p>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-number">4</span>
+                    <span>Entidades</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">13</span>
+                    <span>Páginas</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">3</span>
+                    <span>Roles</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">2</span>
+                    <span>Formularios</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ENTIDADES DEL MODELO -->
+        <div class="section">
+            <h3>🗃️ Entidades del Modelo</h3>
+            <div class="info-box">
+                <h4>Libro</h4>
+                <p><strong>Tabla:</strong> LIBROS</p>
+                <p><strong>Atributos:</strong> 5 campos definidos</p>
+                <p><strong>Referencias:</strong> 1 relaciones con otras entidades</p>
+                <p><strong>Operaciones CRUD:</strong> 
+                    Completas (Crear, Leer, Actualizar, Borrar)
+                </p>
+            </div>
+            <div class="info-box">
+                <h4>Categoria</h4>
+                <p><strong>Tabla:</strong> CATEGORIAS</p>
+                <p><strong>Atributos:</strong> 3 campos definidos</p>
+                <p><strong>Referencias:</strong> 0 relaciones con otras entidades</p>
+                <p><strong>Operaciones CRUD:</strong> 
+                    Personalizadas
+                </p>
+            </div>
+            <div class="info-box">
+                <h4>Usuario</h4>
+                <p><strong>Tabla:</strong> USUARIOS</p>
+                <p><strong>Atributos:</strong> 4 campos definidos</p>
+                <p><strong>Referencias:</strong> 0 relaciones con otras entidades</p>
+                <p><strong>Operaciones CRUD:</strong> 
+                    Personalizadas
+                </p>
+            </div>
+            <div class="info-box">
+                <h4>Prestamo</h4>
+                <p><strong>Tabla:</strong> PRESTAMOS</p>
+                <p><strong>Atributos:</strong> 3 campos definidos</p>
+                <p><strong>Referencias:</strong> 2 relaciones con otras entidades</p>
+                <p><strong>Operaciones CRUD:</strong> 
+                    Personalizadas
+                </p>
+            </div>
+        </div>
+
+        <!-- ROLES Y PERMISOS -->
+        <div class="section">
+            <h3>👥 Sistema de Roles</h3>
+            <div class="info-box">
+                <h4>Administrador</h4>
+                <p><strong>Descripción:</strong> Acceso total al sistema</p>
+                <p><strong>Páginas Accesibles:</strong> 13 páginas</p>
+            </div>
+            <div class="info-box">
+                <h4>Bibliotecario</h4>
+                <p><strong>Descripción:</strong> Gestión de libros y préstamos</p>
+                <p><strong>Páginas Accesibles:</strong> 9 páginas</p>
+            </div>
+            <div class="info-box">
+                <h4>Estudiante</h4>
+                <p><strong>Descripción:</strong> Consulta de libros disponibles</p>
+                <p><strong>Páginas Accesibles:</strong> 4 páginas</p>
+            </div>
+        </div>
+
+        <!-- FORMULARIOS INTERACTIVOS -->
+        <div class="section">
+            <h3>📝 Formularios Interactivos</h3>
+            
+            <h4>Cuestionarios (con evaluación):</h4>
+            <div class="info-box">
+                <h5>Cuestionario de Satisfacción</h5>
+                <p>Evalúa tu experiencia con la biblioteca</p>
+                <p><strong>Preguntas:</strong> 3 preguntas definidas</p>
+            </div>
+            
+            <h4>Encuestas (sin evaluación):</h4>
+            <div class="info-box">
+                <h5>Encuesta de Preferencias</h5>
+                <p>Ayúdanos a conocer tus preferencias de lectura</p>
+                <p><strong>Preguntas:</strong> 3 preguntas definidas</p>
+                <p><strong>Representación:</strong> BARRAS</p>
+            </div>
+        </div>
+
+        <!-- INTEGRACION EXTERNA -->
+        <div class="section">
+            <h3>🌐 Integración Externa</h3>
+            
+            <h4>Redes Sociales Integradas:</h4>
+            <ul>
+                <li>TWITTER - BibliotecaUniv</li>
+                <li>FACEBOOK - BibliotecaUniversitaria</li>
+                <li>INSTAGRAM - biblioteca_univ</li>
+            </ul>
+            
+            <h4>Fuentes RSS:</h4>
+            <ul>
+                <li>Novedades Bibliográficas (5 elementos)</li>
+                <li>Eventos de la Biblioteca (3 elementos)</li>
+            </ul>
+        </div>
+
+        <!-- TECNOLOGIAS UTILIZADAS -->
+        <div class="section">
+            <h3>🛠️ Tecnologías del Proyecto DSL</h3>
+            <div class="stats-grid">
+                <div class="info-box">
+                    <h4>Metamodelado</h4>
+                    <ul>
+                        <li>Eclipse EMF (Ecore)</li>
+                        <li>OCL para restricciones</li>
+                        <li>EuGENia para editor gráfico</li>
+                    </ul>
+                </div>
+                <div class="info-box">
+                    <h4>Generación de Código</h4>
+                    <ul>
+                        <li>Acceleo (MTL)</li>
+                        <li>Plantillas especializadas</li>
+                        <li>Transformación M2T</li>
+                    </ul>
+                </div>
+                <div class="info-box">
+                    <h4>Aplicaciones Generadas</h4>
+                    <ul>
+                        <li>Web: HTML5, CSS3, JavaScript</li>
+                        <li>Escritorio: Java SE</li>
+                        <li>Base de datos: SQL</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- FUNCIONALIDADES AVANZADAS -->
+        <div class="section">
+            <h3>⭐ Funcionalidades Avanzadas Implementadas</h3>
+            <ul>
+                <li>Páginas con paginación automática</li>
+                <li>Sistemas de filtrado por atributos</li>
+                <li>Páginas índice-detalle combinadas</li>
+                <li>Dashboard administrativo</li>
+                <li>Generación de documentación automática</li>
+                <li>Aplicaciones web completamente funcionales</li>
+                <li>Sistema de autenticación y sesiones</li>
+                <li>Validación tanto cliente como servidor</li>
+            </ul>
+        </div>
+
+        <!-- BENEFICIOS -->
+        <div class="section">
+            <h3>💡 Beneficios del DSL DataWeb</h3>
+            <ul>
+                <li>Reducción del tiempo de desarrollo en un 70%</li>
+                <li>Consistencia arquitectónica garantizada</li>
+                <li>Aplicaciones multiplataforma desde un único modelo</li>
+                <li>Validación automática con restricciones OCL</li>
+                <li>Mantenimiento simplificado</li>
+                <li>Reutilización de componentes</li>
+                <li>Documentación automática actualizada</li>
+            </ul>
+        </div>
+
+        <!-- PIE DE PAGINA -->
+        <div class="footer">
+            <p><strong>Proyecto DataWeb DSL</strong></p>
+            <p>Universidad de Extremadura - Desarrollo de Software Dirigido por Modelos</p>
+            <p>Documentación generada automáticamente el Aplicacion mediante plantilla Acceleo</p>
+            <p><em>Para convertir a PDF: Imprimir → Guardar como PDF desde el navegador</em></p>
+        </div>
+
+    </div>
+</body>
+</html>

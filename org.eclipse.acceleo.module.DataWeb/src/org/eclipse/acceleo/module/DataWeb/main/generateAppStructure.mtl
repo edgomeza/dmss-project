@@ -11,10 +11,4 @@
 [/file]
 [file ('app/src/view/.gitkeep', false, 'UTF-8')]
 [/file]
-
-[comment Creamos directorios para cada rol /]
-[for (rol : Rol | app.roles)]
-[file ('app/src/view/'+rol.nombre+'/.gitkeep', false, 'UTF-8')]
-[/file]
-[/for]
 [/template]

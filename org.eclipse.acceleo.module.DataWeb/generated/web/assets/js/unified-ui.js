@@ -1,5 +1,5 @@
 /**
-* GESTOR UNIFICADO DE INTERFAZ - Sistema Bancario Digital
+* GESTOR UNIFICADO DE INTERFAZ - Biblioteca Universitaria
 * Maneja alertas, modales y elementos de UI
 */
 

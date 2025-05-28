@@ -40,21 +40,107 @@ public class AuthManager {
         }
         return instance;
     }
+
+	/**
+	 * Crea usuarios específicos para cada rol (además del admin)
+	 */
+	private void crearUsuariosIniciales() {
+	    // Crear usuario administrador
+	    Usuario admin = new Usuario("admin", "admin", "Administrador del Sistema", "admin@example.com");
+	    String rolAdministrador = identificarRolAdministrador();
+	    
+	    // Admin tiene todos los roles
+	    admin.addRol("Administrador");
+	    admin.addRol("Bibliotecario");
+	    admin.addRol("Estudiante");
+	    admin.setRolActivo(rolAdministrador);
+	    usuarios.put(admin.getUsername(), admin);
+	    
+	    // Crear un usuario específico para cada rol (excepto admin)
+	    Usuario userBibliotecario = new Usuario("bibliotecario", "bibliotecario", "Usuario Bibliotecario", "bibliotecario@example.com");
+	    userBibliotecario.addRol("Bibliotecario");
+	    userBibliotecario.setRolActivo("Bibliotecario");
+	    usuarios.put(userBibliotecario.getUsername(), userBibliotecario);
+	    Usuario userEstudiante = new Usuario("estudiante", "estudiante", "Usuario Estudiante", "estudiante@example.com");
+	    userEstudiante.addRol("Estudiante");
+	    userEstudiante.setRolActivo("Estudiante");
+	    usuarios.put(userEstudiante.getUsername(), userEstudiante);
+	    
+	    guardarUsuarios();
+	    
+	    System.out.println("=== USUARIOS CREADOS ===");
+	    System.out.println("Administrador: admin/admin (puede elegir cualquier rol)");
+	    System.out.println("Bibliotecario: bibliotecario/bibliotecario (rol fijo)");
+	    System.out.println("Estudiante: estudiante/estudiante (rol fijo)");
+	}
+	
+	/**
+	 * Verifica si el usuario actual puede cambiar de rol
+	 * Solo el administrador puede cambiar de rol
+	 * @return true si puede cambiar de rol
+	 */
+	public boolean puedeElegirRol() {
+	    return isAuthenticated() && esAdministrador();
+	}
     
-    /**
-     * Crea el usuario administrador por defecto
-     */
-    private void crearUsuarioAdmin() {
-        Usuario admin = new Usuario("admin", "admin", "Administrador", "admin@example.com");
-        admin.addRol("Administrador");
-        admin.addRol("AdministradorBanco");
-        admin.addRol("GerenteOperaciones");
-        admin.addRol("EmpleadoBanco");
-        admin.addRol("Cliente");
-        usuarios.put(admin.getUsername(), admin);
-        guardarUsuarios();
-        System.out.println("Usuario administrador creado con credenciales: admin/admin");
-    }
+	/**
+	 * Crea el usuario administrador por defecto
+	 */
+	private void crearUsuarioAdmin() {
+	    if (usuarios.isEmpty()) {
+	        crearUsuariosIniciales();
+	    }
+	}
+
+	/**
+	 * Identifica automáticamente cuál es el rol administrador
+	 * basándose en el número de páginas accesibles
+	 * @return Nombre del rol con más permisos
+	 */
+	private String identificarRolAdministrador() {
+	    String rolAdministrador = "";
+	    int maxPermisos = 0;
+	    
+	    int permisosAdministrador = 13;
+	    if (permisosAdministrador > maxPermisos) {
+	        maxPermisos = permisosAdministrador;
+	        rolAdministrador = "Administrador";
+	    }
+	    int permisosBibliotecario = 9;
+	    if (permisosBibliotecario > maxPermisos) {
+	        maxPermisos = permisosBibliotecario;
+	        rolAdministrador = "Bibliotecario";
+	    }
+	    int permisosEstudiante = 4;
+	    if (permisosEstudiante > maxPermisos) {
+	        maxPermisos = permisosEstudiante;
+	        rolAdministrador = "Estudiante";
+	    }
+	    
+	    return rolAdministrador;
+	}
+
+	/**
+	 * Verifica si el usuario actual tiene rol de administrador
+	 * (el rol con más permisos del sistema)
+	 * @return true si el usuario actual es administrador
+	 */
+	public boolean esAdministrador() {
+	    if (!isAuthenticated()) {
+	        return false;
+	    }
+	    
+	    String rolAdministrador = identificarRolAdministrador();
+	    return usuarioActual.tieneRol(rolAdministrador);
+	}
+
+	/**
+	 * Obtiene el nombre del rol administrador del sistema
+	 * @return Nombre del rol con más permisos
+	 */
+	public String getRolAdministrador() {
+	    return identificarRolAdministrador();
+	}
     
     /**
      * Intenta autenticar a un usuario

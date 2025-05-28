@@ -6,6 +6,10 @@ import java.util.Scanner;
 import view.util.ConsoleUtils;
 import survey.*;
 import auth.AuthManager;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * Vista para la administración de encuestas

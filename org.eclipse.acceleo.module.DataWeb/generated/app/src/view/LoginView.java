@@ -29,34 +29,52 @@ public class LoginView {
         ConsoleUtils.limpiarPantalla();
         ConsoleUtils.mostrarTitulo("Inicio de Sesión");
         
-        // Si ya hay un usuario autenticado, ofrecer cerrar sesión
+        // Mostrar usuarios disponibles
+        System.out.println("Usuarios disponibles:");
+        System.out.println("- admin/admin (Administrador - puede elegir rol)");
+        System.out.println("- bibliotecario/bibliotecario (Rol: Bibliotecario - rol fijo)");
+        System.out.println("- estudiante/estudiante (Rol: Estudiante - rol fijo)");
+        ConsoleUtils.mostrarLinea();
+        
+        // Si ya hay un usuario autenticado
         if (authManager.isAuthenticated()) {
             Usuario usuario = authManager.getUsuarioActual();
-            ConsoleUtils.mostrarInfo("Has iniciado sesión como " + usuario.getNombre() + 
-                                     " (" + usuario.getUsername() + ")");
-            ConsoleUtils.mostrarInfo("Rol actual: " + usuario.getRolActivo());
+            ConsoleUtils.mostrarInfo("Sesión activa: " + usuario.getNombre() + " (" + usuario.getRolActivo() + ")");
             
             System.out.println("\nOpciones:");
             System.out.println("1. Continuar con la sesión actual");
-            System.out.println("2. Cambiar de rol");
-            System.out.println("3. Cerrar sesión");
+            if (authManager.puedeElegirRol()) {
+                System.out.println("2. Cambiar de rol");
+                System.out.println("3. Cerrar sesión");
+            } else {
+                System.out.println("2. Cerrar sesión");
+            }
             
-            int opcion = ConsoleUtils.leerOpcion(scanner, 1, 3);
+            int maxOpcion = authManager.puedeElegirRol() ? 3 : 2;
+            int opcion = ConsoleUtils.leerOpcion(scanner, 1, maxOpcion);
             
             switch (opcion) {
                 case 1:
                     return true;
                 case 2:
-                    mostrarMenuCambioRol();
-                    return true;
+                    if (authManager.puedeElegirRol()) {
+                        mostrarMenuCambioRol();
+                        return true;
+                    } else {
+                        // Cerrar sesión
+                        authManager.logout();
+                        ConsoleUtils.mostrarExito("Sesión cerrada correctamente");
+                        ConsoleUtils.pausar(scanner);
+                        return false;
+                    }
                 case 3:
-                    authManager.logout();
-                    ConsoleUtils.mostrarExito("Sesión cerrada correctamente");
-                    ConsoleUtils.pausar(scanner);
-                    // Continuar con el inicio de sesión
+                    if (authManager.puedeElegirRol()) {
+                        authManager.logout();
+                        ConsoleUtils.mostrarExito("Sesión cerrada correctamente");
+                        ConsoleUtils.pausar(scanner);
+                        return false;
+                    }
                     break;
-                default:
-                    return false;
             }
         }
         
@@ -69,14 +87,17 @@ public class LoginView {
             ConsoleUtils.mostrarExito("Inicio de sesión exitoso");
             Usuario usuario = authManager.getUsuarioActual();
             ConsoleUtils.mostrarInfo("Bienvenido, " + usuario.getNombre() + " (" + usuario.getRolActivo() + ")");
-            ConsoleUtils.pausar(scanner);
             
-            // Si el usuario tiene múltiples roles, mostrar selección
-            if (usuario.getRoles().size() > 1) {
+            // Solo el administrador puede elegir rol
+            if (authManager.puedeElegirRol() && usuario.getRoles().size() > 1) {
+                ConsoleUtils.mostrarInfo("Como administrador, puedes elegir con qué rol trabajar");
+                ConsoleUtils.pausar(scanner);
                 mostrarMenuCambioRol();
+            } else {
+                ConsoleUtils.mostrarInfo("Rol asignado: " + usuario.getRolActivo());
+                ConsoleUtils.pausar(scanner);
             }
             
-            // Guardar preferencias de usuario
             AppConfig.getInstance().setSessionValue("lastLogin", usuario.getUltimoAcceso());
             return true;
         } else {
@@ -87,24 +108,42 @@ public class LoginView {
     }
     
     /**
-     * Muestra el menú para cambiar de rol
+     * Muestra el menú para cambiar de rol (solo para administradores)
      */
     private void mostrarMenuCambioRol() {
-        if (!authManager.isAuthenticated()) {
+        if (!authManager.isAuthenticated() || !authManager.puedeElegirRol()) {
+            ConsoleUtils.mostrarError("No tiene permisos para cambiar de rol");
+            ConsoleUtils.pausar(scanner);
             return;
         }
         
         ConsoleUtils.limpiarPantalla();
-        ConsoleUtils.mostrarTitulo("Cambio de Rol");
+        ConsoleUtils.mostrarTitulo("Selección de Rol (Solo Administrador)");
         
         Usuario usuario = authManager.getUsuarioActual();
         String[] roles = usuario.getRoles().toArray(new String[0]);
         
         System.out.println("Rol actual: " + usuario.getRolActivo());
-        System.out.println("\nSeleccione un nuevo rol:");
+        System.out.println("\nComo administrador, puedes trabajar con cualquier rol:");
+        System.out.println("(Esto te permite ver el sistema desde la perspectiva de cada usuario)\n");
         
         for (int i = 0; i < roles.length; i++) {
-            ConsoleUtils.mostrarElementoLista(i + 1, roles[i]);
+            String descripcion = "";
+            // Añadir descripciones según el rol
+            switch(roles[i]) {
+                case "Administrador":
+                    descripcion = " - Acceso total al sistema";
+                    break;
+                case "Bibliotecario":
+                    descripcion = " - Gestión de libros y préstamos";
+                    break;
+                case "Estudiante":
+                    descripcion = " - Consulta de libros disponibles";
+                    break;
+                default:
+                    descripcion = " - Sin descripción";
+            }
+            ConsoleUtils.mostrarElementoLista(i + 1, roles[i] + descripcion);
         }
         
         int opcion = ConsoleUtils.leerOpcion(scanner, 1, roles.length);
@@ -112,7 +151,11 @@ public class LoginView {
         if (opcion > 0 && opcion <= roles.length) {
             String nuevoRol = roles[opcion - 1];
             usuario.setRolActivo(nuevoRol);
-            ConsoleUtils.mostrarExito("Rol cambiado a: " + nuevoRol);
+            ConsoleUtils.mostrarExito("Trabajando ahora como: " + nuevoRol);
+            
+            if (!nuevoRol.equals(authManager.getRolAdministrador())) {
+                ConsoleUtils.mostrarInfo("Nota: Estás viendo el sistema desde la perspectiva de " + nuevoRol);
+            }
         }
         
         ConsoleUtils.pausar(scanner);
