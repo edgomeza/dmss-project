@@ -1,0 +1,197 @@
+/*
+ * 
+ */
+package dataweb.diagram.providers.assistants;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.gmf.runtime.diagram.ui.editparts.IGraphicalEditPart;
+import org.eclipse.gmf.runtime.emf.type.core.IElementType;
+
+import dataweb.diagram.edit.parts.FuenteRSSEditPart;
+import dataweb.diagram.edit.parts.PaginaActualizacionEditPart;
+import dataweb.diagram.edit.parts.PaginaBorradoEditPart;
+import dataweb.diagram.edit.parts.PaginaContenidoEditPart;
+import dataweb.diagram.edit.parts.PaginaCreacionEditPart;
+import dataweb.diagram.edit.parts.PaginaDetalleEditPart;
+import dataweb.diagram.edit.parts.PaginaHomeEditPart;
+import dataweb.diagram.edit.parts.PaginaIndiceDetalleEditPart;
+import dataweb.diagram.edit.parts.PaginaIndiceFiltrosEditPart;
+import dataweb.diagram.edit.parts.PaginaIndicePaginadaEditPart;
+import dataweb.diagram.edit.parts.PaginaIndicePaginadaFiltradaEditPart;
+import dataweb.diagram.edit.parts.RedSocialEditPart;
+import dataweb.diagram.providers.DatawebElementTypes;
+import dataweb.diagram.providers.DatawebModelingAssistantProvider;
+
+/**
+ * @generated
+ */
+public class DatawebModelingAssistantProviderOfPaginaContenidoEditPart extends DatawebModelingAssistantProvider {
+
+	/**
+	* @generated
+	*/
+	@Override
+
+	public List<IElementType> getRelTypesOnSource(IAdaptable source) {
+		IGraphicalEditPart sourceEditPart = (IGraphicalEditPart) source.getAdapter(IGraphicalEditPart.class);
+		return doGetRelTypesOnSource((PaginaContenidoEditPart) sourceEditPart);
+	}
+
+	/**
+	* @generated
+	*/
+	public List<IElementType> doGetRelTypesOnSource(PaginaContenidoEditPart source) {
+		List<IElementType> types = new ArrayList<IElementType>(3);
+		types.add(DatawebElementTypes.PaginaEnlaces_4002);
+		types.add(DatawebElementTypes.PaginaRedesSociales_4003);
+		types.add(DatawebElementTypes.PaginaFuentesRSS_4004);
+		return types;
+	}
+
+	/**
+	* @generated
+	*/
+	@Override
+
+	public List<IElementType> getRelTypesOnSourceAndTarget(IAdaptable source, IAdaptable target) {
+		IGraphicalEditPart sourceEditPart = (IGraphicalEditPart) source.getAdapter(IGraphicalEditPart.class);
+		IGraphicalEditPart targetEditPart = (IGraphicalEditPart) target.getAdapter(IGraphicalEditPart.class);
+		return doGetRelTypesOnSourceAndTarget((PaginaContenidoEditPart) sourceEditPart, targetEditPart);
+	}
+
+	/**
+	* @generated
+	*/
+	public List<IElementType> doGetRelTypesOnSourceAndTarget(PaginaContenidoEditPart source,
+			IGraphicalEditPart targetEditPart) {
+		List<IElementType> types = new LinkedList<IElementType>();
+		if (targetEditPart instanceof PaginaIndiceDetalleEditPart) {
+			types.add(DatawebElementTypes.PaginaEnlaces_4002);
+		}
+		if (targetEditPart instanceof PaginaIndicePaginadaEditPart) {
+			types.add(DatawebElementTypes.PaginaEnlaces_4002);
+		}
+		if (targetEditPart instanceof PaginaIndiceFiltrosEditPart) {
+			types.add(DatawebElementTypes.PaginaEnlaces_4002);
+		}
+		if (targetEditPart instanceof PaginaIndicePaginadaFiltradaEditPart) {
+			types.add(DatawebElementTypes.PaginaEnlaces_4002);
+		}
+		if (targetEditPart instanceof PaginaDetalleEditPart) {
+			types.add(DatawebElementTypes.PaginaEnlaces_4002);
+		}
+		if (targetEditPart instanceof PaginaCreacionEditPart) {
+			types.add(DatawebElementTypes.PaginaEnlaces_4002);
+		}
+		if (targetEditPart instanceof PaginaActualizacionEditPart) {
+			types.add(DatawebElementTypes.PaginaEnlaces_4002);
+		}
+		if (targetEditPart instanceof PaginaBorradoEditPart) {
+			types.add(DatawebElementTypes.PaginaEnlaces_4002);
+		}
+		if (targetEditPart instanceof PaginaHomeEditPart) {
+			types.add(DatawebElementTypes.PaginaEnlaces_4002);
+		}
+		if (targetEditPart instanceof PaginaContenidoEditPart) {
+			types.add(DatawebElementTypes.PaginaEnlaces_4002);
+		}
+		if (targetEditPart instanceof RedSocialEditPart) {
+			types.add(DatawebElementTypes.PaginaRedesSociales_4003);
+		}
+		if (targetEditPart instanceof FuenteRSSEditPart) {
+			types.add(DatawebElementTypes.PaginaFuentesRSS_4004);
+		}
+		return types;
+	}
+
+	/**
+	* @generated
+	*/
+	@Override
+
+	public List<IElementType> getTypesForTarget(IAdaptable source, IElementType relationshipType) {
+		IGraphicalEditPart sourceEditPart = (IGraphicalEditPart) source.getAdapter(IGraphicalEditPart.class);
+		return doGetTypesForTarget((PaginaContenidoEditPart) sourceEditPart, relationshipType);
+	}
+
+	/**
+	* @generated
+	*/
+	public List<IElementType> doGetTypesForTarget(PaginaContenidoEditPart source, IElementType relationshipType) {
+		List<IElementType> types = new ArrayList<IElementType>();
+		if (relationshipType == DatawebElementTypes.PaginaEnlaces_4002) {
+			types.add(DatawebElementTypes.PaginaIndiceDetalle_2001);
+			types.add(DatawebElementTypes.PaginaIndicePaginada_2002);
+			types.add(DatawebElementTypes.PaginaIndiceFiltros_2003);
+			types.add(DatawebElementTypes.PaginaIndicePaginadaFiltrada_2004);
+			types.add(DatawebElementTypes.PaginaDetalle_2005);
+			types.add(DatawebElementTypes.PaginaCreacion_2006);
+			types.add(DatawebElementTypes.PaginaActualizacion_2007);
+			types.add(DatawebElementTypes.PaginaBorrado_2008);
+			types.add(DatawebElementTypes.PaginaHome_2009);
+			types.add(DatawebElementTypes.PaginaContenido_2010);
+		} else if (relationshipType == DatawebElementTypes.PaginaRedesSociales_4003) {
+			types.add(DatawebElementTypes.RedSocial_2015);
+		} else if (relationshipType == DatawebElementTypes.PaginaFuentesRSS_4004) {
+			types.add(DatawebElementTypes.FuenteRSS_2016);
+		}
+		return types;
+	}
+
+	/**
+	* @generated
+	*/
+	@Override
+
+	public List<IElementType> getRelTypesOnTarget(IAdaptable target) {
+		IGraphicalEditPart targetEditPart = (IGraphicalEditPart) target.getAdapter(IGraphicalEditPart.class);
+		return doGetRelTypesOnTarget((PaginaContenidoEditPart) targetEditPart);
+	}
+
+	/**
+	* @generated
+	*/
+	public List<IElementType> doGetRelTypesOnTarget(PaginaContenidoEditPart target) {
+		List<IElementType> types = new ArrayList<IElementType>(2);
+		types.add(DatawebElementTypes.PaginaEnlaces_4002);
+		types.add(DatawebElementTypes.RolPaginasAccesibles_4008);
+		return types;
+	}
+
+	/**
+	* @generated
+	*/
+	@Override
+
+	public List<IElementType> getTypesForSource(IAdaptable target, IElementType relationshipType) {
+		IGraphicalEditPart targetEditPart = (IGraphicalEditPart) target.getAdapter(IGraphicalEditPart.class);
+		return doGetTypesForSource((PaginaContenidoEditPart) targetEditPart, relationshipType);
+	}
+
+	/**
+	* @generated
+	*/
+	public List<IElementType> doGetTypesForSource(PaginaContenidoEditPart target, IElementType relationshipType) {
+		List<IElementType> types = new ArrayList<IElementType>();
+		if (relationshipType == DatawebElementTypes.PaginaEnlaces_4002) {
+			types.add(DatawebElementTypes.PaginaIndiceDetalle_2001);
+			types.add(DatawebElementTypes.PaginaIndicePaginada_2002);
+			types.add(DatawebElementTypes.PaginaIndiceFiltros_2003);
+			types.add(DatawebElementTypes.PaginaIndicePaginadaFiltrada_2004);
+			types.add(DatawebElementTypes.PaginaDetalle_2005);
+			types.add(DatawebElementTypes.PaginaCreacion_2006);
+			types.add(DatawebElementTypes.PaginaActualizacion_2007);
+			types.add(DatawebElementTypes.PaginaBorrado_2008);
+			types.add(DatawebElementTypes.PaginaHome_2009);
+			types.add(DatawebElementTypes.PaginaContenido_2010);
+		} else if (relationshipType == DatawebElementTypes.RolPaginasAccesibles_4008) {
+			types.add(DatawebElementTypes.Rol_2012);
+		}
+		return types;
+	}
+
+}

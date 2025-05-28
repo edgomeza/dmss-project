@@ -1,0 +1,390 @@
+<?xml version="1.0" encoding="ASCII"?>
+<gmfgraph:Canvas xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:gmfgraph="http://www.eclipse.org/gmf/2006/GraphicalDefinition" name="dataweb">
+  <figures name="Default">
+    <figures xsi:type="gmfgraph:PolylineDecoration" name="ReferenciaFigureTargetDecoration"/>
+    <figures xsi:type="gmfgraph:PolylineDecoration" name="PaginaEnlacesFigureTargetDecoration"/>
+    <figures xsi:type="gmfgraph:PolylineDecoration" name="PaginaRedesSocialesFigureTargetDecoration"/>
+    <figures xsi:type="gmfgraph:PolylineDecoration" name="PaginaFuentesRSSFigureTargetDecoration"/>
+    <figures xsi:type="gmfgraph:PolylineDecoration" name="PaginaCRUDEntidadFigureTargetDecoration"/>
+    <figures xsi:type="gmfgraph:PolylineDecoration" name="PaginaIndiceAtributosMostradosFigureTargetDecoration"/>
+    <figures xsi:type="gmfgraph:PolylineDecoration" name="PreguntaOpcionMultipleRespuestaCorrectaFigureTargetDecoration"/>
+    <figures xsi:type="gmfgraph:PolylineDecoration" name="RolPaginasAccesiblesFigureTargetDecoration"/>
+    <figures xsi:type="gmfgraph:PolylineDecoration" name="PaginaIndiceFiltrosAtributosFiltroFigureTargetDecoration"/>
+    <figures xsi:type="gmfgraph:PolylineDecoration" name="PaginaIndicePaginadaFiltradaAtributosFiltroFigureTargetDecoration"/>
+    <descriptors name="EntidadFigure">
+      <actualFigure xsi:type="gmfgraph:RoundedRectangle" name="EntidadFigure">
+        <backgroundColor xsi:type="gmfgraph:RGBColor" red="200" green="200" blue="255"/>
+        <border xsi:type="gmfgraph:MarginBorder">
+          <insets top="5" left="5" bottom="5" right="5"/>
+        </border>
+        <children xsi:type="gmfgraph:Label" name="EntidadLabelFigure" text="Entidad">
+          <maximumSize dx="10000" dy="50"/>
+        </children>
+        <children xsi:type="gmfgraph:Rectangle" name="EntidadAtributosCompartmentFigure" outline="false"/>
+        <children xsi:type="gmfgraph:Rectangle" name="EntidadReferenciasCompartmentFigure" outline="false"/>
+      </actualFigure>
+      <accessors accessor="getFigureEntidadLabelFigure" figure="//@figures.0/@descriptors.0/@actualFigure/@children.0"/>
+      <accessors accessor="getEntidadAtributosCompartmentFigure" figure="//@figures.0/@descriptors.0/@actualFigure/@children.1"/>
+      <accessors accessor="getEntidadReferenciasCompartmentFigure" figure="//@figures.0/@descriptors.0/@actualFigure/@children.2"/>
+    </descriptors>
+    <descriptors name="AtributoFigure">
+      <actualFigure xsi:type="gmfgraph:RoundedRectangle" name="AtributoFigure">
+        <backgroundColor xsi:type="gmfgraph:RGBColor" red="255" green="255" blue="200"/>
+        <border xsi:type="gmfgraph:MarginBorder">
+          <insets top="5" left="5" bottom="5" right="5"/>
+        </border>
+        <children xsi:type="gmfgraph:Label" name="AtributoLabelFigure" text="Atributo"/>
+      </actualFigure>
+      <accessors accessor="getFigureAtributoLabelFigure" figure="//@figures.0/@descriptors.1/@actualFigure/@children.0"/>
+    </descriptors>
+    <descriptors name="PaginaHomeFigure">
+      <actualFigure xsi:type="gmfgraph:RoundedRectangle" name="PaginaHomeFigure">
+        <backgroundColor xsi:type="gmfgraph:RGBColor" red="100" green="255" blue="100"/>
+        <border xsi:type="gmfgraph:MarginBorder">
+          <insets top="5" left="5" bottom="5" right="5"/>
+        </border>
+        <children xsi:type="gmfgraph:Label" name="PaginaHomeLabelFigure" text="PaginaHome"/>
+      </actualFigure>
+      <accessors accessor="getFigurePaginaHomeLabelFigure" figure="//@figures.0/@descriptors.2/@actualFigure/@children.0"/>
+    </descriptors>
+    <descriptors name="PaginaContenidoFigure">
+      <actualFigure xsi:type="gmfgraph:RoundedRectangle" name="PaginaContenidoFigure">
+        <backgroundColor xsi:type="gmfgraph:RGBColor" red="150" green="255" blue="200"/>
+        <border xsi:type="gmfgraph:MarginBorder">
+          <insets top="5" left="5" bottom="5" right="5"/>
+        </border>
+        <children xsi:type="gmfgraph:Label" name="PaginaContenidoLabelFigure" text="PaginaContenido"/>
+      </actualFigure>
+      <accessors accessor="getFigurePaginaContenidoLabelFigure" figure="//@figures.0/@descriptors.3/@actualFigure/@children.0"/>
+    </descriptors>
+    <descriptors name="PaginaDetalleFigure">
+      <actualFigure xsi:type="gmfgraph:RoundedRectangle" name="PaginaDetalleFigure">
+        <backgroundColor xsi:type="gmfgraph:RGBColor" red="255" green="150" blue="150"/>
+        <border xsi:type="gmfgraph:MarginBorder">
+          <insets top="5" left="5" bottom="5" right="5"/>
+        </border>
+        <children xsi:type="gmfgraph:Label" name="PaginaDetalleLabelFigure" text="PaginaDetalle"/>
+      </actualFigure>
+      <accessors accessor="getFigurePaginaDetalleLabelFigure" figure="//@figures.0/@descriptors.4/@actualFigure/@children.0"/>
+    </descriptors>
+    <descriptors name="PaginaCreacionFigure">
+      <actualFigure xsi:type="gmfgraph:RoundedRectangle" name="PaginaCreacionFigure">
+        <backgroundColor xsi:type="gmfgraph:RGBColor" red="150" green="255" blue="255"/>
+        <border xsi:type="gmfgraph:MarginBorder">
+          <insets top="5" left="5" bottom="5" right="5"/>
+        </border>
+        <children xsi:type="gmfgraph:Label" name="PaginaCreacionLabelFigure" text="PaginaCreacion"/>
+      </actualFigure>
+      <accessors accessor="getFigurePaginaCreacionLabelFigure" figure="//@figures.0/@descriptors.5/@actualFigure/@children.0"/>
+    </descriptors>
+    <descriptors name="PaginaActualizacionFigure">
+      <actualFigure xsi:type="gmfgraph:RoundedRectangle" name="PaginaActualizacionFigure">
+        <backgroundColor xsi:type="gmfgraph:RGBColor" red="255" green="255" blue="150"/>
+        <border xsi:type="gmfgraph:MarginBorder">
+          <insets top="5" left="5" bottom="5" right="5"/>
+        </border>
+        <children xsi:type="gmfgraph:Label" name="PaginaActualizacionLabelFigure" text="PaginaActualizacion"/>
+      </actualFigure>
+      <accessors accessor="getFigurePaginaActualizacionLabelFigure" figure="//@figures.0/@descriptors.6/@actualFigure/@children.0"/>
+    </descriptors>
+    <descriptors name="PaginaBorradoFigure">
+      <actualFigure xsi:type="gmfgraph:RoundedRectangle" name="PaginaBorradoFigure">
+        <backgroundColor xsi:type="gmfgraph:RGBColor" red="255" green="100" blue="100"/>
+        <border xsi:type="gmfgraph:MarginBorder">
+          <insets top="5" left="5" bottom="5" right="5"/>
+        </border>
+        <children xsi:type="gmfgraph:Label" name="PaginaBorradoLabelFigure" text="PaginaBorrado"/>
+      </actualFigure>
+      <accessors accessor="getFigurePaginaBorradoLabelFigure" figure="//@figures.0/@descriptors.7/@actualFigure/@children.0"/>
+    </descriptors>
+    <descriptors name="PaginaIndiceDetalleFigure">
+      <actualFigure xsi:type="gmfgraph:RoundedRectangle" name="PaginaIndiceDetalleFigure">
+        <backgroundColor xsi:type="gmfgraph:RGBColor" red="200" green="255" blue="200"/>
+        <border xsi:type="gmfgraph:MarginBorder">
+          <insets top="5" left="5" bottom="5" right="5"/>
+        </border>
+        <children xsi:type="gmfgraph:Label" name="PaginaIndiceDetalleLabelFigure" text="PaginaIndiceDetalle"/>
+      </actualFigure>
+      <accessors accessor="getFigurePaginaIndiceDetalleLabelFigure" figure="//@figures.0/@descriptors.8/@actualFigure/@children.0"/>
+    </descriptors>
+    <descriptors name="EncuestaFigure">
+      <actualFigure xsi:type="gmfgraph:RoundedRectangle" name="EncuestaFigure">
+        <backgroundColor xsi:type="gmfgraph:RGBColor" red="100" green="200" blue="255"/>
+        <border xsi:type="gmfgraph:MarginBorder">
+          <insets top="5" left="5" bottom="5" right="5"/>
+        </border>
+        <children xsi:type="gmfgraph:Label" name="EncuestaLabelFigure" text="Encuesta">
+          <maximumSize dx="10000" dy="50"/>
+        </children>
+        <children xsi:type="gmfgraph:Rectangle" name="EncuestaPreguntasCompartmentFigure" outline="false"/>
+      </actualFigure>
+      <accessors accessor="getFigureEncuestaLabelFigure" figure="//@figures.0/@descriptors.9/@actualFigure/@children.0"/>
+      <accessors accessor="getEncuestaPreguntasCompartmentFigure" figure="//@figures.0/@descriptors.9/@actualFigure/@children.1"/>
+    </descriptors>
+    <descriptors name="CuestionarioFigure">
+      <actualFigure xsi:type="gmfgraph:RoundedRectangle" name="CuestionarioFigure">
+        <backgroundColor xsi:type="gmfgraph:RGBColor" red="255" green="200" blue="100"/>
+        <border xsi:type="gmfgraph:MarginBorder">
+          <insets top="5" left="5" bottom="5" right="5"/>
+        </border>
+        <children xsi:type="gmfgraph:Label" name="CuestionarioLabelFigure" text="Cuestionario">
+          <maximumSize dx="10000" dy="50"/>
+        </children>
+        <children xsi:type="gmfgraph:Rectangle" name="CuestionarioPreguntasCompartmentFigure" outline="false"/>
+      </actualFigure>
+      <accessors accessor="getFigureCuestionarioLabelFigure" figure="//@figures.0/@descriptors.10/@actualFigure/@children.0"/>
+      <accessors accessor="getCuestionarioPreguntasCompartmentFigure" figure="//@figures.0/@descriptors.10/@actualFigure/@children.1"/>
+    </descriptors>
+    <descriptors name="PreguntaOpcionMultipleFigure">
+      <actualFigure xsi:type="gmfgraph:RoundedRectangle" name="PreguntaOpcionMultipleFigure">
+        <backgroundColor xsi:type="gmfgraph:RGBColor" red="255" green="220" blue="220"/>
+        <border xsi:type="gmfgraph:MarginBorder">
+          <insets top="5" left="5" bottom="5" right="5"/>
+        </border>
+        <children xsi:type="gmfgraph:Label" name="PreguntaOpcionMultipleLabelFigure" text="PreguntaOpcionMultiple">
+          <maximumSize dx="10000" dy="50"/>
+        </children>
+        <children xsi:type="gmfgraph:Rectangle" name="PreguntaOpcionMultipleOpcionesCompartmentFigure" outline="false"/>
+      </actualFigure>
+      <accessors accessor="getFigurePreguntaOpcionMultipleLabelFigure" figure="//@figures.0/@descriptors.11/@actualFigure/@children.0"/>
+      <accessors accessor="getPreguntaOpcionMultipleOpcionesCompartmentFigure" figure="//@figures.0/@descriptors.11/@actualFigure/@children.1"/>
+    </descriptors>
+    <descriptors name="OpcionRespuestaFigure">
+      <actualFigure xsi:type="gmfgraph:RoundedRectangle" name="OpcionRespuestaFigure">
+        <backgroundColor xsi:type="gmfgraph:RGBColor" red="220" green="255" blue="220"/>
+        <border xsi:type="gmfgraph:MarginBorder">
+          <insets top="5" left="5" bottom="5" right="5"/>
+        </border>
+        <children xsi:type="gmfgraph:Label" name="OpcionRespuestaLabelFigure" text="OpcionRespuesta"/>
+      </actualFigure>
+      <accessors accessor="getFigureOpcionRespuestaLabelFigure" figure="//@figures.0/@descriptors.12/@actualFigure/@children.0"/>
+    </descriptors>
+    <descriptors name="PreguntaVerdaderoFalsoFigure">
+      <actualFigure xsi:type="gmfgraph:RoundedRectangle" name="PreguntaVerdaderoFalsoFigure">
+        <backgroundColor xsi:type="gmfgraph:RGBColor" red="220" green="220" blue="255"/>
+        <border xsi:type="gmfgraph:MarginBorder">
+          <insets top="5" left="5" bottom="5" right="5"/>
+        </border>
+        <children xsi:type="gmfgraph:Label" name="PreguntaVerdaderoFalsoLabelFigure" text="PreguntaVerdaderoFalso"/>
+      </actualFigure>
+      <accessors accessor="getFigurePreguntaVerdaderoFalsoLabelFigure" figure="//@figures.0/@descriptors.13/@actualFigure/@children.0"/>
+    </descriptors>
+    <descriptors name="PreguntaRespuestaCortaFigure">
+      <actualFigure xsi:type="gmfgraph:RoundedRectangle" name="PreguntaRespuestaCortaFigure">
+        <backgroundColor xsi:type="gmfgraph:RGBColor" red="255" green="255" blue="220"/>
+        <border xsi:type="gmfgraph:MarginBorder">
+          <insets top="5" left="5" bottom="5" right="5"/>
+        </border>
+        <children xsi:type="gmfgraph:Label" name="PreguntaRespuestaCortaLabelFigure" text="PreguntaRespuestaCorta"/>
+      </actualFigure>
+      <accessors accessor="getFigurePreguntaRespuestaCortaLabelFigure" figure="//@figures.0/@descriptors.14/@actualFigure/@children.0"/>
+    </descriptors>
+    <descriptors name="RedSocialFigure">
+      <actualFigure xsi:type="gmfgraph:RoundedRectangle" name="RedSocialFigure">
+        <backgroundColor xsi:type="gmfgraph:RGBColor" red="255" green="150"/>
+        <border xsi:type="gmfgraph:MarginBorder">
+          <insets top="5" left="5" bottom="5" right="5"/>
+        </border>
+        <children xsi:type="gmfgraph:Label" name="RedSocialLabelFigure" text="RedSocial"/>
+      </actualFigure>
+      <accessors accessor="getFigureRedSocialLabelFigure" figure="//@figures.0/@descriptors.15/@actualFigure/@children.0"/>
+    </descriptors>
+    <descriptors name="RolFigure">
+      <actualFigure xsi:type="gmfgraph:RoundedRectangle" name="RolFigure">
+        <backgroundColor xsi:type="gmfgraph:RGBColor" red="100" green="100" blue="255"/>
+        <border xsi:type="gmfgraph:MarginBorder">
+          <insets top="5" left="5" bottom="5" right="5"/>
+        </border>
+        <children xsi:type="gmfgraph:Label" name="RolLabelFigure" text="Rol"/>
+      </actualFigure>
+      <accessors accessor="getFigureRolLabelFigure" figure="//@figures.0/@descriptors.16/@actualFigure/@children.0"/>
+    </descriptors>
+    <descriptors name="FuenteRSSFigure">
+      <actualFigure xsi:type="gmfgraph:RoundedRectangle" name="FuenteRSSFigure">
+        <backgroundColor xsi:type="gmfgraph:RGBColor" green="255" blue="255"/>
+        <border xsi:type="gmfgraph:MarginBorder">
+          <insets top="5" left="5" bottom="5" right="5"/>
+        </border>
+        <children xsi:type="gmfgraph:Label" name="FuenteRSSLabelFigure" text="FuenteRSS"/>
+      </actualFigure>
+      <accessors accessor="getFigureFuenteRSSLabelFigure" figure="//@figures.0/@descriptors.17/@actualFigure/@children.0"/>
+    </descriptors>
+    <descriptors name="PaginaIndicePaginadaFigure">
+      <actualFigure xsi:type="gmfgraph:RoundedRectangle" name="PaginaIndicePaginadaFigure">
+        <backgroundColor xsi:type="gmfgraph:RGBColor" red="255" green="180" blue="120"/>
+        <border xsi:type="gmfgraph:MarginBorder">
+          <insets top="5" left="5" bottom="5" right="5"/>
+        </border>
+        <children xsi:type="gmfgraph:Label" name="PaginaIndicePaginadaLabelFigure" text="PaginaIndicePaginada"/>
+      </actualFigure>
+      <accessors accessor="getFigurePaginaIndicePaginadaLabelFigure" figure="//@figures.0/@descriptors.18/@actualFigure/@children.0"/>
+    </descriptors>
+    <descriptors name="PaginaIndiceFiltrosFigure">
+      <actualFigure xsi:type="gmfgraph:RoundedRectangle" name="PaginaIndiceFiltrosFigure">
+        <backgroundColor xsi:type="gmfgraph:RGBColor" red="180" green="255" blue="120"/>
+        <border xsi:type="gmfgraph:MarginBorder">
+          <insets top="5" left="5" bottom="5" right="5"/>
+        </border>
+        <children xsi:type="gmfgraph:Label" name="PaginaIndiceFiltrosLabelFigure" text="PaginaIndiceFiltros"/>
+      </actualFigure>
+      <accessors accessor="getFigurePaginaIndiceFiltrosLabelFigure" figure="//@figures.0/@descriptors.19/@actualFigure/@children.0"/>
+    </descriptors>
+    <descriptors name="PaginaIndicePaginadaFiltradaFigure">
+      <actualFigure xsi:type="gmfgraph:RoundedRectangle" name="PaginaIndicePaginadaFiltradaFigure">
+        <backgroundColor xsi:type="gmfgraph:RGBColor" red="120" green="180" blue="255"/>
+        <border xsi:type="gmfgraph:MarginBorder">
+          <insets top="5" left="5" bottom="5" right="5"/>
+        </border>
+        <children xsi:type="gmfgraph:Label" name="PaginaIndicePaginadaFiltradaLabelFigure" text="PaginaIndicePaginadaFiltrada"/>
+      </actualFigure>
+      <accessors accessor="getFigurePaginaIndicePaginadaFiltradaLabelFigure" figure="//@figures.0/@descriptors.20/@actualFigure/@children.0"/>
+    </descriptors>
+    <descriptors name="ReferenciaFigure">
+      <actualFigure xsi:type="gmfgraph:PolylineConnection" name="ReferenciaFigure" targetDecoration="//@figures.0/@figures.0">
+        <foregroundColor xsi:type="gmfgraph:RGBColor" red="100" green="100" blue="100"/>
+      </actualFigure>
+    </descriptors>
+    <descriptors name="ReferenciaLabelFigure">
+      <actualFigure xsi:type="gmfgraph:Label" name="ReferenciaLabelLabel" text="Referencia"/>
+    </descriptors>
+    <descriptors name="PaginaEnlacesFigure">
+      <actualFigure xsi:type="gmfgraph:PolylineConnection" name="PaginaEnlacesFigure" targetDecoration="//@figures.0/@figures.1">
+        <foregroundColor xsi:type="gmfgraph:RGBColor" green="150"/>
+      </actualFigure>
+    </descriptors>
+    <descriptors name="PaginaEnlacesExternalLabelFigure">
+      <actualFigure xsi:type="gmfgraph:Label" name="PaginaEnlacesExternalLabel"/>
+    </descriptors>
+    <descriptors name="PaginaRedesSocialesFigure">
+      <actualFigure xsi:type="gmfgraph:PolylineConnection" name="PaginaRedesSocialesFigure" targetDecoration="//@figures.0/@figures.2">
+        <foregroundColor xsi:type="gmfgraph:RGBColor" red="255" green="100"/>
+      </actualFigure>
+    </descriptors>
+    <descriptors name="PaginaRedesSocialesExternalLabelFigure">
+      <actualFigure xsi:type="gmfgraph:Label" name="PaginaRedesSocialesExternalLabel"/>
+    </descriptors>
+    <descriptors name="PaginaFuentesRSSFigure">
+      <actualFigure xsi:type="gmfgraph:PolylineConnection" name="PaginaFuentesRSSFigure" targetDecoration="//@figures.0/@figures.3">
+        <foregroundColor xsi:type="gmfgraph:RGBColor" green="100" blue="255"/>
+      </actualFigure>
+    </descriptors>
+    <descriptors name="PaginaFuentesRSSExternalLabelFigure">
+      <actualFigure xsi:type="gmfgraph:Label" name="PaginaFuentesRSSExternalLabel"/>
+    </descriptors>
+    <descriptors name="PaginaCRUDEntidadFigure">
+      <actualFigure xsi:type="gmfgraph:PolylineConnection" name="PaginaCRUDEntidadFigure" targetDecoration="//@figures.0/@figures.4">
+        <foregroundColor xsi:type="gmfgraph:RGBColor" red="150" blue="150"/>
+      </actualFigure>
+    </descriptors>
+    <descriptors name="PaginaCRUDEntidadExternalLabelFigure">
+      <actualFigure xsi:type="gmfgraph:Label" name="PaginaCRUDEntidadExternalLabel"/>
+    </descriptors>
+    <descriptors name="PaginaIndiceAtributosMostradosFigure">
+      <actualFigure xsi:type="gmfgraph:PolylineConnection" name="PaginaIndiceAtributosMostradosFigure" targetDecoration="//@figures.0/@figures.5">
+        <foregroundColor xsi:type="gmfgraph:RGBColor" red="200" green="100"/>
+      </actualFigure>
+    </descriptors>
+    <descriptors name="PaginaIndiceAtributosMostradosExternalLabelFigure">
+      <actualFigure xsi:type="gmfgraph:Label" name="PaginaIndiceAtributosMostradosExternalLabel"/>
+    </descriptors>
+    <descriptors name="PreguntaOpcionMultipleRespuestaCorrectaFigure">
+      <actualFigure xsi:type="gmfgraph:PolylineConnection" name="PreguntaOpcionMultipleRespuestaCorrectaFigure" targetDecoration="//@figures.0/@figures.6">
+        <foregroundColor xsi:type="gmfgraph:RGBColor" red="255"/>
+      </actualFigure>
+    </descriptors>
+    <descriptors name="PreguntaOpcionMultipleRespuestaCorrectaExternalLabelFigure">
+      <actualFigure xsi:type="gmfgraph:Label" name="PreguntaOpcionMultipleRespuestaCorrectaExternalLabel"/>
+    </descriptors>
+    <descriptors name="RolPaginasAccesiblesFigure">
+      <actualFigure xsi:type="gmfgraph:PolylineConnection" name="RolPaginasAccesiblesFigure" targetDecoration="//@figures.0/@figures.7">
+        <foregroundColor xsi:type="gmfgraph:RGBColor" blue="200"/>
+      </actualFigure>
+    </descriptors>
+    <descriptors name="RolPaginasAccesiblesExternalLabelFigure">
+      <actualFigure xsi:type="gmfgraph:Label" name="RolPaginasAccesiblesExternalLabel"/>
+    </descriptors>
+    <descriptors name="PaginaIndiceFiltrosAtributosFiltroFigure">
+      <actualFigure xsi:type="gmfgraph:PolylineConnection" name="PaginaIndiceFiltrosAtributosFiltroFigure" targetDecoration="//@figures.0/@figures.8">
+        <foregroundColor xsi:type="gmfgraph:RGBColor" red="100" green="200"/>
+      </actualFigure>
+    </descriptors>
+    <descriptors name="PaginaIndiceFiltrosAtributosFiltroExternalLabelFigure">
+      <actualFigure xsi:type="gmfgraph:Label" name="PaginaIndiceFiltrosAtributosFiltroExternalLabel"/>
+    </descriptors>
+    <descriptors name="PaginaIndicePaginadaFiltradaAtributosFiltroFigure">
+      <actualFigure xsi:type="gmfgraph:PolylineConnection" name="PaginaIndicePaginadaFiltradaAtributosFiltroFigure" targetDecoration="//@figures.0/@figures.9">
+        <foregroundColor xsi:type="gmfgraph:RGBColor" green="100" blue="200"/>
+      </actualFigure>
+    </descriptors>
+    <descriptors name="PaginaIndicePaginadaFiltradaAtributosFiltroExternalLabelFigure">
+      <actualFigure xsi:type="gmfgraph:Label" name="PaginaIndicePaginadaFiltradaAtributosFiltroExternalLabel"/>
+    </descriptors>
+  </figures>
+  <nodes name="Entidad" figure="EntidadFigure"/>
+  <nodes name="Atributo" figure="AtributoFigure"/>
+  <nodes name="PaginaHome" figure="PaginaHomeFigure"/>
+  <nodes name="PaginaContenido" figure="PaginaContenidoFigure"/>
+  <nodes name="PaginaDetalle" figure="PaginaDetalleFigure"/>
+  <nodes name="PaginaCreacion" figure="PaginaCreacionFigure"/>
+  <nodes name="PaginaActualizacion" figure="PaginaActualizacionFigure"/>
+  <nodes name="PaginaBorrado" figure="PaginaBorradoFigure"/>
+  <nodes name="PaginaIndiceDetalle" figure="PaginaIndiceDetalleFigure"/>
+  <nodes name="Encuesta" figure="EncuestaFigure"/>
+  <nodes name="Cuestionario" figure="CuestionarioFigure"/>
+  <nodes name="PreguntaOpcionMultiple" figure="PreguntaOpcionMultipleFigure"/>
+  <nodes name="OpcionRespuesta" figure="OpcionRespuestaFigure"/>
+  <nodes name="PreguntaVerdaderoFalso" figure="PreguntaVerdaderoFalsoFigure"/>
+  <nodes name="PreguntaRespuestaCorta" figure="PreguntaRespuestaCortaFigure"/>
+  <nodes name="RedSocial" figure="RedSocialFigure"/>
+  <nodes name="Rol" figure="RolFigure"/>
+  <nodes name="FuenteRSS" figure="FuenteRSSFigure"/>
+  <nodes name="PaginaIndicePaginada" figure="PaginaIndicePaginadaFigure"/>
+  <nodes name="PaginaIndiceFiltros" figure="PaginaIndiceFiltrosFigure"/>
+  <nodes name="PaginaIndicePaginadaFiltrada" figure="PaginaIndicePaginadaFiltradaFigure"/>
+  <connections name="Referencia" figure="ReferenciaFigure"/>
+  <connections name="PaginaEnlaces" figure="PaginaEnlacesFigure"/>
+  <connections name="PaginaRedesSociales" figure="PaginaRedesSocialesFigure"/>
+  <connections name="PaginaFuentesRSS" figure="PaginaFuentesRSSFigure"/>
+  <connections name="PaginaCRUDEntidad" figure="PaginaCRUDEntidadFigure"/>
+  <connections name="PaginaIndiceAtributosMostrados" figure="PaginaIndiceAtributosMostradosFigure"/>
+  <connections name="PreguntaOpcionMultipleRespuestaCorrecta" figure="PreguntaOpcionMultipleRespuestaCorrectaFigure"/>
+  <connections name="RolPaginasAccesibles" figure="RolPaginasAccesiblesFigure"/>
+  <connections name="PaginaIndiceFiltrosAtributosFiltro" figure="PaginaIndiceFiltrosAtributosFiltroFigure"/>
+  <connections name="PaginaIndicePaginadaFiltradaAtributosFiltro" figure="PaginaIndicePaginadaFiltradaAtributosFiltroFigure"/>
+  <compartments name="EntidadAtributosCompartment" figure="EntidadFigure" collapsible="true" accessor="//@figures.0/@descriptors.0/@accessors.1"/>
+  <compartments name="EntidadReferenciasCompartment" figure="EntidadFigure" collapsible="true" accessor="//@figures.0/@descriptors.0/@accessors.2"/>
+  <compartments name="EncuestaPreguntasCompartment" figure="EncuestaFigure" collapsible="true" accessor="//@figures.0/@descriptors.9/@accessors.1"/>
+  <compartments name="CuestionarioPreguntasCompartment" figure="CuestionarioFigure" collapsible="true" accessor="//@figures.0/@descriptors.10/@accessors.1"/>
+  <compartments name="PreguntaOpcionMultipleOpcionesCompartment" figure="PreguntaOpcionMultipleFigure" collapsible="true" accessor="//@figures.0/@descriptors.11/@accessors.1"/>
+  <labels name="EntidadLabel" figure="EntidadFigure" accessor="//@figures.0/@descriptors.0/@accessors.0"/>
+  <labels name="AtributoLabel" figure="AtributoFigure" accessor="//@figures.0/@descriptors.1/@accessors.0"/>
+  <labels name="PaginaHomeLabel" figure="PaginaHomeFigure" accessor="//@figures.0/@descriptors.2/@accessors.0"/>
+  <labels name="PaginaContenidoLabel" figure="PaginaContenidoFigure" accessor="//@figures.0/@descriptors.3/@accessors.0"/>
+  <labels name="PaginaDetalleLabel" figure="PaginaDetalleFigure" accessor="//@figures.0/@descriptors.4/@accessors.0"/>
+  <labels name="PaginaCreacionLabel" figure="PaginaCreacionFigure" accessor="//@figures.0/@descriptors.5/@accessors.0"/>
+  <labels name="PaginaActualizacionLabel" figure="PaginaActualizacionFigure" accessor="//@figures.0/@descriptors.6/@accessors.0"/>
+  <labels name="PaginaBorradoLabel" figure="PaginaBorradoFigure" accessor="//@figures.0/@descriptors.7/@accessors.0"/>
+  <labels name="PaginaIndiceDetalleLabel" figure="PaginaIndiceDetalleFigure" accessor="//@figures.0/@descriptors.8/@accessors.0"/>
+  <labels name="EncuestaLabel" figure="EncuestaFigure" accessor="//@figures.0/@descriptors.9/@accessors.0"/>
+  <labels name="CuestionarioLabel" figure="CuestionarioFigure" accessor="//@figures.0/@descriptors.10/@accessors.0"/>
+  <labels name="PreguntaOpcionMultipleLabel" figure="PreguntaOpcionMultipleFigure" accessor="//@figures.0/@descriptors.11/@accessors.0"/>
+  <labels name="OpcionRespuestaLabel" figure="OpcionRespuestaFigure" accessor="//@figures.0/@descriptors.12/@accessors.0"/>
+  <labels name="PreguntaVerdaderoFalsoLabel" figure="PreguntaVerdaderoFalsoFigure" accessor="//@figures.0/@descriptors.13/@accessors.0"/>
+  <labels name="PreguntaRespuestaCortaLabel" figure="PreguntaRespuestaCortaFigure" accessor="//@figures.0/@descriptors.14/@accessors.0"/>
+  <labels name="RedSocialLabel" figure="RedSocialFigure" accessor="//@figures.0/@descriptors.15/@accessors.0"/>
+  <labels name="RolLabel" figure="RolFigure" accessor="//@figures.0/@descriptors.16/@accessors.0"/>
+  <labels name="FuenteRSSLabel" figure="FuenteRSSFigure" accessor="//@figures.0/@descriptors.17/@accessors.0"/>
+  <labels name="PaginaIndicePaginadaLabel" figure="PaginaIndicePaginadaFigure" accessor="//@figures.0/@descriptors.18/@accessors.0"/>
+  <labels name="PaginaIndiceFiltrosLabel" figure="PaginaIndiceFiltrosFigure" accessor="//@figures.0/@descriptors.19/@accessors.0"/>
+  <labels name="PaginaIndicePaginadaFiltradaLabel" figure="PaginaIndicePaginadaFiltradaFigure" accessor="//@figures.0/@descriptors.20/@accessors.0"/>
+  <labels name="ReferenciaLabel" figure="ReferenciaLabelFigure" elementIcon="false"/>
+  <labels name="PaginaEnlacesExternalLabel" figure="PaginaEnlacesExternalLabelFigure" elementIcon="false"/>
+  <labels name="PaginaRedesSocialesExternalLabel" figure="PaginaRedesSocialesExternalLabelFigure" elementIcon="false"/>
+  <labels name="PaginaFuentesRSSExternalLabel" figure="PaginaFuentesRSSExternalLabelFigure" elementIcon="false"/>
+  <labels name="PaginaCRUDEntidadExternalLabel" figure="PaginaCRUDEntidadExternalLabelFigure" elementIcon="false"/>
+  <labels name="PaginaIndiceAtributosMostradosExternalLabel" figure="PaginaIndiceAtributosMostradosExternalLabelFigure" elementIcon="false"/>
+  <labels name="PreguntaOpcionMultipleRespuestaCorrectaExternalLabel" figure="PreguntaOpcionMultipleRespuestaCorrectaExternalLabelFigure" elementIcon="false"/>
+  <labels name="RolPaginasAccesiblesExternalLabel" figure="RolPaginasAccesiblesExternalLabelFigure" elementIcon="false"/>
+  <labels name="PaginaIndiceFiltrosAtributosFiltroExternalLabel" figure="PaginaIndiceFiltrosAtributosFiltroExternalLabelFigure" elementIcon="false"/>
+  <labels name="PaginaIndicePaginadaFiltradaAtributosFiltroExternalLabel" figure="PaginaIndicePaginadaFiltradaAtributosFiltroExternalLabelFigure" elementIcon="false"/>
+</gmfgraph:Canvas>

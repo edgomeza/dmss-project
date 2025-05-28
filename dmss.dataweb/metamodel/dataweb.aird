@@ -3,7 +3,17 @@
   <viewpoint:DAnalysis uid="_ipnsMBuxEfCmQI4lfh_30Q" selectedViews="_jh-3kBuxEfCmQI4lfh_30Q _LW5hICUIEfCEN-jKXX-b6w _LXA14CUIEfCEN-jKXX-b6w _MGH-oCUIEfCEN-jKXX-b6w" version="15.2.0.202303281325">
     <semanticResources>dataweb.ecore</semanticResources>
     <semanticResources>../model/Aplicacion.xmi</semanticResources>
+    <semanticResources>platform:/plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel</semanticResources>
+    <semanticResources>platform:/plugin/org.eclipse.emf.ecore/model/Ecore.genmodel</semanticResources>
+    <semanticResources>platform:/plugin/org.eclipse.emf.ecore/model/Ecore.ecore</semanticResources>
+    <semanticResources>platform:/plugin/org.eclipse.gmf.runtime.notation/model/notation.ecore</semanticResources>
+    <semanticResources>dataweb.emf</semanticResources>
     <semanticResources>dataweb.genmodel</semanticResources>
+    <semanticResources>dataweb.gmfgraph</semanticResources>
+    <semanticResources>dataweb.gmfmap</semanticResources>
+    <semanticResources>dataweb.gmftool</semanticResources>
+    <semanticResources>dataweb.gmfgen</semanticResources>
+    <semanticResources>dataweb.trace</semanticResources>
     <ownedViews xmi:type="viewpoint:DView" uid="_jh-3kBuxEfCmQI4lfh_30Q">
       <viewpoint xmi:type="description:Viewpoint" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']"/>
       <ownedRepresentationDescriptors xmi:type="viewpoint:DRepresentationDescriptor" uid="_jjsu0BuxEfCmQI4lfh_30Q" name="dataweb" repPath="#_jjHgABuxEfCmQI4lfh_30Q" changeId="1746980781217">

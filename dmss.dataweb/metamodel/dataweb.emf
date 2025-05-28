@@ -1,0 +1,271 @@
+@namespace(uri="http://www.unex.es/dmss/dataweb", prefix="dataweb")
+@gmf
+@GenModel(operationReflection="true",tableProviders="true",complianceLevel="6.0")
+package dataweb;
+
+@gmf.diagram
+@Ecore(constraints="R01_una_sola_pagina_home R04_al_menos_una_red_social_y_rss R06b_al_menos_una_encuesta_y_cuestionario")
+@"http://www.eclipse.org/emf/2002/Ecore/OCL/Pivot"(
+    R01_una_sola_pagina_home="self.paginas->select(p | p.oclIsTypeOf(PaginaHome))->size() = 1",
+    R04_al_menos_una_red_social_y_rss="self.redesSociales->size() >= 1 and self.fuentesRSS->size() >= 1",
+    R06b_al_menos_una_encuesta_y_cuestionario="self.encuestas->size() >= 1 and self.cuestionarios->size() >= 1"
+)
+class Aplicacion {
+	attr String[1] nombre;
+	attr String[1] descripcion;
+
+	@gmf.compartment
+	val Entidad[+] entidades;
+
+	@gmf.compartment
+	val Pagina[+] paginas;
+
+	@gmf.compartment
+	val Rol[+] roles;
+
+	@gmf.compartment
+	val Cuestionario[*] cuestionarios;
+
+	@gmf.compartment
+	val Encuesta[*] encuestas;
+
+	@gmf.compartment
+	val RedSocial[+] redesSociales;
+
+	@gmf.compartment
+	val FuenteRSS[+] fuentesRSS;
+
+	// D02 - Atributo derivado
+	derived volatile transient attr double[1] paginasMediasAccesibles;
+}
+
+@gmf.node(label="nombre", color="200,200,255")
+@Ecore(constraints="R02_crud_incompatible R03_indice_requiere_detalle R05_no_autorreferencia R06_no_referencia_circular R08_solo_una_pagina_indice R09_atributos_pertenecen_entidad")
+@"http://www.eclipse.org/emf/2002/Ecore/OCL/Pivot"(
+    R02_crud_incompatible="self.hasCRUD implies (not self.hasIndex and not self.hasExtendedIndex and not self.hasDetails and not self.hasCreate and not self.hasUpdate and not self.hasDelete)",
+    R03_indice_requiere_detalle="(self.hasIndex or self.hasExtendedIndex) implies self.hasDetails",
+    R05_no_autorreferencia="self.referencias->forAll(r | r.target <> self)",
+    R06_no_referencia_circular="self.referencias->forAll(r | r.target.referencias->forAll(r2 | r2.target <> self))",
+    R08_solo_una_pagina_indice="Pagina.allInstances()->select(p | p.oclIsKindOf(PaginaIndice) and p.oclAsType(PaginaCRUD).entidad = self)->size() <= 1",
+    R09_atributos_pertenecen_entidad="Pagina.allInstances()->select(p | p.oclIsKindOf(PaginaIndice))->forAll(pi | pi.oclAsType(PaginaIndice).atributosMostrados->forAll(a | a.oclContainer() = pi.oclAsType(PaginaCRUD).entidad))"
+)
+class Entidad {
+	attr String[1] nombre;
+	attr String[1] tableName;
+	attr boolean[1] hasCRUD;
+	attr boolean[1] hasIndex;
+	attr boolean[1] hasExtendedIndex;
+	attr boolean[1] hasDetails;
+	attr boolean[1] hasCreate;
+	attr boolean[1] hasUpdate;
+	attr boolean[1] hasDelete;
+
+	@gmf.compartment
+	val Atributo[+] atributos;
+
+	@gmf.compartment
+	val Referencia[*] referencias;
+}
+
+@gmf.node(label="nombre", color="255,255,200")
+class Atributo {
+	attr String[1] nombre;
+	attr boolean[1] isPrimaryKey;
+	attr TipoAtributo[1] tipo;
+}
+
+enum TipoAtributo {
+	STRING = 0;
+	INTEGER = 1;
+	BOOLEAN = 2;
+	DECIMAL = 3;
+}
+
+@gmf.link(label="nombre", source="source", target="target", target.decoration="arrow", color="100,100,100")
+class Referencia {
+	attr String[1] nombre;
+	attr String[1] multiplicidad;
+	ref Entidad[1] source;
+	ref Entidad[1] target;
+}
+
+@gmf.node(label="nombre", color="150,255,150")
+abstract class Pagina {
+	@gmf.link(target.decoration="arrow", color="0,150,0")
+	ref Pagina[*] enlaces;
+
+	@gmf.link(target.decoration="arrow", color="255,100,0")
+	ref RedSocial[*] redesSociales;
+
+	@gmf.link(target.decoration="arrow", color="0,100,255")
+	ref FuenteRSS[*] fuentesRSS;
+	attr String[1] nombre;
+	attr String[1] titulo;
+	attr String descripcion;
+}
+
+@gmf.node(label="nombre", color="100,255,100")
+class PaginaHome extends Pagina {
+}
+
+@gmf.node(label="nombre", color="150,255,200")
+class PaginaContenido extends Pagina {
+	attr String[1] contenido;
+}
+
+@gmf.node(label="nombre", color="200,150,255")
+abstract class PaginaCRUD extends Pagina {
+	@gmf.link(target.decoration="arrow", color="150,0,150")
+	ref Entidad[1] entidad;
+}
+
+@gmf.node(label="nombre", color="255,200,150")
+abstract class PaginaIndice extends PaginaCRUD {
+	@gmf.link(target.decoration="arrow", color="200,100,0")
+	ref Atributo[+] atributosMostrados;
+}
+
+@gmf.node(label="nombre", color="255,150,150")
+class PaginaDetalle extends PaginaCRUD {
+}
+
+@gmf.node(label="nombre", color="150,255,255")
+class PaginaCreacion extends PaginaCRUD {
+}
+
+@gmf.node(label="nombre", color="255,255,150")
+class PaginaActualizacion extends PaginaCRUD {
+}
+
+@gmf.node(label="nombre", color="255,100,100")
+class PaginaBorrado extends PaginaCRUD {
+}
+
+@gmf.node(label="nombre", color="200,255,200")
+class PaginaIndiceDetalle extends PaginaIndice {
+}
+
+@gmf.node(label="nombre", color="100,200,255")
+class Encuesta {
+	@gmf.compartment
+	val Pregunta[+] preguntas;
+	attr String[1] nombre;
+	attr String descripcion;
+	attr TipoRepresentacion[1] tipoRepresentacion;
+	attr String[1] titulo;
+
+	// D03 y D04 - Atributos derivados
+	derived volatile transient attr int[1] numeroPregVF;
+	derived volatile transient attr int[1] numeroPregSelect;
+}
+
+enum TipoRepresentacion {
+	TEXTO = 0;
+	BARRAS = 1;
+	CIRCULAR = 2;
+	LINEAS = 3;
+}
+
+enum TipoRedSocial {
+	TWITTER = 0;
+	FACEBOOK = 1;
+	INSTAGRAM = 2;
+	LINKEDIN = 3;
+}
+
+@gmf.node(label="nombre", color="255,200,100")
+@Ecore(constraints="R07_cuestionarios_con_respuesta")
+@"http://www.eclipse.org/emf/2002/Ecore/OCL/Pivot"(
+    R07_cuestionarios_con_respuesta="self.preguntas->forAll(p | p.oclIsTypeOf(PreguntaOpcionMultiple) implies p.oclAsType(PreguntaOpcionMultiple).respuestaCorrecta <> null)"
+)
+class Cuestionario {
+	@gmf.compartment
+	val Pregunta[+] preguntas;
+	attr String[1] nombre;
+	attr String descripcion;
+	attr String[1] titulo;
+
+	// D03 y D04 - Atributos derivados
+	derived volatile transient attr int[1] numeroPregVF;
+	derived volatile transient attr int[1] numeroPregSelect;
+}
+
+@gmf.node(label="nombre", color="200,255,255")
+abstract class Pregunta {
+	attr String[1] nombre;
+	attr String[1] texto;
+}
+
+@gmf.node(label="nombre", color="255,220,220")
+class PreguntaOpcionMultiple extends Pregunta {
+	@gmf.compartment
+	val OpcionRespuesta[2..*] opciones;
+
+	@gmf.link(target.decoration="arrow", color="255,0,0")
+	ref OpcionRespuesta respuestaCorrecta;
+}
+
+@gmf.node(label="nombre", color="220,255,220")
+class OpcionRespuesta {
+	attr String[1] nombre;
+	attr String[1] texto;
+	attr String[1] valor;
+}
+
+@gmf.node(label="nombre", color="220,220,255")
+class PreguntaVerdaderoFalso extends Pregunta {
+	attr Boolean respuestaCorrecta;
+}
+
+@gmf.node(label="nombre", color="255,255,220")
+class PreguntaRespuestaCorta extends Pregunta {
+	attr String respuestaCorta;
+}
+
+@gmf.node(label="nombre", color="255,150,0")
+class RedSocial {
+	attr TipoRedSocial[1] tipo;
+	id attr String[1] nombre;
+	attr String[1] codigoEmbed;
+	attr String[1] nombreCuenta;
+}
+
+@gmf.node(label="nombre", color="100,100,255")
+class Rol {
+	attr String[1] nombre;
+	attr String descripcion;
+
+	@gmf.link(target.decoration="arrow", color="0,0,200")
+	ref Pagina[+] paginasAccesibles;
+
+	// D01 - Atributo derivado
+	derived volatile transient attr int[1] numeroEntidadesAccesibles;
+}
+
+@gmf.node(label="nombre", color="0,255,255")
+class FuenteRSS {
+	attr String[1] nombre;
+	attr String[1] url;
+	attr String[1] titulo;
+	attr int[1] numItems;
+	attr boolean[1] mostrarDescripcion;
+}
+
+@gmf.node(label="nombre", color="255,180,120")
+class PaginaIndicePaginada extends PaginaIndice {
+	attr int[1] pageSize;
+}
+
+@gmf.node(label="nombre", color="180,255,120")
+class PaginaIndiceFiltros extends PaginaIndice {
+	@gmf.link(target.decoration="arrow", color="100,200,0")
+	ref Atributo[*] atributosFiltro;
+}
+
+@gmf.node(label="nombre", color="120,180,255")
+class PaginaIndicePaginadaFiltrada extends PaginaIndice {
+	attr int[1] pageSize;
+
+	@gmf.link(target.decoration="arrow", color="0,100,200")
+	ref Atributo[*] atributosFiltro;
+}

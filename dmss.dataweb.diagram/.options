@@ -1,0 +1,7 @@
+# Tracing options for the dmss.dataweb.diagram plug-in
+
+# Common issues
+dmss.dataweb.diagram/debug=false
+
+# Visual IDs
+dmss.dataweb.diagram/debug/visualID=false
